@@ -1,0 +1,55 @@
+# Node
+node_modules/
+
+# Env files (root and subfolders)
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+/dist/
+/build/
+/coverage/
+.tmp/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+
+# Runtime uploads
+**/uploads/**
+!**/uploads/.gitkeep
+
+# Client-specific (React/Vite)
+client/dist/
+client/build/
+client/.vite/
+client/.cache/
+client/coverage/
+
+# Package manager lock files (optional - uncomment if you want to ignore them)
+# client/package-lock.json
+# client/yarn.lock
+# client/pnpm-lock.yaml
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
