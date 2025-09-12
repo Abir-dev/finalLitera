@@ -128,7 +128,7 @@ export default function LiveClasses() {
     const fetchLiveClasses = async () => {
       try {
         setLoading(true);
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const response = await axios.get(`${API_BASE}/courses?liveClasses=true`);
         
         // Transform courses to match our component structure

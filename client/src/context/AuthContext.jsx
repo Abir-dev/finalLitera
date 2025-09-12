@@ -6,7 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const apiEnv = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const apiEnv = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
   const normalizedApi = apiEnv.endsWith("/api")
     ? apiEnv
     : `${apiEnv.replace(/\/$/, "")}/api`;

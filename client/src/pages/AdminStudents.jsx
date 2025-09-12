@@ -43,7 +43,7 @@ export default function AdminStudents() {
       try {
         setLoading(true);
         setError("");
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const token = localStorage.getItem('adminToken');
         const res = await fetch(`${API_BASE}/users?role=student&limit=200`, {
           method: 'GET',
@@ -125,7 +125,7 @@ export default function AdminStudents() {
     }
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
       const token = localStorage.getItem('adminToken');
       
       const response = await fetch(`${API_BASE}/admin/students`, {

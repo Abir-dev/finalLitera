@@ -9,4 +9,17 @@ export default defineConfig({
      tailwindcss(),
     react()
   ],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  },
+  define: {
+    'import.meta.env.VITE_API_URL': JSON.stringify('http://localhost:5001/api')
+  }
 })

@@ -36,7 +36,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:5000/api/auth/signup", // backend signup endpoint
+        "http://localhost:5001/api/auth/signup", // backend signup endpoint
         {
           firstName: formData.firstName,
           lastName: formData.lastName,

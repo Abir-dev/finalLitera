@@ -7,7 +7,8 @@ import {
   getUserCourses,
   getUserStats,
   updateProfile,
-  getProfile
+  getProfile,
+  changePassword
 } from '../controllers/userController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { validatePagination, validateProfileUpdate } from '../middleware/validation.js';
@@ -23,6 +24,11 @@ router.get('/profile/me', protect, getProfile);
 // @route   PUT /api/users/profile/me
 // @access  Private
 router.put('/profile/me', protect, validateProfileUpdate, updateProfile);
+
+// @desc    Change user password
+// @route   PUT /api/users/profile/change-password
+// @access  Private
+router.put('/profile/change-password', protect, changePassword);
 
 // @desc    Get user statistics (Admin only)
 // @route   GET /api/users/stats/overview

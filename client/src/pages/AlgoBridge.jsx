@@ -288,7 +288,7 @@ export default function AlgoBridge() {
   useEffect(() => {
     (async () => {
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const res = await fetch(`${API_BASE}/exams/available`);
         if (res.ok) {
           const json = await res.json();

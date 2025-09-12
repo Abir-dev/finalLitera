@@ -25,7 +25,7 @@ export default function Home() {
     (async () => {
       try {
         const API_BASE =
-          import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+          import.meta.env.VITE_API_URL || "http://localhost:5001/api";
         const res = await fetch(`${API_BASE}/courses?limit=4`);
         if (!res.ok) return;
         const json = await res.json();

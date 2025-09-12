@@ -1,7 +1,28 @@
 import { useAuth } from "../context/AuthContext.jsx";
+import { useState, useEffect } from "react";
+import profileService from "../services/profileService.js";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadUserStats = async () => {
+      try {
+        const response = await profileService.getUserStats();
+        setStats(response.stats);
+      } catch (error) {
+        console.error('Error loading user stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      loadUserStats();
+    }
+  }, [user]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -30,12 +51,14 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-sm border p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Active Courses</p>
-              <p className="text-2xl font-bold text-gray-900">3</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {loading ? '...' : (stats?.enrolledCourses || 0)}
+              </p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">📚</span>
@@ -46,11 +69,13 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl shadow-sm border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Hours Studied</p>
-              <p className="text-2xl font-bold text-gray-900">24</p>
+              <p className="text-sm font-medium text-gray-600">Completed</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {loading ? '...' : (stats?.completedCourses || 0)}
+              </p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">⏱️</span>
+              <span className="text-2xl">✅</span>
             </div>
           </div>
         </div>
@@ -59,10 +84,26 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Certificates</p>
-              <p className="text-2xl font-bold text-gray-900">1</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {loading ? '...' : (stats?.certificates || 0)}
+              </p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">🏆</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Avg Progress</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {loading ? '...' : `${stats?.averageProgress || 0}%`}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <span className="text-2xl">📈</span>
             </div>
           </div>
         </div>

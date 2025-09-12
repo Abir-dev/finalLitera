@@ -2,6 +2,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useState, useEffect } from "react";
+import profileService from "../services/profileService.js";
 
 const BRAND = {
   blue: "#163D74",
@@ -21,6 +23,22 @@ const menu = [
 
 export default function DashboardLayout() {
   const { user } = useAuth();
+  const [userStats, setUserStats] = useState(null);
+
+  useEffect(() => {
+    const loadUserStats = async () => {
+      try {
+        const response = await profileService.getUserStats();
+        setUserStats(response.stats);
+      } catch (error) {
+        console.error('Error loading user stats:', error);
+      }
+    };
+
+    if (user) {
+      loadUserStats();
+    }
+  }, [user]);
 
   return (
     <div className="h-screen w-full overflow-hidden bg-white text-slate-900">
@@ -37,11 +55,23 @@ export default function DashboardLayout() {
           {/* Profile section */}
           <div className="px-6 pt-8 pb-6">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20 mx-auto shadow">
-              <img className="w-full h-full object-cover" src="https://i.pravatar.cc/200?img=8" alt="profile" />
+              <img 
+                className="w-full h-full object-cover" 
+                src={user?.avatar || "https://i.pravatar.cc/200?img=8"} 
+                alt="profile" 
+              />
             </div>
             <p className="text-center mt-4 font-medium">
               {user ? user.firstName || user.email?.split('@')[0] || 'User' : 'Loading...'}
             </p>
+            <div className="text-center mt-2 text-sm text-white/80">
+              {userStats && (
+                <div className="space-y-1">
+                  <div>{userStats.enrolledCourses || 0} Courses</div>
+                  <div>{userStats.completedCourses || 0} Completed</div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Menu (scrollable) */}

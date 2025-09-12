@@ -1,28 +1,168 @@
 // src/pages/Profile.jsx
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../context/AuthContext.jsx";
+import profileService from "../services/profileService.js";
 
 const brand = { blue: "#18457A" };
 
 export default function Profile() {
+  const { user, setUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('personal');
+  const [stats, setStats] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
   const [form, setForm] = useState({
-    firstName: "Sanchari",
-    lastName: "Ghosh",
-    email: "sanchari76@gmail.com",
-    countryCode: "+91",
-    phone: "9876543450",
-    password: "*******************",
-    github: "",
-    linkedin: "",
-    website: "",
-    youtube: "",
-    resume: ""
+    firstName: "",
+    lastName: "",
+    email: "",
+    profile: {
+      bio: "",
+      socialLinks: {
+        website: "",
+        linkedin: "",
+        github: "",
+        twitter: ""
+      },
+      skills: []
+    },
+    preferences: {
+      notifications: {
+        email: true,
+        push: true,
+        courseUpdates: true,
+        marketing: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    }
   });
 
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
-  const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  // Load user data on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        setLoading(true);
+        const response = await profileService.getUserStats();
+        const userData = response.user;
+        
+        // Update form with real user data
+        setForm({
+          firstName: userData.firstName || "",
+          lastName: userData.lastName || "",
+          email: userData.email || "",
+          profile: {
+            bio: userData.profile?.bio || "",
+            socialLinks: {
+              website: userData.profile?.socialLinks?.website || "",
+              linkedin: userData.profile?.socialLinks?.linkedin || "",
+              github: userData.profile?.socialLinks?.github || "",
+              twitter: userData.profile?.socialLinks?.twitter || ""
+            },
+            skills: userData.profile?.skills || []
+          },
+          preferences: {
+            notifications: {
+              email: userData.preferences?.notifications?.email ?? true,
+              push: userData.preferences?.notifications?.push ?? true,
+              courseUpdates: userData.preferences?.notifications?.courseUpdates ?? true,
+              marketing: userData.preferences?.notifications?.marketing ?? false
+            },
+            language: userData.preferences?.language || 'en',
+            timezone: userData.preferences?.timezone || 'UTC'
+          }
+        });
+        
+        setStats(response.stats);
+        setUser(userData); // Update auth context with latest data
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [setUser]);
+
+  const onChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (name.includes('.')) {
+      const [parent, child, subChild] = name.split('.');
+      setForm(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: subChild ? {
+            ...prev[parent][child],
+            [subChild]: type === 'checkbox' ? checked : value
+          } : (type === 'checkbox' ? checked : value)
+        }
+      }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      const response = await profileService.updateProfile(form);
+      setUser(response.data.user);
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Error updating profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      alert('New password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await profileService.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      alert('Password changed successfully!');
+      setShowPasswordModal(false);
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      alert(error.response?.data?.message || 'Error changing password. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleFileUpload = (file) => {
     if (file) {
@@ -108,277 +248,438 @@ export default function Profile() {
     return '📎';
   };
 
-  return (
-    <section className="max-w-5xl mx-auto px-6 md:px-10 py-8 bg-gradient-to-br from-slate-50 to-indigo-50 min-h-screen">
-      {/* Header row */}
-      <div className="flex items-center justify-between bg-white rounded-2xl p-6 shadow-lg border border-indigo-100">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="text-3xl">👤</div>
-            <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Your Profile
-            </h1>
-          </div>
-          <p className="text-[12px] text-slate-500 mt-1">Information About Your Self</p>
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <button className="inline-flex items-center gap-2 rounded-full border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-2 text-sm hover:from-indigo-100 hover:to-purple-100 transition-all duration-300 shadow-sm">
-            <span className="font-medium text-indigo-700">👁️ View Profile</span>
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-full border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-2 text-sm hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-sm">
-            <span className="font-medium text-blue-700">✏️ EDIT</span>
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-full border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-2 text-sm hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-sm">
-            <span className="font-medium text-green-700">🎓 Education</span>
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-full border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 px-4 py-2 text-sm hover:from-orange-100 hover:to-red-100 transition-all duration-300 shadow-sm">
-            <span className="font-medium text-orange-700">💳 Payment</span>
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-full border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-2 text-sm hover:from-purple-100 hover:to-purple-100 transition-all duration-300 shadow-sm">
-            <span className="font-medium text-purple-700">📋 Project Info</span>
-          </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-8">
+      {/* Header with Real-time Stats */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white mb-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+              <img 
+                src={user?.avatar || "https://i.pravatar.cc/200?img=8"} 
+                alt="Profile" 
+                className="w-16 h-16 rounded-full border-2 border-white/30"
+              />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                {form.firstName} {form.lastName}
+              </h1>
+              <p className="text-blue-100 text-lg">{form.email}</p>
+              <p className="text-blue-200 text-sm">
+                Member since {new Date(user?.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold">{stats?.enrolledCourses || 0}</div>
+            <div className="text-blue-200 text-sm">Enrolled Courses</div>
+          </div>
         </div>
       </div>
 
-      {/* Card */}
-      <div className="mt-6 rounded-2xl bg-white shadow-xl border-2 border-gradient-to-r from-indigo-100 to-purple-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4">
-          <h2 className="text-white font-bold text-lg flex items-center gap-2">
-            <span className="text-2xl">📝</span>
-            Personal Information
-          </h2>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Active Courses</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.enrolledCourses || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <span className="text-2xl">📚</span>
+            </div>
+          </div>
         </div>
-        <div className="p-6 md:p-8">
-          {/* Name */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="group">
-              <label className="block text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                <span className="text-indigo-600">👤</span>
-                First Name
-              </label>
-              <input
-                name="firstName"
-                value={form.firstName}
-                onChange={onChange}
-                className="w-full rounded-xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 transition-all duration-300 group-hover:border-indigo-300"
-              />
+
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Completed</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.completedCourses || 0}</p>
             </div>
-            <div className="group">
-              <label className="block text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                <span className="text-indigo-600">👤</span>
-                Last Name
-              </label>
-              <input
-                name="lastName"
-                value={form.lastName}
-                onChange={onChange}
-                className="w-full rounded-xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 transition-all duration-300 group-hover:border-indigo-300"
-              />
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <span className="text-2xl">✅</span>
             </div>
           </div>
+        </div>
 
-          {/* Email */}
-          <div className="mt-6 group">
-            <label className="block text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
-              <span className="text-green-600">📧</span>
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={onChange}
-              className="w-full rounded-xl border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-400 transition-all duration-300 group-hover:border-green-300"
-            />
-          </div>
-
-          {/* Phone */}
-          <div className="mt-6 group">
-            <label className="block text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
-              <span className="text-blue-600">📱</span>
-              Phone No.
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                name="countryCode"
-                value={form.countryCode}
-                onChange={onChange}
-                className="w-24 rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all duration-300 group-hover:border-blue-300"
-              />
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={onChange}
-                className="flex-1 rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all duration-300 group-hover:border-blue-300"
-              />
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Certificates</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.certificates || 0}</p>
+            </div>
+            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <span className="text-2xl">🏆</span>
             </div>
           </div>
+        </div>
 
-          {/* Password */}
-          <div className="mt-6 group">
-            <label className="block text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
-              <span className="text-red-600">🔒</span>
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={onChange}
-                className="w-full rounded-xl border-2 border-red-200 bg-gradient-to-r from-red-50 to-pink-50 px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400 transition-all duration-300 group-hover:border-red-300"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500">
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor">
-                  <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" />
-                  <circle cx="12" cy="12" r="2.5" strokeWidth="1.5" />
-                </svg>
-              </span>
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Avg Progress</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.averageProgress || 0}%</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <span className="text-2xl">📈</span>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Links */}
-          <div className="mt-8">
-            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-4">
-              <p className="text-sm font-semibold text-purple-800 flex items-center gap-2">
-                <span className="text-xl">🔗</span>
-                Social Links & Portfolio
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="group">
-                <input
-                  placeholder="GitHub Link |"
-                  name="github"
-                  value={form.github}
-                  onChange={onChange}
-                  className="w-full rounded-xl border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-slate-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-400 transition-all duration-300 group-hover:border-gray-300"
-                />
-              </div>
-              <div className="group">
-                <input
-                  placeholder="LinkedIn Link |"
-                  name="linkedin"
-                  value={form.linkedin}
-                  onChange={onChange}
-                  className="w-full rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all duration-300 group-hover:border-blue-300"
-                />
-              </div>
-              <div className="group">
-                <input
-                  placeholder="Website Link |"
-                  name="website"
-                  value={form.website}
-                  onChange={onChange}
-                  className="w-full rounded-xl border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-400 transition-all duration-300 group-hover:border-green-300"
-                />
-              </div>
-              <div className="group">
-                <input
-                  placeholder="Youtube Link |"
-                  name="youtube"
-                  value={form.youtube}
-                  onChange={onChange}
-                  className="w-full rounded-xl border-2 border-red-200 bg-gradient-to-r from-red-50 to-pink-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400 transition-all duration-300 group-hover:border-red-300"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* File Upload Section */}
-          <div className="mt-8">
-            <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-4 mb-4">
-              <p className="text-sm font-semibold text-orange-800 flex items-center gap-2">
-                <span className="text-xl">📁</span>
-                Resume / Project File Upload
-              </p>
-            </div>
-
-            {!uploadedFile ? (
-              <div
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-                  isDragOver
-                    ? 'border-orange-400 bg-orange-50 border-orange-400'
-                    : 'border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 hover:border-orange-300 hover:bg-orange-100'
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-xl shadow-sm border mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {[
+              { id: 'personal', label: 'Personal Info', icon: '👤' },
+              { id: 'social', label: 'Social Links', icon: '🔗' },
+              { id: 'preferences', label: 'Preferences', icon: '⚙️' },
+              { id: 'security', label: 'Security', icon: '🔒' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
               >
-                <div className="text-4xl mb-4">📁</div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                  {isDragOver ? 'Drop your file here!' : 'Upload Resume or Project File'}
-                </h3>
-                <p className="text-sm text-slate-600 mb-4">
-                  Drag and drop your file here, or click to browse
-                </p>
-                <p className="text-xs text-slate-500 mb-6">
-                  Supported formats: PDF, DOC, DOCX, TXT, Images (Max size: 10MB)
-                </p>
-                
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                >
-                  📂 Choose File
-                </button>
-                
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        {activeTab === 'personal' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  First Name
+                </label>
                 <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileInputChange}
-                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                  className="hidden"
+                  type="text"
+                  name="firstName"
+                  value={form.firstName}
+                  onChange={onChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
-            ) : (
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="text-4xl">{getFileIcon(uploadedFile.type)}</div>
-                    <div>
-                      <h4 className="font-semibold text-slate-800">{uploadedFile.name}</h4>
-                      <p className="text-sm text-slate-600">
-                        {formatFileSize(uploadedFile.size)} • {uploadedFile.type}
-                      </p>
-                    </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={form.lastName}
+                  onChange={onChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={onChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bio
+              </label>
+              <textarea
+                name="profile.bio"
+                value={form.profile.bio}
+                onChange={onChange}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Tell us about yourself..."
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'social' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Links</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Website
+                </label>
+                <input
+                  type="url"
+                  name="profile.socialLinks.website"
+                  value={form.profile.socialLinks.website}
+                  onChange={onChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="https://yourwebsite.com"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  LinkedIn
+                </label>
+                <input
+                  type="url"
+                  name="profile.socialLinks.linkedin"
+                  value={form.profile.socialLinks.linkedin}
+                  onChange={onChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="https://linkedin.com/in/yourprofile"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  GitHub
+                </label>
+                <input
+                  type="url"
+                  name="profile.socialLinks.github"
+                  value={form.profile.socialLinks.github}
+                  onChange={onChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="https://github.com/yourusername"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Twitter
+                </label>
+                <input
+                  type="url"
+                  name="profile.socialLinks.twitter"
+                  value={form.profile.socialLinks.twitter}
+                  onChange={onChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="https://twitter.com/yourusername"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'preferences' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Email Notifications</label>
+                  <p className="text-sm text-gray-500">Receive notifications via email</p>
+                </div>
+                <input
+                  type="checkbox"
+                  name="preferences.notifications.email"
+                  checked={form.preferences.notifications.email}
+                  onChange={onChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Push Notifications</label>
+                  <p className="text-sm text-gray-500">Receive push notifications in browser</p>
+                </div>
+                <input
+                  type="checkbox"
+                  name="preferences.notifications.push"
+                  checked={form.preferences.notifications.push}
+                  onChange={onChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Course Updates</label>
+                  <p className="text-sm text-gray-500">Get notified about course updates</p>
+                </div>
+                <input
+                  type="checkbox"
+                  name="preferences.notifications.courseUpdates"
+                  checked={form.preferences.notifications.courseUpdates}
+                  onChange={onChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Marketing Emails</label>
+                  <p className="text-sm text-gray-500">Receive promotional content and offers</p>
+                </div>
+                <input
+                  type="checkbox"
+                  name="preferences.notifications.marketing"
+                  checked={form.preferences.notifications.marketing}
+                  onChange={onChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'security' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Settings</h3>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <span className="text-yellow-400">⚠️</span>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Password Security
+                  </h3>
+                  <div className="mt-2 text-sm text-yellow-700">
+                    <p>Keep your account secure by regularly updating your password.</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="mt-4">
                     <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors duration-300"
+                      onClick={() => setShowPasswordModal(true)}
+                      className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-yellow-200 transition-colors"
                     >
-                      🔄 Replace
-                    </button>
-                    <button
-                      onClick={removeFile}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors duration-300"
-                    >
-                      🗑️ Remove
+                      Change Password
                     </button>
                   </div>
                 </div>
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileInputChange}
-                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                  className="hidden"
-                />
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Save Button */}
-          <div className="mt-8 flex justify-end">
-            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
-              💾 Save Changes
-            </button>
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <span className="text-blue-400">ℹ️</span>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800">
+                    Account Information
+                  </h3>
+                  <div className="mt-2 text-sm text-blue-700">
+                    <p>Account created: {new Date(user?.createdAt).toLocaleDateString()}</p>
+                    <p>Last updated: {new Date(user?.updatedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Save Button */}
+        <div className="mt-8 flex justify-end">
+          <button
+            onClick={handleSaveProfile}
+            disabled={saving}
+            className="bg-indigo-600 text-white px-6 py-2 rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
         </div>
       </div>
-    </section>
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setShowPasswordModal(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangePassword}
+                  disabled={saving}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Changing...' : 'Change Password'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
