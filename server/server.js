@@ -27,7 +27,8 @@ import Admin from "./models/Admin.js";
 dotenv.config();
 
 const app = express();
-
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
 // --- SECURITY MIDDLEWARE ---
 app.use(helmet()); // set security headers
 app.use(compression()); // gzip compression
@@ -98,14 +99,14 @@ const connectDB = async () => {
 // --- CREATE ADMIN ACCOUNT ---
 const createAdminIfNotExists = async () => {
   try {
-    const existingAdmin = await Admin.findOne({ email: "rahul12@gmail.com" });
+    const existingAdmin = await Admin.findOne({ email: ADMIN_EMAIL });
 
     if (!existingAdmin) {
       const admin = new Admin({
         firstName: "Rahul",
         lastName: "Admin",
-        email: "rahul12@gmail.com",
-        password: "rahul12",
+        email: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD,
         role: "admin",
         isActive: true,
         permissions: {
