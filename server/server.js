@@ -18,6 +18,7 @@ import adminRoutes from "./routes/admin.js";
 import adminCourseRoutes from "./routes/adminCourses.js";
 import paymentRoutes from "./routes/payment.js";
 import examRoutes from "./routes/exams.js";
+import liveClassRoutes from "./routes/liveClasses.js";
 import connectCloudinary from "./utils/cloudinary.js";
 
 // Import Admin model
@@ -27,8 +28,8 @@ import Admin from "./models/Admin.js";
 dotenv.config();
 
 const app = express();
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 // --- SECURITY MIDDLEWARE ---
 app.use(helmet()); // set security headers
 app.use(compression()); // gzip compression
@@ -83,9 +84,7 @@ if (process.env.NODE_ENV === "development") {
 // --- MONGODB CONNECTION ---
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(
-      process.env.MONGODB_URI || ""
-    );
+    const conn = await mongoose.connect(process.env.MONGODB_URI || "");
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
 
     // Create admin account if it doesn't exist
@@ -146,6 +145,7 @@ app.use("/api/admin", adminRoutes); // Admin authentication and management route
 app.use("/api/admin/courses", adminCourseRoutes); // Admin course management routes
 app.use("/api/payments", paymentRoutes); // Razorpay payment routes
 app.use("/api/exams", examRoutes); // Exams routes
+app.use("/api/live-classes", liveClassRoutes); // Live classes routes
 
 // --- HEALTH CHECK ---
 app.get("/api/health", (req, res) => {
