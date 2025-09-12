@@ -42,4 +42,67 @@ export const listStudents = async (req, res) => {
   }
 };
 
+// @desc    Create new student (Admin only)
+// @route   POST /api/admin/students
+// @access  Private/Admin
+export const createStudent = async (req, res) => {
+  try {
+    const { firstName, lastName, email, password } = req.body;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'First name, last name, email, and password are required'
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User with this email already exists'
+      });
+    }
+
+    // Create new student
+    const student = new User({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password,
+      role: 'student',
+      isActive: true
+    });
+
+    await student.save();
+
+    // Return student data without password
+    const studentData = {
+      id: student._id,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      email: student.email,
+      role: student.role,
+      isActive: student.isActive,
+      createdAt: student.createdAt
+    };
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Student created successfully',
+      data: {
+        student: studentData
+      }
+    });
+  } catch (error) {
+    console.error('Create student error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error during student creation'
+    });
+  }
+};
+
 

@@ -10,7 +10,7 @@ import {
   deleteAdmin
 } from '../controllers/adminController.js';
 import { adminAuth, superAdminAuth, requirePermission } from '../middleware/adminAuth.js';
-import { listStudents } from '../controllers/adminUsersController.js';
+import { listStudents, createStudent } from '../controllers/adminUsersController.js';
 
 const router = express.Router();
 
@@ -76,5 +76,10 @@ router.get('/verify', adminAuth, (req, res) => {
 // @route   GET /api/admin/students
 // @access  Private/Admin
 router.get('/students', adminAuth, listStudents);
+
+// @desc    Create new student (Admin)
+// @route   POST /api/admin/students
+// @access  Private/Admin
+router.post('/students', adminAuth, createStudent);
 
 export default router;

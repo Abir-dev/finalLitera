@@ -10,6 +10,17 @@ export default function AdminStudents() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+  
+  // Add Student Form State
+  const [newStudent, setNewStudent] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
 
   useEffect(() => {
     const transformUser = (u) => {
@@ -74,6 +85,92 @@ export default function AdminStudents() {
         ? { ...student, status: student.status === "active" ? "inactive" : "active" }
         : student
     ));
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewStudent(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear errors when user starts typing
+    if (submitError) setSubmitError("");
+  };
+
+  const handleSubmitStudent = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess("");
+
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('adminToken');
+      
+      const response = await fetch(`${API_BASE}/admin/students`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify(newStudent)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create student');
+      }
+
+      // Add the new student to the list
+      const transformedStudent = {
+        id: data.data.student.id,
+        name: `${data.data.student.firstName} ${data.data.student.lastName}`,
+        email: data.data.student.email,
+        phone: "",
+        course: "-",
+        status: data.data.student.isActive ? "active" : "inactive",
+        joinDate: data.data.student.createdAt,
+        progress: 0,
+        lastActive: ""
+      };
+
+      setStudents(prev => [transformedStudent, ...prev]);
+      setSubmitSuccess("Student created successfully!");
+      
+      // Reset form
+      setNewStudent({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: ""
+      });
+
+      // Close modal after a short delay
+      setTimeout(() => {
+        setShowAddModal(false);
+        setSubmitSuccess("");
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error creating student:', error);
+      setSubmitError(error.message || 'Failed to create student');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setNewStudent({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: ""
+    });
+    setSubmitError("");
+    setSubmitSuccess("");
   };
 
   const getStatusBadge = (status) => {
@@ -324,6 +421,134 @@ export default function AdminStudents() {
           </div>
         </div>
       </div>
+
+      {/* Add Student Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Add New Student</h2>
+                <button
+                  onClick={handleCloseModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmitStudent} className="space-y-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={newStudent.firstName}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    placeholder="Enter first name"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={newStudent.lastName}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    placeholder="Enter last name"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={newStudent.email}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    placeholder="Enter email address"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Password *
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={newStudent.password}
+                    onChange={handleInputChange}
+                    required
+                    minLength={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    placeholder="Enter password (min 6 characters)"
+                  />
+                </div>
+
+                {submitError && (
+                  <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
+                    {submitError}
+                  </div>
+                )}
+
+                {submitSuccess && (
+                  <div className="p-3 bg-green-50 text-green-700 rounded-md border border-green-200">
+                    {submitSuccess}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating...
+                      </span>
+                    ) : (
+                      "Create Student"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
