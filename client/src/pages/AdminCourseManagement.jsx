@@ -420,7 +420,7 @@ export default function AdminCourseManagement() {
 
       {/* Course Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-white bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 ">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
@@ -975,7 +975,7 @@ export default function AdminCourseManagement() {
 
       {/* Meet Links Modal */}
       {showLinksModal && selectedCourse && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
@@ -1077,7 +1077,7 @@ export default function AdminCourseManagement() {
 
       {/* Course Selection Modal for Live Links */}
       {showCourseSelectionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
