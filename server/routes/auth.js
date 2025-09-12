@@ -11,9 +11,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const JWT_EXPIRE = process.env.JWT_EXPIRE || "7d";
 
 // Debug logging for JWT_SECRET
-console.log("Auth routes - JWT_SECRET loaded:", JWT_SECRET ? "Present" : "Missing");
-console.log("Auth routes - JWT_SECRET length:", JWT_SECRET?.length || 0);
-console.log("Auth routes - JWT_SECRET value:", JWT_SECRET);
+// console.log("Auth routes - JWT_SECRET loaded:", JWT_SECRET ? "Present" : "Missing");
+// console.log("Auth routes - JWT_SECRET length:", JWT_SECRET?.length || 0);
+// console.log("Auth routes - JWT_SECRET value:", JWT_SECRET);
 
 // --- SIGNUP ---
 router.post("/signup", async (req, res) => {
