@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
 // Force the correct backend URL
-const backendURL = "http://localhost:5000";
+const backendURL = import.meta.env.VITE_API_URL;
 
 export default function AdminCourseManagement() {
   const { admin } = useAdminAuth();
@@ -62,7 +62,7 @@ export default function AdminCourseManagement() {
         return;
       }
 
-      const response = await axios.get(`${backendURL}/api/admin/courses`, {
+      const response = await axios.get(`${backendURL}/admin/courses`, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
       });
@@ -94,7 +94,7 @@ export default function AdminCourseManagement() {
     const testConnection = async () => {
       try {
         console.log('Testing server connection...');
-        const response = await axios.get(`${backendURL}/api/health`);
+        const response = await axios.get(`${backendURL}/health`);
         console.log('Server health check:', response.data);
       } catch (error) {
         console.error('Server connection test failed:', error);
@@ -159,7 +159,7 @@ export default function AdminCourseManagement() {
       if (editingCourse) {
         // Update course
         response = await axios.put(
-          `${backendURL}/api/admin/courses/${editingCourse._id}`,
+          `${backendURL}/admin/courses/${editingCourse._id}`,
           formDataToSend,
           {
             headers: {
@@ -171,8 +171,8 @@ export default function AdminCourseManagement() {
         toast.success('Course updated successfully!');
       } else {
         // Create course
-        response = await axios.post(
-          `${backendURL}/api/admin/courses`,
+       const response = await axios.post(
+          `${backendURL}/admin/courses`,
           formDataToSend,
           {
             headers: {
@@ -253,7 +253,7 @@ export default function AdminCourseManagement() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.delete(`${backendURL}/api/admin/courses/${courseId}`, {
+      await axios.delete(`${backendURL}/admin/courses/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Course deleted successfully!');
@@ -269,7 +269,7 @@ export default function AdminCourseManagement() {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.patch(
-        `${backendURL}/api/admin/courses/${courseId}/toggle-publish`,
+        `${backendURL}/admin/courses/${courseId}/toggle-publish`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -308,7 +308,7 @@ export default function AdminCourseManagement() {
     try {
       const token = localStorage.getItem('adminToken');
       const response = await axios.put(
-        `${backendURL}/api/admin/courses/${selectedCourse._id}/meet-links`,
+        `${backendURL}/admin/courses/${selectedCourse._id}/meet-links`,
         meetLinkData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -357,7 +357,7 @@ export default function AdminCourseManagement() {
         isLaunchPad: false
       };
 
-      const response = await axios.post(`${backendURL}/api/admin/courses`, sampleCourseData, {
+      const response = await axios.post(`${backendURL}/admin/courses`, sampleCourseData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
