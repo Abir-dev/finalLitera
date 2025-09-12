@@ -19,6 +19,9 @@ export const getCourses = async (req, res) => {
     if (req.query.category) filter.category = req.query.category;
     if (req.query.level) filter.level = req.query.level;
     if (req.query.instructor) filter.instructor = req.query.instructor;
+    if (req.query.liveClasses === 'true') {
+      filter['schedule.liveSessions.0'] = { $exists: true };
+    }
     
     // Price range filter
     if (req.query.minPrice || req.query.maxPrice) {

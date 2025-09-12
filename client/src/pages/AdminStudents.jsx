@@ -103,6 +103,27 @@ export default function AdminStudents() {
     setSubmitError("");
     setSubmitSuccess("");
 
+    // Client-side validation
+    if (!newStudent.firstName.trim() || !newStudent.lastName.trim() || !newStudent.email.trim() || !newStudent.password.trim()) {
+      setSubmitError("All fields are required");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (newStudent.password.length < 6) {
+      setSubmitError("Password must be at least 6 characters long");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newStudent.email)) {
+      setSubmitError("Please enter a valid email address");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const token = localStorage.getItem('adminToken');
@@ -120,6 +141,10 @@ export default function AdminStudents() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle validation errors with detailed messages
+        if (data.errors && Array.isArray(data.errors)) {
+          throw new Error(data.errors.join(', '));
+        }
         throw new Error(data.message || 'Failed to create student');
       }
 

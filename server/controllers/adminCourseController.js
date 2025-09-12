@@ -190,7 +190,11 @@ export const createCourse = async (req, res) => {
       learningOutcomes: Array.isArray(learningOutcomes) ? learningOutcomes : (learningOutcomes ? String(learningOutcomes).split(',').map(outcome => outcome.trim()) : []),
       isPublished: isPublished === 'true' || isPublished === true,
       isFeatured: isFeatured === 'true' || isFeatured === true,
-      isLaunchPad: isLaunchPad === 'true' || isLaunchPad === true
+      isLaunchPad: isLaunchPad === 'true' || isLaunchPad === true,
+      schedule: {
+        isSelfPaced: true,
+        liveSessions: []
+      }
     });
 
     await course.save();
@@ -407,6 +411,79 @@ export const toggleCoursePublish = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Server error'
+    });
+  }
+};
+
+// @desc    Update course meet links
+// @route   PUT /api/admin/courses/:id/meet-links
+// @access  Private/Admin
+export const updateCourseMeetLinks = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Course not found'
+      });
+    }
+
+    const { meetLink, isLiveClass } = req.body;
+
+    // Handle live class settings
+    let liveSessions = course.schedule?.liveSessions || [];
+    
+    if (isLiveClass === true || isLiveClass === 'true') {
+      if (!meetLink) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Meeting link is required when enabling live class'
+        });
+      }
+      
+      // Update or create live session
+      if (liveSessions.length > 0) {
+        liveSessions[0].meetingLink = meetLink;
+        liveSessions[0].title = course.title;
+        liveSessions[0].duration = course.duration || 60;
+      } else {
+        liveSessions = [{
+          title: course.title,
+          date: new Date(),
+          duration: course.duration || 60,
+          meetingLink: meetLink
+        }];
+      }
+    } else if (isLiveClass === false || isLiveClass === 'false') {
+      // Disable live class
+      liveSessions = [];
+    }
+
+    // Update course with new live session data
+    const updatedCourse = await Course.findByIdAndUpdate(
+      req.params.id,
+      {
+        schedule: {
+          isSelfPaced: !(isLiveClass === true || isLiveClass === 'true'),
+          liveSessions: liveSessions
+        }
+      },
+      { new: true, runValidators: true }
+    ).populate('instructor', 'firstName lastName email avatar');
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Meet links updated successfully',
+      data: {
+        course: updatedCourse
+      }
+    });
+  } catch (error) {
+    console.error('Update meet links error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error during meet links update'
     });
   }
 };

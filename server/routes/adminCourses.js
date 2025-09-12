@@ -8,7 +8,8 @@ import {
   updateCourse,
   deleteCourse,
   toggleCoursePublish,
-  getCourseStats
+  getCourseStats,
+  updateCourseMeetLinks
 } from '../controllers/adminCourseController.js';
 import { adminAuth, requirePermission } from '../middleware/adminAuth.js';
 
@@ -85,6 +86,11 @@ router.put('/:id',
 // @route   PATCH /api/admin/courses/:id/toggle-publish
 // @access  Private/Admin
 router.patch('/:id/toggle-publish', adminAuth, requirePermission('courseManagement'), toggleCoursePublish);
+
+// @desc    Update course meet links
+// @route   PUT /api/admin/courses/:id/meet-links
+// @access  Private/Admin
+router.put('/:id/meet-links', adminAuth, requirePermission('courseManagement'), updateCourseMeetLinks);
 
 // @desc    Delete course
 // @route   DELETE /api/admin/courses/:id

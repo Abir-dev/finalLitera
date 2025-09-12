@@ -1,5 +1,6 @@
 // src/pages/LiveClasses.jsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import axios from "axios";
 
 const styles = {
   brandBlue: "#18457A",
@@ -20,51 +21,36 @@ function LiveBadge() {
   );
 }
 
-function LiveVideoPlayer({ title, author, viewers, videoUrl, thumbnail, isLive = true }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const handlePlayClick = () => {
-    setIsPlaying(!isPlaying);
+function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive = true, startTime, duration }) {
+  const handleJoinClass = () => {
+    if (meetLink) {
+      window.open(meetLink, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
-    <div className="relative group">
+    <div className="relative group cursor-pointer" onClick={handleJoinClass}>
       <div className="relative">
         <div
-          className="h-44 sm:h-48 w-full rounded-xl bg-slate-200 border overflow-hidden"
+          className="h-44 sm:h-48 w-full rounded-xl bg-slate-200 border overflow-hidden hover:shadow-lg transition-all duration-300"
           style={{ borderColor: isLive ? styles.liveRed : "#e5e7eb" }}
         >
-          {/* Video Player */}
+          {/* Course Thumbnail */}
           <div className="relative w-full h-full">
-            {isPlaying ? (
-              <iframe
-                src={`${videoUrl}?autoplay=1`}
-                className="w-full h-full object-cover"
-                title={title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            ) : (
-              <>
-                <img 
-                  src={thumbnail} 
-                  alt={title}
-                  className="w-full h-full object-cover"
-                />
-                
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                  <button
-                    onClick={handlePlayClick}
-                    className="w-16 h-16 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all hover:scale-110"
-                  >
-                    <svg className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </button>
-                </div>
-              </>
-            )}
+            <img 
+              src={thumbnail} 
+              alt={title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            
+            {/* Join Button Overlay */}
+            <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="bg-white bg-opacity-90 rounded-full p-4 hover:bg-opacity-100 transition-all hover:scale-110">
+                <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"/>
+                </svg>
+              </div>
+            </div>
 
             {/* Live Viewers Count */}
             {isLive && (
@@ -76,40 +62,29 @@ function LiveVideoPlayer({ title, author, viewers, videoUrl, thumbnail, isLive =
               </div>
             )}
 
-            {/* Stop Button when playing */}
-            {isPlaying && (
-              <button
-                onClick={handlePlayClick}
-                className="absolute top-2 right-2 bg-black bg-opacity-70 text-white p-1 rounded-full hover:bg-opacity-90 transition-all z-10"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 6h12v12H6z"/>
-                </svg>
-              </button>
+            {/* AI-Powered Features Indicator */}
+            {isLive && (
+              <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
+                <div className="flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                  AI Powered
+                </div>
+              </div>
             )}
           </div>
         </div>
-
-        {/* AI-Powered Features Indicator */}
-        {isLive && (
-          <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
-            <div className="flex items-center gap-1">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
-              AI Powered
-            </div>
-          </div>
-        )}
       </div>
 
-      <div className="mt-2">
-        <p className="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">{title}</p>
-        <p className="text-[11px] text-slate-600 -mt-0.5">Drive deep into machine learning</p>
-        <p className="text-[11px] text-slate-500 mt-1">By {author}</p>
+      <div className="mt-3">
+        <h3 className="text-sm font-semibold text-slate-900 leading-snug group-hover:text-blue-600 transition-colors">
+          {title}
+        </h3>
+        <p className="text-xs text-slate-600 mt-1">By {instructor}</p>
         
         {/* Live Status Info */}
-        {isLive && (
+        {isLive ? (
           <div className="mt-2 flex items-center gap-2 text-xs text-slate-600">
             <span className="flex items-center gap-1">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
@@ -118,58 +93,89 @@ function LiveVideoPlayer({ title, author, viewers, videoUrl, thumbnail, isLive =
             <span>•</span>
             <span>{viewers} viewers</span>
           </div>
+        ) : (
+          <div className="mt-2 flex items-center gap-2 text-xs text-slate-600">
+            <span className="flex items-center gap-1">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
+              </svg>
+              Starts at {startTime}
+            </span>
+            <span>•</span>
+            <span>{duration}</span>
+          </div>
         )}
+        
+        {/* Join Button */}
+        <button 
+          onClick={handleJoinClass}
+          className="mt-3 w-full bg-gradient-to-r from-red-600 to-orange-600 text-white text-xs font-medium py-2 px-4 rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300 transform hover:scale-105"
+        >
+          {isLive ? 'Join Live Class' : 'Join Meeting'}
+        </button>
       </div>
     </div>
   );
 }
 
 export default function LiveClasses() {
-  // Restored YouTube links instead of sample mp4
-  const items = useMemo(
-    () => [
-      {
-        id: 1,
-        title: "Stanford CS229: Machine Learning (Lecture 1)",
-        author: "Stanford Online",
-        viewers: "1.8K",
-        thumbnail: "https://i.ytimg.com/vi/jGwO_UgTS7I/hqdefault.jpg",
-        videoUrl: "https://www.youtube.com/embed/m8pOnJxOcqY",
-        isLive: true
-      },
-      {
-        id: 2,
-        title: "Intro to Machine Learning (MIT 6.036)",
-        author: "MIT OpenCourseWare",
-        viewers: "1.2K",
-        thumbnail: "https://i.ytimg.com/vi/i_LwzRVP7bg/hqdefault.jpg",
-        videoUrl: "https://www.youtube.com/embed/i_LwzRVP7bg",
-        isLive: true
-      },
-      {
-        id: 3,
-        title: "ML for Everybody – Full Course",
-        author: "freeCodeCamp.org",
-        viewers: "3.4K",
-        thumbnail: "https://i.ytimg.com/vi/m8pOnJxOcqY/hqdefault.jpg",
-        videoUrl: "https://www.youtube.com/embed/m8pOnJxOcqY",
-        isLive: true
-      },
-      {
-        id: 4,
-        title: "Neural Networks for ML (Geoffrey Hinton)",
-        author: "Coursera",
-        viewers: "924",
-        thumbnail: "https://i.ytimg.com/vi/cbeTc-Urqak/hqdefault.jpg",
-        videoUrl: "https://www.youtube.com/embed/cbeTc-Urqak",
-        isLive: false
-      }
-    ],
-    []
-  );
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const liveClasses = items.filter(item => item.isLive);
-  const upcomingClasses = items.filter(item => !item.isLive);
+  // Fetch live classes from API
+  useEffect(() => {
+    const fetchLiveClasses = async () => {
+      try {
+        setLoading(true);
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const response = await axios.get(`${API_BASE}/courses?liveClasses=true`);
+        
+        // Transform courses to match our component structure
+        const transformedCourses = response.data.data.courses.map(course => ({
+          id: course._id,
+          title: course.title,
+          instructor: course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : 'Instructor',
+          viewers: Math.floor(Math.random() * 5000) + 100, // Random viewer count for demo
+          thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
+          meetLink: course.schedule?.liveSessions?.[0]?.meetingLink || "",
+          isLive: true, // All courses with live sessions are considered live
+          startTime: new Date(course.schedule?.liveSessions?.[0]?.date || Date.now()).toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+          }),
+          duration: `${course.schedule?.liveSessions?.[0]?.duration || course.duration || 60} minutes`
+        }));
+
+        setCourses(transformedCourses);
+      } catch (error) {
+        console.error('Error fetching live classes:', error);
+        setError('Failed to load live classes');
+        // Fallback to sample data if API fails
+        setCourses([
+          {
+            id: 1,
+            title: "Advanced React Development",
+            instructor: "Dr. Sarah Johnson",
+            viewers: "1.8K",
+            thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=300&fit=crop",
+            meetLink: "https://meet.google.com/abc-defg-hij",
+            isLive: true,
+            startTime: "10:00 AM",
+            duration: "2 hours"
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLiveClasses();
+  }, []);
+
+  const liveClasses = courses.filter(item => item.isLive);
+  const upcomingClasses = courses.filter(item => !item.isLive);
 
     return (
     <>
@@ -177,6 +183,19 @@ export default function LiveClasses() {
         <h1 className="text-2xl md:text-3xl font-extrabold" style={{ color: styles.brandBlue }}>
           Live Classes
         </h1>
+
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+            <span className="ml-3 text-gray-600">Loading live classes...</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+            {error}
+          </div>
+        )}
 
         {/* Live Now Section */}
         {liveClasses.length > 0 && (
@@ -187,7 +206,7 @@ export default function LiveClasses() {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {liveClasses.map((item) => (
-                <LiveVideoPlayer key={item.id} {...item} />
+                <LiveClassCard key={item.id} {...item} />
               ))}
             </div>
           </div>
@@ -199,7 +218,7 @@ export default function LiveClasses() {
             <h2 className="text-lg font-semibold text-slate-900 mb-3">Upcoming Classes</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {upcomingClasses.map((item) => (
-                <LiveVideoPlayer key={item.id} {...item} />
+                <LiveClassCard key={item.id} {...item} />
               ))}
             </div>
           </div>
