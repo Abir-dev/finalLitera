@@ -42,16 +42,17 @@ export default function DashboardLayout() {
 
   return (
     <div className="h-screen w-full overflow-hidden bg-white text-slate-900">
-      {/* Top navbar */}
-      <Navbar />
-
       {/* Body: right‑rounded sidebar + scrollable content */}
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex h-screen">
         {/* Sidebar */}
         <aside
           className="w-64 text-white flex flex-col rounded-r-3xl shadow-xl"
           style={{ background: BRAND.blue }}
         >
+             <button onClick={() => window.location.reload()} className="ml-auto w-12 h-12 rounded-full flex items-center justify-center cursor-pointer">
+            {/* <img src="/icons/refresh.svg" alt="Refresh" className="w-6 h-6 rounded-full" /> */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw-icon lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          </button>
           {/* Profile section */}
           <div className="px-6 pt-8 pb-6">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20 mx-auto shadow">
@@ -104,9 +105,9 @@ export default function DashboardLayout() {
               to="/"
               className="ml-auto w-12 h-12 rounded-full flex items-center justify-center cursor-pointer"
             >
-              <img src="/icons/home.svg" alt="Home" className="w-6 h-6 invert" />
+              <img src="/icons/home.svg" alt="Home" className="invert" />
             </NavLink>
-              {/* <button onClick={() => window.location.reload()}>
+              {/* <button onClick={() => window.location.reload()} className="ml-auto w-12 h-12 rounded-full flex items-center justify-center cursor-pointer">
             <img src="/icons/refresh.svg" alt="Refresh" className="w-6 h-6 rounded-full" />
           </button> */}
           </div>
