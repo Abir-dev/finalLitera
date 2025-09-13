@@ -10,7 +10,7 @@
     "dev:5001": "PORT=5001 nodemon server.js",
     "seed": "node scripts/seedData.js",
     "test": "jest",
-    "build": "tsc"
+    "build": "echo 'No build step needed for JavaScript project'"
   },
   "keywords": [
     "lms",
