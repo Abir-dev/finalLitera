@@ -28,46 +28,48 @@ function CourseCard({ course, enrollment }) {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
   };
 
   const getProgressColor = (progress) => {
-    if (progress === 100) return 'bg-green-500';
-    if (progress > 50) return 'bg-blue-500';
-    if (progress > 0) return 'bg-yellow-500';
-    return 'bg-gray-300';
+    if (progress === 100) return "bg-green-500";
+    if (progress > 50) return "bg-blue-500";
+    if (progress > 0) return "bg-yellow-500";
+    return "bg-gray-300";
   };
 
   return (
-    <div 
+    <div
       className="bg-white border rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
       onClick={handleCardClick}
     >
       <div className="w-full h-36 bg-slate-200 rounded-lg mb-3 overflow-hidden">
-        <img 
-          src={course.thumbnail || "/src/assets/courses1.jpg"} 
+        <img
+          src={course.thumbnail || "/src/assets/courses1.jpg"}
           alt={course.title}
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-slate-900 line-clamp-2">{course.title}</h3>
-        
+        <h3 className="text-sm font-semibold text-slate-900 line-clamp-2">
+          {course.title}
+        </h3>
+
         <div className="flex items-center space-x-2 text-xs text-slate-600">
           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-            {course.level || 'Beginner'}
+            {course.level || "Beginner"}
           </span>
           <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">
-            {course.category || 'General'}
+            {course.category || "General"}
           </span>
         </div>
-        
+
         <p className="text-xs text-indigo-600">
           By {course.instructor?.firstName} {course.instructor?.lastName}
         </p>
-        
+
         <div className="text-xs text-slate-500">
           <p>Enrolled: {formatDate(enrollment.enrolledAt)}</p>
           <p>Last accessed: {formatDate(enrollment.lastAccessed)}</p>
@@ -77,11 +79,15 @@ function CourseCard({ course, enrollment }) {
       <div className="mt-3">
         <div className="flex justify-between items-center mb-1">
           <span className="text-xs font-medium text-slate-700">Progress</span>
-          <span className="text-xs text-slate-600">{enrollment.progress || 0}%</span>
+          <span className="text-xs text-slate-600">
+            {enrollment.progress || 0}%
+          </span>
         </div>
         <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
           <div
-            className={`h-full transition-all duration-300 ${getProgressColor(enrollment.progress || 0)}`}
+            className={`h-full transition-all duration-300 ${getProgressColor(
+              enrollment.progress || 0
+            )}`}
             style={{ width: `${enrollment.progress || 0}%` }}
           />
         </div>
@@ -94,14 +100,14 @@ export default function Subscription() {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     search: "",
     category: "all",
-    level: "all", 
+    level: "all",
     progress: "all",
-    sort: "last-accessed-desc"
+    sort: "last-accessed-desc",
   });
 
   // Debounced search for better performance
@@ -109,12 +115,20 @@ export default function Subscription() {
 
   // Available filter options
   const categories = useMemo(() => {
-    const cats = [...new Set(enrolledCourses.map(course => course.course?.category).filter(Boolean))];
+    const cats = [
+      ...new Set(
+        enrolledCourses.map((course) => course.course?.category).filter(Boolean)
+      ),
+    ];
     return ["all", ...cats];
   }, [enrolledCourses]);
 
   const levels = useMemo(() => {
-    const levs = [...new Set(enrolledCourses.map(course => course.course?.level).filter(Boolean))];
+    const levs = [
+      ...new Set(
+        enrolledCourses.map((course) => course.course?.level).filter(Boolean)
+      ),
+    ];
     return ["all", ...levs];
   }, [enrolledCourses]);
 
@@ -126,7 +140,7 @@ export default function Subscription() {
     { value: "progress-desc", label: "Progress (Highest)" },
     { value: "progress-asc", label: "Progress (Lowest)" },
     { value: "title-asc", label: "Title (A-Z)" },
-    { value: "title-desc", label: "Title (Z-A)" }
+    { value: "title-desc", label: "Title (Z-A)" },
   ];
 
   // Load enrolled courses
@@ -141,8 +155,39 @@ export default function Subscription() {
       const response = await profileService.getEnrolledCourses();
       setEnrolledCourses(response.enrolledCourses || []);
     } catch (error) {
-      console.error('Error loading enrolled courses:', error);
-      setError('Failed to load enrolled courses. Please try again.');
+      console.error("Error loading enrolled courses:", error);
+      setError("Failed to load enrolled courses. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const syncEnrollments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Call the sync endpoint
+      const response = await fetch("/api/users/sync-enrollments", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.status === "success") {
+        console.log("Enrollments synced:", result.data);
+        // Reload the courses after sync
+        await loadEnrolledCourses();
+      } else {
+        throw new Error(result.message || "Failed to sync enrollments");
+      }
+    } catch (error) {
+      console.error("Error syncing enrollments:", error);
+      setError("Failed to sync enrollments. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -155,36 +200,50 @@ export default function Subscription() {
     // Search filter - search in title, instructor name, and description (using debounced search)
     if (debouncedSearch) {
       const searchTerm = debouncedSearch.toLowerCase();
-      filtered = filtered.filter(course => 
-        course.course?.title?.toLowerCase().includes(searchTerm) ||
-        course.course?.instructor?.firstName?.toLowerCase().includes(searchTerm) ||
-        course.course?.instructor?.lastName?.toLowerCase().includes(searchTerm) ||
-        course.course?.shortDescription?.toLowerCase().includes(searchTerm) ||
-        course.course?.description?.toLowerCase().includes(searchTerm)
+      filtered = filtered.filter(
+        (course) =>
+          course.course?.title?.toLowerCase().includes(searchTerm) ||
+          course.course?.instructor?.firstName
+            ?.toLowerCase()
+            .includes(searchTerm) ||
+          course.course?.instructor?.lastName
+            ?.toLowerCase()
+            .includes(searchTerm) ||
+          course.course?.shortDescription?.toLowerCase().includes(searchTerm) ||
+          course.course?.description?.toLowerCase().includes(searchTerm)
       );
     }
 
     // Category filter
     if (filters.category !== "all") {
-      filtered = filtered.filter(course => course.course?.category === filters.category);
+      filtered = filtered.filter(
+        (course) => course.course?.category === filters.category
+      );
     }
 
     // Level filter
     if (filters.level !== "all") {
-      filtered = filtered.filter(course => course.course?.level === filters.level);
+      filtered = filtered.filter(
+        (course) => course.course?.level === filters.level
+      );
     }
 
     // Progress filter
     if (filters.progress !== "all") {
       switch (filters.progress) {
         case "not-started":
-          filtered = filtered.filter(course => (course.progress || 0) === 0);
+          filtered = filtered.filter((course) => (course.progress || 0) === 0);
           break;
         case "in-progress":
-          filtered = filtered.filter(course => (course.progress || 0) > 0 && (course.progress || 0) < 100);
+          filtered = filtered.filter(
+            (course) =>
+              (course.progress || 0) > 0 && (course.progress || 0) < 100
+          );
           break;
         case "completed":
-          filtered = filtered.filter(course => (course.progress || 0) === 100);
+          filtered = filtered.filter(
+            (course) => (course.progress || 0) === 100
+          );
           break;
       }
     }
@@ -192,10 +251,14 @@ export default function Subscription() {
     // Sort
     switch (filters.sort) {
       case "title-asc":
-        filtered.sort((a, b) => (a.course?.title || "").localeCompare(b.course?.title || ""));
+        filtered.sort((a, b) =>
+          (a.course?.title || "").localeCompare(b.course?.title || "")
+        );
         break;
       case "title-desc":
-        filtered.sort((a, b) => (b.course?.title || "").localeCompare(a.course?.title || ""));
+        filtered.sort((a, b) =>
+          (b.course?.title || "").localeCompare(a.course?.title || "")
+        );
         break;
       case "progress-asc":
         filtered.sort((a, b) => (a.progress || 0) - (b.progress || 0));
@@ -204,16 +267,26 @@ export default function Subscription() {
         filtered.sort((a, b) => (b.progress || 0) - (a.progress || 0));
         break;
       case "enrolled-date-asc":
-        filtered.sort((a, b) => new Date(a.enrolledAt || 0) - new Date(b.enrolledAt || 0));
+        filtered.sort(
+          (a, b) => new Date(a.enrolledAt || 0) - new Date(b.enrolledAt || 0)
+        );
         break;
       case "enrolled-date-desc":
-        filtered.sort((a, b) => new Date(b.enrolledAt || 0) - new Date(a.enrolledAt || 0));
+        filtered.sort(
+          (a, b) => new Date(b.enrolledAt || 0) - new Date(a.enrolledAt || 0)
+        );
         break;
       case "last-accessed-asc":
-        filtered.sort((a, b) => new Date(a.lastAccessed || 0) - new Date(b.lastAccessed || 0));
+        filtered.sort(
+          (a, b) =>
+            new Date(a.lastAccessed || 0) - new Date(b.lastAccessed || 0)
+        );
         break;
       case "last-accessed-desc":
-        filtered.sort((a, b) => new Date(b.lastAccessed || 0) - new Date(a.lastAccessed || 0));
+        filtered.sort(
+          (a, b) =>
+            new Date(b.lastAccessed || 0) - new Date(a.lastAccessed || 0)
+        );
         break;
     }
 
@@ -221,7 +294,7 @@ export default function Subscription() {
   }, [enrolledCourses, filters, debouncedSearch]);
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const clearFilters = () => {
@@ -230,7 +303,7 @@ export default function Subscription() {
       category: "all",
       level: "all",
       progress: "all",
-      sort: "last-accessed-desc"
+      sort: "last-accessed-desc",
     });
   };
 
@@ -249,7 +322,7 @@ export default function Subscription() {
       <section>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">{error}</p>
-          <button 
+          <button
             onClick={loadEnrolledCourses}
             className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
           >
@@ -271,6 +344,15 @@ export default function Subscription() {
           <p className="text-gray-600 mt-1">
             {filteredCourses.length} of {enrolledCourses.length} courses
           </p>
+          {enrolledCourses.length === 0 && (
+            <button
+              onClick={syncEnrollments}
+              disabled={loading}
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {loading ? "Syncing..." : "Sync Enrollments"}
+            </button>
+          )}
         </div>
 
         {/* Search */}
@@ -281,8 +363,18 @@ export default function Subscription() {
             value={filters.search}
             onChange={(e) => handleFilterChange("search", e.target.value)}
           />
-          <svg className="w-5 h-5 absolute left-3 top-2.5 text-[#1F4B7A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
+          <svg
+            className="w-5 h-5 absolute left-3 top-2.5 text-[#1F4B7A]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m21 21-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"
+            />
           </svg>
           {filters.search && filters.search !== debouncedSearch && (
             <div className="absolute right-3 top-2.5">
@@ -293,10 +385,15 @@ export default function Subscription() {
       </div>
 
       {/* Active Filters Summary */}
-      {(filters.search || filters.category !== "all" || filters.level !== "all" || filters.progress !== "all") && (
+      {(filters.search ||
+        filters.category !== "all" ||
+        filters.level !== "all" ||
+        filters.progress !== "all") && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-blue-800">Active filters:</span>
+            <span className="text-sm font-medium text-blue-800">
+              Active filters:
+            </span>
             {filters.search && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 Search: "{filters.search}"
@@ -314,7 +411,7 @@ export default function Subscription() {
             )}
             {filters.progress !== "all" && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Progress: {filters.progress.replace('-', ' ')}
+                Progress: {filters.progress.replace("-", " ")}
               </span>
             )}
             <button
@@ -332,14 +429,16 @@ export default function Subscription() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Category Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category
+            </label>
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange("category", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F4B7A] focus:border-[#1F4B7A]"
             >
               <option value="all">All Categories</option>
-              {categories.slice(1).map(category => (
+              {categories.slice(1).map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -349,14 +448,16 @@ export default function Subscription() {
 
           {/* Level Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Level
+            </label>
             <select
               value={filters.level}
               onChange={(e) => handleFilterChange("level", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F4B7A] focus:border-[#1F4B7A]"
             >
               <option value="all">All Levels</option>
-              {levels.slice(1).map(level => (
+              {levels.slice(1).map((level) => (
                 <option key={level} value={level}>
                   {level}
                 </option>
@@ -366,7 +467,9 @@ export default function Subscription() {
 
           {/* Progress Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Progress</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Progress
+            </label>
             <select
               value={filters.progress}
               onChange={(e) => handleFilterChange("progress", e.target.value)}
@@ -381,13 +484,15 @@ export default function Subscription() {
 
           {/* Sort Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Sort By
+            </label>
             <select
               value={filters.sort}
               onChange={(e) => handleFilterChange("sort", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F4B7A] focus:border-[#1F4B7A]"
             >
-              {sortOptions.map(option => (
+              {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -411,16 +516,17 @@ export default function Subscription() {
       {filteredCourses.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📚</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No courses found
+          </h3>
           <p className="text-gray-600 mb-4">
-            {enrolledCourses.length === 0 
-              ? "You haven't enrolled in any courses yet." 
-              : "Try adjusting your filters to see more results."
-            }
+            {enrolledCourses.length === 0
+              ? "You haven't enrolled in any courses yet."
+              : "Try adjusting your filters to see more results."}
           </p>
           {enrolledCourses.length === 0 && (
-            <button 
-              onClick={() => window.location.href = '/courses'}
+            <button
+              onClick={() => (window.location.href = "/courses")}
               className="px-6 py-2 bg-[#1F4B7A] text-white rounded-lg hover:bg-[#1a3f6b] transition-colors"
             >
               Browse Courses
@@ -430,8 +536,8 @@ export default function Subscription() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredCourses.map((enrollment) => (
-            <CourseCard 
-              key={enrollment._id || enrollment.course?._id} 
+            <CourseCard
+              key={enrollment._id || enrollment.course?._id}
               course={enrollment.course}
               enrollment={enrollment}
             />

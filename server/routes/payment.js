@@ -15,7 +15,7 @@ const razorInstance = new Razorpay({
 // Debug Razorpay configuration
 console.log("Razorpay Config:", {
   key_id: process.env.RAZORPAY_KEY_ID ? "Present" : "Missing",
-  key_secret: process.env.RAZORPAY_KEY_SECRET ? "Present" : "Missing"
+  key_secret: process.env.RAZORPAY_KEY_SECRET ? "Present" : "Missing",
 });
 
 // Test authentication endpoint
@@ -56,7 +56,7 @@ router.post("/create-order", protect, async (req, res) => {
     console.log("Finding course with ID:", courseId);
     const course = await Course.findById(courseId);
     console.log("Course found:", course ? "Yes" : "No");
-    
+
     if (!course || !course.isPublished) {
       return res
         .status(404)
@@ -65,15 +65,17 @@ router.post("/create-order", protect, async (req, res) => {
 
     const amountInPaise = Math.round(Number(course.price) * 100);
     console.log("Creating Razorpay order with amount:", amountInPaise);
-    
+
     const orderOptions = {
       amount: amountInPaise,
       currency: course.currency || "INR",
-      receipt: `c_${String(course._id).slice(-12)}_${Date.now().toString().slice(-8)}`,
+      receipt: `c_${String(course._id).slice(-12)}_${Date.now()
+        .toString()
+        .slice(-8)}`,
       notes: { courseId: String(course._id), userId: String(req.user.id) },
     };
     console.log("Order options:", orderOptions);
-    
+
     const order = await razorInstance.orders.create(orderOptions);
     console.log("Razorpay order created successfully:", order.id);
 
@@ -95,11 +97,15 @@ router.post("/create-order", protect, async (req, res) => {
       message: error.message,
       code: error.code,
       statusCode: error.statusCode,
-      description: error.description
+      description: error.description,
     });
     res
       .status(500)
-      .json({ status: "error", message: "Failed to create order", details: error.message });
+      .json({
+        status: "error",
+        message: "Failed to create order",
+        details: error.message,
+      });
   }
 });
 
@@ -136,7 +142,8 @@ router.post(
 
         if (courseId && userId) {
           try {
-            await Enrollment.findOneAndUpdate(
+            // Create enrollment in Enrollment collection
+            const enrollment = await Enrollment.findOneAndUpdate(
               { user: userId, course: courseId },
               {
                 user: userId,
@@ -152,6 +159,16 @@ router.post(
               },
               { upsert: true, new: true }
             );
+
+            // Also add to User model's enrolledCourses array for backward compatibility
+            const User = (await import("../models/User.js")).default;
+            const user = await User.findById(userId);
+            if (user && !user.isEnrolledInCourse(courseId)) {
+              await user.enrollInCourse(courseId);
+              console.log("Added enrollment to User model for user:", userId);
+            }
+
+            console.log("Enrollment created successfully:", enrollment._id);
           } catch (err) {
             console.error("Enrollment upsert error:", err);
           }

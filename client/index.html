@@ -1,11 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      // Suppress CORS warnings from Razorpay
+      const originalConsoleError = console.error;
+      console.error = function (...args) {
+        const message = args.join(" ");
+        if (
+          message.includes("x-rtb-fingerprint-id") ||
+          message.includes("Refused to get unsafe header")
+        ) {
+          console.warn(
+            "CORS warning suppressed - this is a known Razorpay issue and doesn't affect functionality"
+          );
+          return;
+        }
+        originalConsoleError.apply(console, args);
+      };
+    </script>
+    <script
+      src="https://checkout.razorpay.com/v1/checkout.js"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
     <div id="root"></div>

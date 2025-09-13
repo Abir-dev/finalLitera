@@ -42,8 +42,12 @@ app.use(cookieParser()); // parse cookies
 // --- RATE LIMITING ---
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max requests per IP
+  max: 1000, // max requests per IP (increased for development)
   message: "Too many requests from this IP, please try again later.",
+  skip: (req) => {
+    // Skip rate limiting in development
+    return process.env.NODE_ENV === "development";
+  },
 });
 app.use("/api/", limiter);
 
@@ -76,6 +80,7 @@ const corsOptions = {
     "X-Requested-With",
     "Accept",
     "Origin",
+    "x-rtb-fingerprint-id",
   ],
   optionsSuccessStatus: 200, // For legacy browser support
   preflightContinue: false,

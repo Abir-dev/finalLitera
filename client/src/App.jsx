@@ -79,6 +79,12 @@ export default function App() {
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
+
+      {/* Redirect old subscription route to dashboard */}
+      <Route
+        path="/subscription"
+        element={<Navigate to="/dashboard/subscription" replace />}
+      />
     </Routes>
   );
 }
