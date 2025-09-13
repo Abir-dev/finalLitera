@@ -39,6 +39,20 @@ function CourseCard({ course, enrollment }) {
     return "bg-gray-300";
   };
 
+  const getProgressValue = (enrollment) => {
+    // Handle different progress structures
+    if (typeof enrollment.progress === 'number') {
+      return enrollment.progress;
+    }
+    if (enrollment.progress && typeof enrollment.progress === 'object') {
+      // User model structure: progress.completedVideos / progress.totalVideos
+      if (enrollment.progress.completedVideos && enrollment.progress.totalVideos) {
+        return Math.round((enrollment.progress.completedVideos / enrollment.progress.totalVideos) * 100);
+      }
+    }
+    return 0;
+  };
+
   return (
     <div
       className="bg-white border rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
@@ -80,15 +94,15 @@ function CourseCard({ course, enrollment }) {
         <div className="flex justify-between items-center mb-1">
           <span className="text-xs font-medium text-slate-700">Progress</span>
           <span className="text-xs text-slate-600">
-            {enrollment.progress || 0}%
+            {getProgressValue(enrollment)}%
           </span>
         </div>
         <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
           <div
             className={`h-full transition-all duration-300 ${getProgressColor(
-              enrollment.progress || 0
+              getProgressValue(enrollment)
             )}`}
-            style={{ width: `${enrollment.progress || 0}%` }}
+            style={{ width: `${getProgressValue(enrollment)}%` }}
           />
         </div>
       </div>
@@ -232,17 +246,17 @@ export default function Subscription() {
     if (filters.progress !== "all") {
       switch (filters.progress) {
         case "not-started":
-          filtered = filtered.filter((course) => (course.progress || 0) === 0);
+          filtered = filtered.filter((course) => getProgressValue(course) === 0);
           break;
         case "in-progress":
           filtered = filtered.filter(
             (course) =>
-              (course.progress || 0) > 0 && (course.progress || 0) < 100
+              getProgressValue(course) > 0 && getProgressValue(course) < 100
           );
           break;
         case "completed":
           filtered = filtered.filter(
-            (course) => (course.progress || 0) === 100
+            (course) => getProgressValue(course) === 100
           );
           break;
       }
@@ -261,10 +275,10 @@ export default function Subscription() {
         );
         break;
       case "progress-asc":
-        filtered.sort((a, b) => (a.progress || 0) - (b.progress || 0));
+        filtered.sort((a, b) => getProgressValue(a) - getProgressValue(b));
         break;
       case "progress-desc":
-        filtered.sort((a, b) => (b.progress || 0) - (a.progress || 0));
+        filtered.sort((a, b) => getProgressValue(b) - getProgressValue(a));
         break;
       case "enrolled-date-asc":
         filtered.sort(

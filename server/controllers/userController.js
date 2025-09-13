@@ -1,6 +1,6 @@
 import User from '../models/User.js';
-import Course from '../models/Course.js';
 import Enrollment from '../models/Enrollment.js';
+import Course from '../models/Course.js';
 import Notification from '../models/Notification.js';
 
 // @desc    Get all users (Admin only)
@@ -255,6 +255,46 @@ export const getUserCourses = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Server error'
+    });
+  }
+};
+
+// @desc    Get user's enrollments from Enrollment collection
+// @route   GET /api/users/enrollments
+// @access  Private
+export const getUserEnrollments = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    console.log('Getting enrollments for user:', userId);
+    
+    // Get user's enrollments with populated course data
+    const enrollments = await Enrollment.find({ user: userId })
+      .populate({
+        path: 'course',
+        select: 'title thumbnail instructor description level category duration price originalPrice currency shortDescription',
+        populate: {
+          path: 'instructor',
+          select: 'firstName lastName avatar'
+        }
+      })
+      .sort({ enrolledAt: -1 });
+
+    console.log('Found enrollments:', enrollments.length);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        enrollments
+      }
+    });
+  } catch (error) {
+    console.error('Get user enrollments error:', error);
+    console.error('Error details:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      error: error.message
     });
   }
 };

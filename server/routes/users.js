@@ -5,6 +5,7 @@ import {
   updateUser,
   deleteUser,
   getUserCourses,
+  getUserEnrollments,
   getUserStats,
   updateProfile,
   getProfile,
@@ -73,6 +74,11 @@ router.delete("/:id", protect, authorize("admin"), deleteUser);
 // @route   GET /api/users/:id/courses
 // @access  Private
 router.get("/:id/courses", protect, getUserCourses);
+
+// @desc    Get current user's enrollments from Enrollment collection
+// @route   GET /api/users/enrollments
+// @access  Private
+router.get("/enrollments", protect, getUserEnrollments);
 
 // @desc    Sync user enrollments from User model to Enrollment collection
 // @route   POST /api/users/sync-enrollments

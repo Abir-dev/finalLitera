@@ -4,6 +4,8 @@ import Razorpay from "razorpay";
 import { protect } from "../middleware/auth.js";
 import Course from "../models/Course.js";
 import Enrollment from "../models/Enrollment.js";
+import User from "../models/User.js";
+import Notification from "../models/Notification.js";
 
 const router = express.Router();
 
@@ -79,6 +81,53 @@ router.post("/create-order", protect, async (req, res) => {
     const order = await razorInstance.orders.create(orderOptions);
     console.log("Razorpay order created successfully:", order.id);
 
+    // Check if user is already enrolled in this course
+    const user = await User.findById(req.user.id);
+    if (user.isEnrolledInCourse(courseId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Already enrolled in this course"
+      });
+    }
+
+    // Create enrollment record in Enrollment collection
+    const enrollment = await Enrollment.findOneAndUpdate(
+      { user: req.user.id, course: courseId },
+      {
+        user: req.user.id,
+        course: courseId,
+        status: "active",
+        payment: {
+          amount: course.price,
+          currency: course.currency || "INR",
+          paymentMethod: "razorpay",
+          transactionId: order.id,
+          paidAt: null, // Will be updated when payment is captured
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    // Add enrollment to User model's enrolledCourses array for backward compatibility
+    if (!user.isEnrolledInCourse(courseId)) {
+      await user.enrollInCourse(courseId);
+      console.log("Added enrollment to User model for user:", req.user.id);
+    }
+
+    // Increment course enrollment count
+    await course.incrementEnrollment();
+
+    // Create notification
+    await Notification.create({
+      user: req.user.id,
+      type: 'course_enrollment',
+      title: 'Course Enrollment Confirmed',
+      message: `You have successfully enrolled in "${course.title}"`,
+      data: { courseId: course._id, enrollmentId: enrollment._id }
+    });
+
+    console.log("Enrollment created successfully:", enrollment._id);
+
     res.status(200).json({
       status: "success",
       data: {
@@ -88,6 +137,10 @@ router.post("/create-order", protect, async (req, res) => {
           price: course.price,
           originalPrice: course.originalPrice,
           currency: course.currency || "INR",
+        },
+        enrollment: {
+          id: enrollment._id,
+          status: enrollment.status,
         },
       },
     });
