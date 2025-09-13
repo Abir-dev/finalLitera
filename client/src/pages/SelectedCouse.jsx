@@ -1,6 +1,9 @@
 // src/pages/SelectedCouse.jsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import VideoPlaylist from "../components/VideoPlaylist.jsx";
+import CourseProgressTracker from "../components/CourseProgressTracker.jsx";
+import ProgressAnalytics from "../components/ProgressAnalytics.jsx";
 
 const brand = { blue: "#18457A", progress: "#1F4B7A", green: "#16a34a" };
 
@@ -10,6 +13,13 @@ export default function SelectedCourse() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [courseProgressData, setCourseProgressData] = useState({
+    courseProgress: 0,
+    moduleProgress: [],
+    timeProgress: 0,
+    totalVideos: 0,
+    completedVideos: 0
+  });
 
   // Enhanced course data for Machine Learning
   const courseData = useMemo(() => ({
@@ -25,40 +35,256 @@ export default function SelectedCourse() {
     nextLesson: "Neural Network Architectures - Part 3",
     modules: [
       {
+        id: "module-1",
         title: "Introduction to Machine Learning",
         duration: "8 hours",
         completed: true,
-        topics: ["Supervised vs Unsupervised Learning", "Data Preprocessing", "Model Evaluation"]
+        topics: ["Supervised vs Unsupervised Learning", "Data Preprocessing", "Model Evaluation"],
+        videos: [
+          {
+            id: "video-1-1",
+            title: "What is Machine Learning?",
+            description: "Introduction to the fundamentals of machine learning and its applications",
+            duration: "15:30",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses1.jpg"
+          },
+          {
+            id: "video-1-2",
+            title: "Types of Machine Learning",
+            description: "Understanding supervised, unsupervised, and reinforcement learning",
+            duration: "18:45",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+            thumbnail: "/src/assets/courses2.jpg"
+          },
+          {
+            id: "video-1-3",
+            title: "Data Preprocessing Techniques",
+            description: "Hands-on tutorial on cleaning and preparing data for ML models",
+            duration: "22:15",
+            type: "tutorial",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+            thumbnail: "/src/assets/courses3.jpg"
+          }
+        ]
       },
       {
+        id: "module-2",
         title: "Linear Regression & Classification",
         duration: "12 hours",
         completed: true,
-        topics: ["Linear Regression", "Logistic Regression", "Regularization"]
+        topics: ["Linear Regression", "Logistic Regression", "Regularization"],
+        videos: [
+          {
+            id: "video-2-1",
+            title: "Linear Regression Fundamentals",
+            description: "Understanding the mathematical foundation of linear regression",
+            duration: "20:10",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses4.jpg"
+          },
+          {
+            id: "video-2-2",
+            title: "Implementing Linear Regression",
+            description: "Step-by-step implementation using Python and scikit-learn",
+            duration: "25:30",
+            type: "tutorial",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+            thumbnail: "/src/assets/courses5.jpg"
+          },
+          {
+            id: "video-2-3",
+            title: "Logistic Regression Explained",
+            description: "Understanding classification problems and logistic regression",
+            duration: "18:20",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+            thumbnail: "/src/assets/courses1.jpg"
+          },
+          {
+            id: "video-2-4",
+            title: "Regularization Techniques",
+            description: "L1, L2 regularization and their impact on model performance",
+            duration: "16:45",
+            type: "demo",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses2.jpg"
+          }
+        ]
       },
       {
+        id: "module-3",
         title: "Decision Trees & Ensemble Methods",
         duration: "15 hours",
         completed: true,
-        topics: ["Decision Trees", "Random Forest", "Gradient Boosting"]
+        topics: ["Decision Trees", "Random Forest", "Gradient Boosting"],
+        videos: [
+          {
+            id: "video-3-1",
+            title: "Decision Trees Algorithm",
+            description: "Understanding how decision trees make predictions",
+            duration: "19:30",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+            thumbnail: "/src/assets/courses3.jpg"
+          },
+          {
+            id: "video-3-2",
+            title: "Building Decision Trees in Python",
+            description: "Practical implementation of decision trees",
+            duration: "24:15",
+            type: "tutorial",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+            thumbnail: "/src/assets/courses4.jpg"
+          },
+          {
+            id: "video-3-3",
+            title: "Random Forest Ensemble",
+            description: "Understanding ensemble methods and random forests",
+            duration: "21:40",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses5.jpg"
+          },
+          {
+            id: "video-3-4",
+            title: "Gradient Boosting Deep Dive",
+            description: "Advanced ensemble techniques with gradient boosting",
+            duration: "28:20",
+            type: "demo",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+            thumbnail: "/src/assets/courses1.jpg"
+          }
+        ]
       },
       {
+        id: "module-4",
         title: "Neural Networks & Deep Learning",
         duration: "20 hours",
         completed: false,
-        topics: ["Perceptrons", "Backpropagation", "Convolutional Networks"]
+        topics: ["Perceptrons", "Backpropagation", "Convolutional Networks"],
+        videos: [
+          {
+            id: "video-4-1",
+            title: "Introduction to Neural Networks",
+            description: "Understanding the basic building blocks of neural networks",
+            duration: "23:15",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+            thumbnail: "/src/assets/courses2.jpg"
+          },
+          {
+            id: "video-4-2",
+            title: "Perceptrons and Activation Functions",
+            description: "Deep dive into perceptrons and different activation functions",
+            duration: "26:30",
+            type: "tutorial",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses3.jpg"
+          },
+          {
+            id: "video-4-3",
+            title: "Backpropagation Algorithm",
+            description: "Understanding how neural networks learn through backpropagation",
+            duration: "31:45",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+            thumbnail: "/src/assets/courses4.jpg"
+          },
+          {
+            id: "video-4-4",
+            title: "Convolutional Neural Networks",
+            description: "Introduction to CNNs for image processing",
+            duration: "29:20",
+            type: "demo",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+            thumbnail: "/src/assets/courses5.jpg"
+          },
+          {
+            id: "video-4-5",
+            title: "Building Your First CNN",
+            description: "Hands-on tutorial on implementing CNNs with TensorFlow",
+            duration: "35:10",
+            type: "tutorial",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses1.jpg"
+          }
+        ]
       },
       {
+        id: "module-5",
         title: "Natural Language Processing",
         duration: "18 hours",
         completed: false,
-        topics: ["Text Processing", "Word Embeddings", "Transformer Models"]
+        topics: ["Text Processing", "Word Embeddings", "Transformer Models"],
+        videos: [
+          {
+            id: "video-5-1",
+            title: "Text Preprocessing Techniques",
+            description: "Tokenization, stemming, and text cleaning methods",
+            duration: "20:25",
+            type: "tutorial",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+            thumbnail: "/src/assets/courses2.jpg"
+          },
+          {
+            id: "video-5-2",
+            title: "Word Embeddings and Word2Vec",
+            description: "Understanding vector representations of words",
+            duration: "24:40",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+            thumbnail: "/src/assets/courses3.jpg"
+          },
+          {
+            id: "video-5-3",
+            title: "Transformer Architecture",
+            description: "Introduction to transformer models and attention mechanisms",
+            duration: "32:15",
+            type: "demo",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses4.jpg"
+          }
+        ]
       },
       {
+        id: "module-6",
         title: "Computer Vision",
         duration: "16 hours",
         completed: false,
-        topics: ["Image Processing", "CNN Architectures", "Object Detection"]
+        topics: ["Image Processing", "CNN Architectures", "Object Detection"],
+        videos: [
+          {
+            id: "video-6-1",
+            title: "Image Processing Fundamentals",
+            description: "Basic image processing techniques and filters",
+            duration: "22:30",
+            type: "tutorial",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4",
+            thumbnail: "/src/assets/courses5.jpg"
+          },
+          {
+            id: "video-6-2",
+            title: "Advanced CNN Architectures",
+            description: "ResNet, VGG, and other modern CNN architectures",
+            duration: "28:45",
+            type: "lecture",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4",
+            thumbnail: "/src/assets/courses1.jpg"
+          },
+          {
+            id: "video-6-3",
+            title: "Object Detection with YOLO",
+            description: "Implementing real-time object detection",
+            duration: "33:20",
+            type: "demo",
+            url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+            thumbnail: "/src/assets/courses2.jpg"
+          }
+        ]
       }
     ],
     projects: [
@@ -140,6 +366,63 @@ export default function SelectedCourse() {
     }
   };
 
+  const handleVideoComplete = (videoId) => {
+    // Mark video as completed and update progress
+    console.log(`Video ${videoId} completed!`);
+    // Here you would typically update the backend with video completion
+    // For now, we'll just show a success message
+    alert(`Great job! You've completed the video.`);
+  };
+
+  const handleVideoProgressUpdate = (videoId, currentTime, duration) => {
+    // Save video progress to localStorage
+    localStorage.setItem(`video-progress-${videoId}`, currentTime.toString());
+    localStorage.setItem(`video-duration-${videoId}`, duration.toString());
+    
+    // Update overall course progress based on video completion
+    const totalVideos = courseData.modules.reduce((total, module) => total + module.videos.length, 0);
+    const completedVideos = courseData.modules.reduce((total, module) => {
+      return total + module.videos.filter(video => {
+        const progress = localStorage.getItem(`video-progress-${video.id}`);
+        const videoDuration = localStorage.getItem(`video-duration-${video.id}`);
+        if (progress && videoDuration) {
+          return (parseFloat(progress) / parseFloat(videoDuration)) >= 0.95;
+        }
+        return false;
+      }).length;
+    }, 0);
+    
+    const newProgress = Math.round((completedVideos / totalVideos) * 100);
+    setProgress(newProgress);
+  };
+
+  const handleCourseProgressUpdate = (progressData) => {
+    setCourseProgressData(progressData);
+    setProgress(progressData.courseProgress);
+  };
+
+  // Initialize progress on component mount
+  useEffect(() => {
+    const initializeProgress = () => {
+      const totalVideos = courseData.modules.reduce((total, module) => total + module.videos.length, 0);
+      const completedVideos = courseData.modules.reduce((total, module) => {
+        return total + module.videos.filter(video => {
+          const progress = localStorage.getItem(`video-progress-${video.id}`);
+          const videoDuration = localStorage.getItem(`video-duration-${video.id}`);
+          if (progress && videoDuration) {
+            return (parseFloat(progress) / parseFloat(videoDuration)) >= 0.95;
+          }
+          return false;
+        }).length;
+      }, 0);
+      
+      const initialProgress = totalVideos > 0 ? Math.round((completedVideos / totalVideos) * 100) : 0;
+      setProgress(initialProgress);
+    };
+
+    initializeProgress();
+  }, [courseData.modules]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <section className="max-w-7xl mx-auto px-6 md:px-10 py-8">
@@ -170,86 +453,60 @@ export default function SelectedCourse() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8">
           {/* Left Column - Course Content */}
           <div className="space-y-8">
-            {/* Course Progress Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Course Progress</h2>
-                <span className="text-3xl font-bold text-blue-600">{progress}%</span>
-              </div>
-              
-              {/* Enhanced Progress Bar */}
-              <div className="mb-6">
-                <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>Started</span>
-                  <span>In Progress</span>
-                  <span>Completed</span>
-                </div>
-              </div>
+            {/* Comprehensive Course Progress Tracker */}
+            <CourseProgressTracker 
+              modules={courseData.modules}
+              onProgressUpdate={handleCourseProgressUpdate}
+              courseId={id}
+              showDetailed={true}
+            />
 
-              {/* Next Lesson */}
-              <div className="bg-blue-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">Next Lesson</h3>
-                <p className="text-blue-800 mb-4">{courseData.nextLesson}</p>
+            {/* Quick Actions */}
+            <div className="bg-white rounded-2xl shadow-xl p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   onClick={handleResumeCourse}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors font-semibold"
+                  className="p-4 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-left"
                 >
-                  ▶ Continue Learning
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Continue Learning</h4>
+                      <p className="text-sm text-gray-600">{courseData.nextLesson}</p>
+                    </div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="p-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors text-left"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">View Progress</h4>
+                      <p className="text-sm text-gray-600">See detailed progress above</p>
+                    </div>
+                  </div>
                 </button>
               </div>
             </div>
 
-            {/* Course Modules */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Modules</h2>
-              <div className="space-y-4">
-                {courseData.modules.map((module, index) => (
-                  <div key={index} className={`p-6 border-2 rounded-xl transition-all duration-300 ${
-                    module.completed 
-                      ? 'border-green-200 bg-green-50' 
-                      : 'border-gray-200 bg-gray-50 hover:border-blue-300'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                          module.completed 
-                            ? 'bg-green-500 text-white' 
-                            : 'bg-gray-300 text-gray-600'
-                        }`}>
-                          {module.completed ? '✓' : index + 1}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{module.title}</h3>
-                          <p className="text-sm text-gray-600">{module.duration}</p>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {module.topics.map((topic, i) => (
-                              <span key={i} className="px-2 py-1 bg-white rounded-full text-xs text-gray-600 border">
-                                {topic}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          module.completed 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {module.completed ? 'Completed' : 'In Progress'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Video Playlist */}
+            <VideoPlaylist 
+              modules={courseData.modules}
+              onVideoComplete={handleVideoComplete}
+              onProgressUpdate={handleVideoProgressUpdate}
+            />
 
             {/* Projects Section */}
             <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -281,7 +538,7 @@ export default function SelectedCourse() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Course Image */}
+            {/* Course Image with Progress */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <div className="relative">
                 <img
@@ -290,7 +547,21 @@ export default function SelectedCourse() {
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                  {progress}% Complete
+                  {courseProgressData.courseProgress || progress}% Complete
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                  <div className="text-white">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Progress</span>
+                      <span>{courseProgressData.completedVideos || 0}/{courseProgressData.totalVideos || 0} videos</span>
+                    </div>
+                    <div className="w-full bg-gray-600 rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full transition-all duration-1000"
+                        style={{ width: `${courseProgressData.courseProgress || progress}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="p-6">
@@ -373,17 +644,37 @@ export default function SelectedCourse() {
               </div>
             </div>
 
-            {/* Course Stats */}
+            {/* Progress Analytics */}
+            <ProgressAnalytics 
+              courseProgressData={courseProgressData}
+              modules={courseData.modules}
+            />
+
+            {/* Enhanced Course Stats */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Course Statistics</h3>
               <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Overall Progress</span>
+                  <span className="font-semibold text-blue-600">{courseProgressData.courseProgress || progress}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Videos Watched</span>
+                  <span className="font-semibold">{courseProgressData.completedVideos || 0}/{courseProgressData.totalVideos || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Time Progress</span>
+                  <span className="font-semibold text-green-600">{courseProgressData.timeProgress || 0}%</span>
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Total Duration</span>
                   <span className="font-semibold">{courseData.totalHours}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Modules Completed</span>
-                  <span className="font-semibold">{courseData.modules.filter(m => m.completed).length}/{courseData.modules.length}</span>
+                  <span className="font-semibold">
+                    {courseProgressData.moduleProgress?.filter(m => m.progress === 100).length || 0}/{courseData.modules.length}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Projects Done</span>

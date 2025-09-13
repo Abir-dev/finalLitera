@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { courseService } from '../services/courseService';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -15,6 +15,9 @@ export default function Courses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All Courses");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("All Levels");
+  const [sortBy, setSortBy] = useState("default");
 
   const categories = [
     "All Courses",
@@ -25,6 +28,23 @@ export default function Courses() {
     "Cloud Computing",
     "DevOps",
     "Cybersecurity"
+  ];
+
+  const levels = [
+    "All Levels",
+    "Beginner",
+    "Intermediate", 
+    "Advanced"
+  ];
+
+  const sortOptions = [
+    { value: "default", label: "Default" },
+    { value: "title-asc", label: "Title (A-Z)" },
+    { value: "title-desc", label: "Title (Z-A)" },
+    { value: "price-asc", label: "Price (Low to High)" },
+    { value: "price-desc", label: "Price (High to Low)" },
+    { value: "rating-desc", label: "Rating (High to Low)" },
+    { value: "students-desc", label: "Most Popular" }
   ];
 
   // Load courses from backend
@@ -91,10 +111,62 @@ export default function Courses() {
     }
   ];
 
-  // Filter courses by category
-  const filteredCourses = selectedCategory === "All Courses" 
-    ? courses 
-    : courses.filter(course => course.category === selectedCategory);
+  // Filter and sort courses
+  const filteredCourses = useMemo(() => {
+    let filtered = [...courses];
+
+    // Search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(course => 
+        course.title?.toLowerCase().includes(search) ||
+        course.shortDescription?.toLowerCase().includes(search) ||
+        course.description?.toLowerCase().includes(search) ||
+        course.instructor?.firstName?.toLowerCase().includes(search) ||
+        course.instructor?.lastName?.toLowerCase().includes(search)
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== "All Courses") {
+      filtered = filtered.filter(course => {
+        const courseCategory = course.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Other';
+        return courseCategory === selectedCategory;
+      });
+    }
+
+    // Level filter
+    if (selectedLevel !== "All Levels") {
+      filtered = filtered.filter(course => {
+        const courseLevel = course.level?.charAt(0).toUpperCase() + course.level?.slice(1) || 'Beginner';
+        return courseLevel === selectedLevel;
+      });
+    }
+
+    // Sort courses
+    if (sortBy !== "default") {
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case "title-asc":
+            return (a.title || "").localeCompare(b.title || "");
+          case "title-desc":
+            return (b.title || "").localeCompare(a.title || "");
+          case "price-asc":
+            return (a.price || 0) - (b.price || 0);
+          case "price-desc":
+            return (b.price || 0) - (a.price || 0);
+          case "rating-desc":
+            return (b.rating?.average || b.rating || 0) - (a.rating?.average || a.rating || 0);
+          case "students-desc":
+            return (b.enrollmentCount || b.students || 0) - (a.enrollmentCount || a.students || 0);
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return filtered;
+  }, [courses, searchTerm, selectedCategory, selectedLevel, sortBy]);
 
   // Format course data for display
   const formatCourseData = (course) => {
@@ -173,8 +245,79 @@ export default function Courses() {
           </p>
           {courses.length > 0 && (
             <p className="text-sm text-gray-500 mt-2">
-              Showing {courses.length} course{courses.length !== 1 ? 's' : ''}
+              Showing {filteredCourses.length} of {courses.length} course{courses.length !== 1 ? 's' : ''}
             </p>
+          )}
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search Courses</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search by title, instructor, or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4A8B] focus:border-[#1B4A8B]"
+                />
+                <svg className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Level Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+              <select
+                value={selectedLevel}
+                onChange={(e) => setSelectedLevel(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4A8B] focus:border-[#1B4A8B]"
+              >
+                {levels.map(level => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4A8B] focus:border-[#1B4A8B]"
+              >
+                {sortOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Clear Filters */}
+          {(searchTerm || selectedCategory !== "All Courses" || selectedLevel !== "All Levels" || sortBy !== "default") && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("All Courses");
+                  setSelectedLevel("All Levels");
+                  setSortBy("default");
+                }}
+                className="text-sm text-[#1B4A8B] hover:text-[#153a6f] underline"
+              >
+                Clear all filters
+              </button>
+            </div>
           )}
         </div>
 
@@ -305,8 +448,33 @@ export default function Courses() {
 
         {/* Courses Grid */}
         <section>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {courses.map((course) => {
+          {filteredCourses.length === 0 && !loading ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
+              <p className="text-gray-600 mb-4">
+                {courses.length === 0 
+                  ? "No courses are available at the moment." 
+                  : "Try adjusting your search or filters to see more results."
+                }
+              </p>
+              {(searchTerm || selectedCategory !== "All Courses" || selectedLevel !== "All Levels") && (
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("All Courses");
+                    setSelectedLevel("All Levels");
+                    setSortBy("default");
+                  }}
+                  className="px-6 py-2 bg-[#1B4A8B] text-white rounded-lg hover:bg-[#153a6f] transition-colors"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredCourses.map((course) => {
               const formattedCourse = formatCourseData(course);
               return (
                 <div key={formattedCourse.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group hover:scale-105">
@@ -375,7 +543,8 @@ export default function Courses() {
                 </div>
               );
             })}
-          </div>
+            </div>
+          )}
         </section>
 
         {/* Call to Action */}

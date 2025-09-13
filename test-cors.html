@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - LMS-kinG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #b91c1c;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #dcfce7;
+            border: 1px solid #16a34a;
+            color: #166534;
+        }
+        .error {
+            background: #fef2f2;
+            border: 1px solid #dc2626;
+            color: #991b1b;
+        }
+        .info {
+            background: #eff6ff;
+            border: 1px solid #2563eb;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 CORS Test - LMS-kinG API</h1>
+        <p>This page tests if the CORS configuration is working properly for the LMS-kinG API.</p>
+        
+        <div>
+            <button class="test-button" onclick="testHealth()">Test Health Endpoint</button>
+            <button class="test-button" onclick="testCORS()">Test CORS Headers</button>
+            <button class="test-button" onclick="testAdminStats()">Test Admin Stats</button>
+            <button class="test-button" onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001/api';
+        
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testHealth() {
+            addResult('Testing health endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                addResult(`✅ Health check successful: ${data.message}`, 'success');
+            } catch (error) {
+                addResult(`❌ Health check failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCORS() {
+            addResult('Testing CORS preflight request...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                if (response.ok) {
+                    addResult('✅ CORS preflight successful', 'success');
+                    addResult(`CORS Headers: ${JSON.stringify({
+                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                        'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                    }, null, 2)}`, 'info');
+                } else {
+                    addResult(`❌ CORS preflight failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ CORS test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAdminStats() {
+            addResult('Testing admin dashboard stats endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/admin/dashboard/stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer test-token'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (response.status === 401) {
+                    addResult('✅ CORS working (401 Unauthorized is expected without valid token)', 'success');
+                } else if (response.ok) {
+                    addResult('✅ Admin stats endpoint accessible', 'success');
+                } else {
+                    addResult(`⚠️ Admin stats returned: ${response.status}`, 'info');
+                }
+            } catch (error) {
+                if (error.message.includes('CORS')) {
+                    addResult(`❌ CORS error: ${error.message}`, 'error');
+                } else {
+                    addResult(`⚠️ Request failed: ${error.message}`, 'info');
+                }
+            }
+        }
+        
+        // Auto-test on page load
+        window.onload = function() {
+            addResult('🚀 CORS Test Page Loaded', 'info');
+            addResult('Click the buttons above to test CORS configuration', 'info');
+        };
+    </script>
+</body>
+</html>

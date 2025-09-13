@@ -15,6 +15,17 @@ import { validatePagination, validateProfileUpdate } from '../middleware/validat
 
 const router = express.Router();
 
+// @desc    Test endpoint
+// @route   GET /api/users/test
+// @access  Public
+router.get('/test', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'User routes are working',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // @desc    Get current user profile
 // @route   GET /api/users/profile/me
 // @access  Private

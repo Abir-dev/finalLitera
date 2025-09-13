@@ -488,6 +488,128 @@ export const updateCourseMeetLinks = async (req, res) => {
   }
 };
 
+// @desc    Test courses endpoint (Admin only)
+// @route   GET /api/admin/courses/test
+// @access  Private/Admin
+export const testCourses = async (req, res) => {
+  try {
+    console.log("Testing courses endpoint...");
+    
+    const totalCourses = await Course.countDocuments();
+    const publishedCourses = await Course.countDocuments({ isPublished: true });
+    
+    res.status(200).json({
+      status: "success",
+      message: "Courses endpoint working",
+      data: {
+        totalCourses,
+        publishedCourses
+      }
+    });
+  } catch (error) {
+    console.error("Test courses error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Server error in test endpoint",
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get available courses for assignment (Admin only)
+// @route   GET /api/admin/courses/available
+// @access  Private/Admin
+export const getAvailableCourses = async (req, res) => {
+  try {
+    console.log("Fetching available courses...");
+    console.log("Admin ID:", req.admin?.id);
+    
+    // First, let's check if there are any courses at all
+    const totalCourses = await Course.countDocuments();
+    console.log(`Total courses in database: ${totalCourses}`);
+    
+    // Get published courses without instructor population first
+    const courses = await Course.find({ isPublished: true })
+      .select('_id title description thumbnail level category duration price instructor')
+      .sort({ title: 1 });
+
+    console.log(`Found ${courses.length} published courses`);
+
+    // If no published courses, return empty array
+    if (courses.length === 0) {
+      console.log("No published courses found, returning empty array");
+      return res.status(200).json({
+        status: "success",
+        data: {
+          courses: []
+        }
+      });
+    }
+
+    // Try to populate instructor for each course individually to avoid errors
+    const coursesWithInstructor = await Promise.all(
+      courses.map(async (course) => {
+        try {
+          // Ensure course object is valid
+          if (!course || !course._id) {
+            console.error('Invalid course object:', course);
+            return null;
+          }
+
+          // Create a clean course object with only the fields we need
+          const cleanCourse = {
+            _id: course._id,
+            title: course.title || 'Untitled Course',
+            description: course.description || '',
+            thumbnail: course.thumbnail || '',
+            level: course.level || 'beginner',
+            category: course.category || 'other',
+            duration: course.duration || '00:00:00',
+            price: course.price || 0,
+            instructor: null
+          };
+
+          // Try to populate instructor if it exists
+          if (course.instructor) {
+            try {
+              await course.populate('instructor', 'firstName lastName');
+              cleanCourse.instructor = course.instructor;
+            } catch (populateError) {
+              console.error(`Error populating instructor for course ${course._id}:`, populateError);
+              cleanCourse.instructor = null;
+            }
+          }
+
+          return cleanCourse;
+        } catch (error) {
+          console.error(`Error processing course ${course?._id}:`, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out any null courses
+    const validCourses = coursesWithInstructor.filter(course => course !== null);
+
+    console.log(`Successfully processed ${validCourses.length} valid courses`);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        courses: validCourses
+      }
+    });
+  } catch (error) {
+    console.error("Get available courses error:", error);
+    console.error("Error stack:", error.stack);
+    res.status(500).json({
+      status: "error",
+      message: "Server error while fetching available courses",
+      error: error.message
+    });
+  }
+};
+
 // @desc    Get course statistics
 // @route   GET /api/admin/courses/stats/overview
 // @access  Private/Admin

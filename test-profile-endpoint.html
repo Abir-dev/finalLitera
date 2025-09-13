@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Profile Endpoint</title>
+</head>
+<body>
+    <h1>Profile Endpoint Test</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testProfileEndpoint() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Get token from localStorage (you'll need to login first)
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    resultDiv.innerHTML = '<p style="color: red;">No token found. Please login first.</p>';
+                    return;
+                }
+                
+                console.log('Testing profile endpoint...');
+                console.log('Token:', token.substring(0, 20) + '...');
+                
+                const response = await fetch('http://localhost:5001/api/users/profile/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p style="color: green;">✅ Profile endpoint working!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p style="color: red;">❌ Error: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <p style="color: red;">❌ Network Error: ${error.message}</p>
+                `;
+            }
+        }
+        
+        // Test on page load
+        testProfileEndpoint();
+    </script>
+</body>
+</html>

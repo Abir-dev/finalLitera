@@ -68,18 +68,28 @@ const userSchema = new mongoose.Schema(
         default: Date.now
       },
       progress: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 100
+        completedVideos: {
+          type: Number,
+          default: 0,
+          min: 0
+        },
+        totalVideos: {
+          type: Number,
+          default: 0,
+          min: 0
+        },
+        watchedTime: {
+          type: String,
+          default: "0:00:00"
+        },
+        lastAccessed: {
+          type: Date,
+          default: Date.now
+        }
       },
       completedLessons: [{
         type: mongoose.Schema.Types.ObjectId
       }],
-      lastAccessed: {
-        type: Date,
-        default: Date.now
-      },
       certificateIssued: {
         type: Boolean,
         default: false
@@ -131,16 +141,20 @@ userSchema.methods.enrollInCourse = async function (courseId) {
   this.enrolledCourses.push({
     course: courseId,
     enrolledAt: new Date(),
-    progress: 0,
-    completedLessons: [],
-    lastAccessed: new Date()
+    progress: {
+      completedVideos: 0,
+      totalVideos: 0,
+      watchedTime: "0:00:00",
+      lastAccessed: new Date()
+    },
+    completedLessons: []
   });
   
   return this.save();
 };
 
 // Update course progress
-userSchema.methods.updateCourseProgress = async function (courseId, progress, lessonId) {
+userSchema.methods.updateCourseProgress = async function (courseId, progressData, lessonId) {
   const enrollment = this.enrolledCourses.find(
     enrollment => enrollment.course.toString() === courseId.toString()
   );
@@ -149,8 +163,17 @@ userSchema.methods.updateCourseProgress = async function (courseId, progress, le
     throw new Error('User is not enrolled in this course');
   }
   
-  enrollment.progress = progress;
-  enrollment.lastAccessed = new Date();
+  // Update progress data
+  if (progressData.completedVideos !== undefined) {
+    enrollment.progress.completedVideos = progressData.completedVideos;
+  }
+  if (progressData.totalVideos !== undefined) {
+    enrollment.progress.totalVideos = progressData.totalVideos;
+  }
+  if (progressData.watchedTime !== undefined) {
+    enrollment.progress.watchedTime = progressData.watchedTime;
+  }
+  enrollment.progress.lastAccessed = new Date();
   
   if (lessonId && !enrollment.completedLessons.includes(lessonId)) {
     enrollment.completedLessons.push(lessonId);
@@ -165,7 +188,16 @@ userSchema.methods.getCourseProgress = function (courseId) {
     enrollment => enrollment.course.toString() === courseId.toString()
   );
   
-  return enrollment ? enrollment.progress : 0;
+  if (!enrollment) {
+    return {
+      completedVideos: 0,
+      totalVideos: 0,
+      watchedTime: "0:00:00",
+      lastAccessed: null
+    };
+  }
+  
+  return enrollment.progress;
 };
 
 // Issue certificate
@@ -178,7 +210,11 @@ userSchema.methods.issueCertificate = async function (courseId, certificateUrl) 
     throw new Error('User is not enrolled in this course');
   }
   
-  if (enrollment.progress < 100) {
+  const progressPercentage = enrollment.progress.totalVideos > 0 
+    ? (enrollment.progress.completedVideos / enrollment.progress.totalVideos) * 100 
+    : 0;
+    
+  if (progressPercentage < 100) {
     throw new Error('Course must be completed to issue certificate');
   }
   

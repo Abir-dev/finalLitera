@@ -1,0 +1,143 @@
+/* Video Player Custom Styles */
+
+/* Custom scrollbar for video playlist */
+.video-playlist::-webkit-scrollbar {
+  width: 6px;
+}
+
+.video-playlist::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.video-playlist::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.video-playlist::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Video player modal animations */
+.video-player-modal {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Video controls hover effects */
+.video-controls button:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Progress bar hover effect */
+.video-progress-bar:hover {
+  height: 8px;
+  transition: height 0.2s ease;
+}
+
+/* Video thumbnail hover effects */
+.video-thumbnail:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+/* Module expansion animation */
+.module-content {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+/* Video completion badge */
+.video-completed-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+}
+
+/* Video progress indicator */
+.video-progress-indicator {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  box-shadow: 0 2px 8px 0 rgba(59, 130, 246, 0.3);
+}
+
+/* Loading spinner for video */
+.video-loading-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive video player */
+@media (max-width: 768px) {
+  .video-player-container {
+    padding: 1rem;
+  }
+  
+  .video-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .video-time-display {
+    font-size: 0.875rem;
+  }
+}
+
+/* Video type badges */
+.video-type-lecture {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.video-type-tutorial {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.video-type-demo {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+}
+
+/* Module completion status */
+.module-completed {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  border-color: #22c55e;
+}
+
+.module-in-progress {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-color: #f59e0b;
+}
+
+.module-not-started {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  border-color: #d1d5db;
+}

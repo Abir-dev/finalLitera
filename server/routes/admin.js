@@ -17,7 +17,20 @@ import {
 import {
   listStudents,
   createStudent,
+  updateStudent,
+  assignCourseToStudent,
+  removeCourseFromStudent,
+  getStudentProgress,
 } from "../controllers/adminUsersController.js";
+import {
+  getDashboardStats,
+  getRecentActivities,
+  getTopCourses,
+  getEnrollmentTrends,
+  getRevenueData,
+  getStudentProgress as getDashboardProgress,
+  getSystemHealth,
+} from "../controllers/dashboardController.js";
 
 const router = express.Router();
 
@@ -88,5 +101,36 @@ router.get("/students", adminAuth, listStudents);
 // @route   POST /api/admin/students
 // @access  Private/Admin
 router.post("/students", adminAuth, createStudent);
+
+// @desc    Update student (Admin)
+// @route   PUT /api/admin/students/:id
+// @access  Private/Admin
+router.put("/students/:id", adminAuth, updateStudent);
+
+// @desc    Assign course to student (Admin)
+// @route   POST /api/admin/students/:id/assign-course
+// @access  Private/Admin
+router.post("/students/:id/assign-course", adminAuth, assignCourseToStudent);
+
+// @desc    Remove course from student (Admin)
+// @route   DELETE /api/admin/students/:id/courses/:courseId
+// @access  Private/Admin
+router.delete("/students/:id/courses/:courseId", adminAuth, removeCourseFromStudent);
+
+// @desc    Get student progress report (Admin)
+// @route   GET /api/admin/students/:id/progress
+// @access  Private/Admin
+router.get("/students/:id/progress", adminAuth, getStudentProgress);
+
+// @desc    Dashboard routes
+// @route   GET /api/admin/dashboard/*
+// @access  Private/Admin
+router.get("/dashboard/stats", adminAuth, getDashboardStats);
+router.get("/dashboard/activities", adminAuth, getRecentActivities);
+router.get("/dashboard/courses", adminAuth, getTopCourses);
+router.get("/dashboard/trends", adminAuth, getEnrollmentTrends);
+router.get("/dashboard/revenue", adminAuth, getRevenueData);
+router.get("/dashboard/progress", adminAuth, getDashboardProgress);
+router.get("/dashboard/health", adminAuth, getSystemHealth);
 
 export default router;

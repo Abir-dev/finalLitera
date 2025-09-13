@@ -9,7 +9,9 @@ import {
   deleteCourse,
   toggleCoursePublish,
   getCourseStats,
-  updateCourseMeetLinks
+  updateCourseMeetLinks,
+  getAvailableCourses,
+  testCourses
 } from '../controllers/adminCourseController.js';
 import { adminAuth, requirePermission } from '../middleware/adminAuth.js';
 
@@ -50,6 +52,16 @@ router.get('/', adminAuth, requirePermission('courseManagement'), getAllCourses)
 // @route   GET /api/admin/courses/stats/overview
 // @access  Private/Admin
 router.get('/stats/overview', adminAuth, requirePermission('courseManagement'), getCourseStats);
+
+// @desc    Test courses endpoint
+// @route   GET /api/admin/courses/test
+// @access  Private/Admin
+router.get('/test', adminAuth, testCourses);
+
+// @desc    Get available courses for assignment
+// @route   GET /api/admin/courses/available
+// @access  Private/Admin
+router.get('/available', adminAuth, getAvailableCourses);
 
 // @desc    Get course by ID (Admin view)
 // @route   GET /api/admin/courses/:id

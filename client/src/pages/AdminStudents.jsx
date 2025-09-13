@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import StudentProgressReport from "../components/StudentProgressReport.jsx";
+import EditStudentModal from "../components/EditStudentModal.jsx";
+import CourseAssignmentModal from "../components/CourseAssignmentModal.jsx";
 
 export default function AdminStudents() {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -10,6 +14,11 @@ export default function AdminStudents() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showProgressReport, setShowProgressReport] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showCourseAssignment, setShowCourseAssignment] = useState(false);
+  const [assignmentStudent, setAssignmentStudent] = useState(null);
   
   // Add Student Form State
   const [newStudent, setNewStudent] = useState({
@@ -45,18 +54,52 @@ export default function AdminStudents() {
         setError("");
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
         const token = localStorage.getItem('adminToken');
-        const res = await fetch(`${API_BASE}/users?role=student&limit=200`, {
+        
+        // Debug logging
+        console.log('API_BASE:', API_BASE);
+        console.log('Token exists:', !!token);
+        console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
+        
+        if (!token) {
+          setError('No admin token found. Redirecting to login...');
+          setLoading(false);
+          setTimeout(() => navigate('/admin/login'), 2000);
+          return;
+        }
+        
+        const res = await fetch(`${API_BASE}/admin/students?limit=200`, {
           method: 'GET',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
           credentials: 'include'
         });
-        if (!res.ok) throw new Error('Failed to load students');
+        
+        console.log('Response status:', res.status);
+        console.log('Response ok:', res.ok);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('Error response:', errorText);
+          
+          if (res.status === 401) {
+            setError('Authentication failed. Please login again.');
+            localStorage.removeItem('adminToken');
+            setTimeout(() => navigate('/admin/login'), 2000);
+            return;
+          }
+          
+          throw new Error(`Failed to load students: ${res.status} ${res.statusText}`);
+        }
+        
         const json = await res.json();
+        console.log('Response data:', json);
         const users = json.data?.users || [];
         setStudents(users.map(transformUser));
       } catch (e) {
-        console.error(e);
-        setError('Failed to load students');
+        console.error('Error loading students:', e);
+        setError(e.message || 'Failed to load students');
       } finally {
         setLoading(false);
       }
@@ -196,6 +239,68 @@ export default function AdminStudents() {
     });
     setSubmitError("");
     setSubmitSuccess("");
+  };
+
+  const handleViewProgressReport = (student) => {
+    setSelectedStudent(student);
+    setShowProgressReport(true);
+  };
+
+  const handleCloseProgressReport = () => {
+    setShowProgressReport(false);
+    setSelectedStudent(null);
+  };
+
+  const handleEditStudent = (student) => {
+    setEditingStudent(student);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingStudent(null);
+  };
+
+  const handleStudentUpdate = (updatedStudent) => {
+    // Update the student in the local state
+    setStudents(prevStudents => 
+      prevStudents.map(student => 
+        student.id === updatedStudent.id 
+          ? {
+              ...student,
+              name: `${updatedStudent.firstName} ${updatedStudent.lastName}`,
+              email: updatedStudent.email,
+              phone: updatedStudent.profile?.phone || "",
+              status: updatedStudent.isActive ? "active" : "inactive"
+            }
+          : student
+      )
+    );
+  };
+
+  const handleAssignCourse = (student) => {
+    setAssignmentStudent(student);
+    setShowCourseAssignment(true);
+  };
+
+  const handleCloseCourseAssignment = () => {
+    setShowCourseAssignment(false);
+    setAssignmentStudent(null);
+  };
+
+  const handleCourseAssigned = (assignmentData) => {
+    // Update the student's course information in the local state
+    setStudents(prevStudents => 
+      prevStudents.map(student => 
+        student.id === assignmentData.student.id 
+          ? {
+              ...student,
+              course: assignmentData.course.title,
+              // You could also update other fields if needed
+            }
+          : student
+      )
+    );
   };
 
   const getStatusBadge = (status) => {
@@ -358,10 +463,25 @@ export default function AdminStudents() {
                     {student.lastActive}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <button
-                        onClick={() => setEditingStudent(student)}
+                        onClick={() => handleViewProgressReport(student)}
+                        className="text-purple-600 hover:text-purple-900 px-2 py-1 rounded hover:bg-purple-50"
+                        title="View Progress Report"
+                      >
+                        📊 Progress
+                      </button>
+                      <button
+                        onClick={() => handleAssignCourse(student)}
+                        className="text-green-600 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50"
+                        title="Assign Course to Student"
+                      >
+                        📚 Assign Course
+                      </button>
+                      <button
+                        onClick={() => handleEditStudent(student)}
                         className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50"
+                        title="Edit Student Details"
                       >
                         ✏️ Edit
                       </button>
@@ -574,6 +694,29 @@ export default function AdminStudents() {
           </div>
         </div>
       )}
+
+      {/* Student Progress Report Modal */}
+      <StudentProgressReport
+        student={selectedStudent}
+        isOpen={showProgressReport}
+        onClose={handleCloseProgressReport}
+      />
+
+      {/* Edit Student Modal */}
+      <EditStudentModal
+        student={editingStudent}
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        onUpdate={handleStudentUpdate}
+      />
+
+      {/* Course Assignment Modal */}
+      <CourseAssignmentModal
+        student={assignmentStudent}
+        isOpen={showCourseAssignment}
+        onClose={handleCloseCourseAssignment}
+        onCourseAssigned={handleCourseAssigned}
+      />
     </div>
   );
 }

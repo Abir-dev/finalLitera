@@ -32,7 +32,14 @@ export const getUsers = async (req, res) => {
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .populate('enrolledCourses.course', 'title thumbnail');
+      .populate({
+        path: 'enrolledCourses.course',
+        select: 'title thumbnail instructor description level category duration price',
+        populate: {
+          path: 'instructor',
+          select: 'firstName lastName'
+        }
+      });
 
     const total = await User.countDocuments(filter);
 
@@ -65,7 +72,14 @@ export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
       .select('-password')
-      .populate('enrolledCourses.course', 'title thumbnail instructor rating');
+      .populate({
+        path: 'enrolledCourses.course',
+        select: 'title thumbnail instructor description level category duration price',
+        populate: {
+          path: 'instructor',
+          select: 'firstName lastName'
+        }
+      });
 
     if (!user) {
       return res.status(404).json({
@@ -215,7 +229,7 @@ export const getUserCourses = async (req, res) => {
     const user = await User.findById(req.params.id)
       .populate({
         path: 'enrolledCourses.course',
-        select: 'title thumbnail instructor rating duration price',
+        select: 'title thumbnail instructor description level category duration price',
         populate: {
           path: 'instructor',
           select: 'firstName lastName avatar'
@@ -334,9 +348,30 @@ export const updateProfile = async (req, res) => {
 // @access  Private
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id)
-      .select('-password')
-      .populate('enrolledCourses.course', 'title thumbnail instructor rating');
+    console.log('Getting profile for user ID:', req.user.id);
+    
+    // First, try to get user without populate to isolate the issue
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+    
+    console.log('User found:', user.firstName, user.lastName);
+    console.log('User enrolled courses count:', user.enrolledCourses?.length || 0);
+    
+    // Now try to populate the courses
+    await user.populate({
+      path: 'enrolledCourses.course',
+      select: 'title thumbnail instructor description level category duration price',
+      populate: {
+        path: 'instructor',
+        select: 'firstName lastName'
+      }
+    });
 
     res.status(200).json({
       status: 'success',
@@ -346,9 +381,11 @@ export const getProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('Get profile error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       status: 'error',
-      message: 'Server error'
+      message: 'Server error',
+      error: error.message
     });
   }
 };
