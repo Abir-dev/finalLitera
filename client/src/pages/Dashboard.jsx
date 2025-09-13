@@ -31,7 +31,7 @@ export default function Dashboard() {
         <div className="flex items-center space-x-6">
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
             <img 
-              src={user?.avatar || "https://i.pravatar.cc/200?img=8"} 
+              src={user?.avatar || "/icons/profile.svg"} 
               alt="Profile" 
               className="w-16 h-16 rounded-full border-2 border-white/30"
             />

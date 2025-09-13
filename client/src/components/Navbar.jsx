@@ -25,12 +25,12 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
+      <header className="sticky top-0 z-50 bg-white/30 backdrop-blur-sm bg-opacity-50 rounded-b-lg shadow-md border-b border-white/20 mb-4 ">
         <div className="max-w-6xl mx-auto px-4">
           <div className="h-16 flex items-center justify-between">
             {/* Logo */}
             <Link to="/">
-              <img src={Logo} alt="Logo" className="h-12 w-15 invert" />
+              <img src={Logo} alt="Logo" className="h-15 w-15 invert" />
             </Link>
 
             {/* Nav Links */}
@@ -53,7 +53,7 @@ export default function Navbar() {
 
                   <div className="relative group">
                     <img
-                      src={user.avatar || "https://i.pravatar.cc/200?img=8"}
+                      src={user.avatar || "/icons/profile.svg"}
                       alt="Profile"
                       className="w-10 h-10 rounded-full border cursor-pointer"
                       onClick={handleProfileClick}
@@ -79,7 +79,7 @@ export default function Navbar() {
                   </Link> */}
                   <button
                     onClick={() => setIsLoginModalOpen(true)}
-                    className="rounded-full bg-[#1B4A8B] text-white text-sm font-semibold px-5 py-2.5 shadow"
+                    className="rounded-full bg-[#1B4A8B] hover:bg-[#1B4A8B]/90 text-white text-sm font-semibold px-5 py-2.5 shadow cursor-pointer"
                   >
                     Login
                   </button>
