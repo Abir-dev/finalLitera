@@ -31,11 +31,11 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
   const fetchStudentProgress = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
       const token = localStorage.getItem('adminToken');
-      
+
       const response = await fetch(`${API_BASE}/admin/students/${student.id}/progress`, {
         method: 'GET',
         headers: {
@@ -51,96 +51,96 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
 
       const data = await response.json();
       const progressData = data.data.progress;
-      
+
       // If no real data, use mock data as fallback
       if (!progressData || !progressData.courses || progressData.courses.length === 0) {
         const mockProgressData = {
-        student: {
-          id: student.id,
-          name: student.name,
-          email: student.email,
-          joinDate: student.joinDate,
-          lastActive: new Date().toISOString(),
-          status: student.status
-        },
-        courses: [
-          {
-            id: 'course-1',
-            title: 'Advanced Machine Learning & AI',
-            instructor: 'Dr. John Doe',
-            enrolledDate: '2024-01-15',
-            progress: 75,
-            totalVideos: 24,
-            completedVideos: 18,
-            totalDuration: '12:30:00',
-            watchedDuration: '9:22:30',
-            modules: [
-              {
-                id: 'module-1',
-                title: 'Introduction to Machine Learning',
-                progress: 100,
-                videos: 6,
-                completedVideos: 6,
-                duration: '3:15:00',
-                topics: ['ML Basics', 'Data Types', 'Algorithms']
-              },
-              {
-                id: 'module-2',
-                title: 'Supervised Learning',
-                progress: 80,
-                videos: 8,
-                completedVideos: 6,
-                duration: '4:20:00',
-                topics: ['Linear Regression', 'Classification', 'Decision Trees']
-              },
-              {
-                id: 'module-3',
-                title: 'Unsupervised Learning',
-                progress: 60,
-                videos: 6,
-                completedVideos: 4,
-                duration: '3:45:00',
-                topics: ['Clustering', 'Dimensionality Reduction']
-              },
-              {
-                id: 'module-4',
-                title: 'Deep Learning',
-                progress: 0,
-                videos: 4,
-                completedVideos: 0,
-                duration: '1:10:00',
-                topics: ['Neural Networks', 'CNN', 'RNN']
-              }
-            ],
-            assessments: [
-              { title: 'ML Fundamentals Quiz', score: 85, date: '2024-01-20', status: 'Completed' },
-              { title: 'Supervised Learning Assignment', score: 92, date: '2024-01-25', status: 'Completed' },
-              { title: 'Unsupervised Learning Project', score: 78, date: '2024-02-01', status: 'Completed' },
-              { title: 'Final Exam', score: null, date: null, status: 'Pending' }
-            ],
-            projects: [
-              { title: 'House Price Prediction', status: 'Completed', score: 88, dueDate: '2024-01-30' },
-              { title: 'Customer Segmentation', status: 'In Progress', score: null, dueDate: '2024-02-15' },
-              { title: 'Image Classification', status: 'Not Started', score: null, dueDate: '2024-02-28' }
+          student: {
+            id: student.id,
+            name: student.name,
+            email: student.email,
+            joinDate: student.joinDate,
+            lastActive: new Date().toISOString(),
+            status: student.status
+          },
+          courses: [
+            {
+              id: 'course-1',
+              title: 'Advanced Machine Learning & AI',
+              instructor: 'Dr. John Doe',
+              enrolledDate: '2024-01-15',
+              progress: 75,
+              totalVideos: 24,
+              completedVideos: 18,
+              totalDuration: '12:30:00',
+              watchedDuration: '9:22:30',
+              modules: [
+                {
+                  id: 'module-1',
+                  title: 'Introduction to Machine Learning',
+                  progress: 100,
+                  videos: 6,
+                  completedVideos: 6,
+                  duration: '3:15:00',
+                  topics: ['ML Basics', 'Data Types', 'Algorithms']
+                },
+                {
+                  id: 'module-2',
+                  title: 'Supervised Learning',
+                  progress: 80,
+                  videos: 8,
+                  completedVideos: 6,
+                  duration: '4:20:00',
+                  topics: ['Linear Regression', 'Classification', 'Decision Trees']
+                },
+                {
+                  id: 'module-3',
+                  title: 'Unsupervised Learning',
+                  progress: 60,
+                  videos: 6,
+                  completedVideos: 4,
+                  duration: '3:45:00',
+                  topics: ['Clustering', 'Dimensionality Reduction']
+                },
+                {
+                  id: 'module-4',
+                  title: 'Deep Learning',
+                  progress: 0,
+                  videos: 4,
+                  completedVideos: 0,
+                  duration: '1:10:00',
+                  topics: ['Neural Networks', 'CNN', 'RNN']
+                }
+              ],
+              assessments: [
+                { title: 'ML Fundamentals Quiz', score: 85, date: '2024-01-20', status: 'Completed' },
+                { title: 'Supervised Learning Assignment', score: 92, date: '2024-01-25', status: 'Completed' },
+                { title: 'Unsupervised Learning Project', score: 78, date: '2024-02-01', status: 'Completed' },
+                { title: 'Final Exam', score: null, date: null, status: 'Pending' }
+              ],
+              projects: [
+                { title: 'House Price Prediction', status: 'Completed', score: 88, dueDate: '2024-01-30' },
+                { title: 'Customer Segmentation', status: 'In Progress', score: null, dueDate: '2024-02-15' },
+                { title: 'Image Classification', status: 'Not Started', score: null, dueDate: '2024-02-28' }
+              ]
+            }
+          ],
+          analytics: {
+            totalLearningTime: '9:22:30',
+            averageSessionTime: '45 minutes',
+            learningStreak: 7,
+            completionRate: 75,
+            lastActivity: '2 hours ago',
+            weeklyProgress: [
+              { week: 1, videos: 3, time: 45 },
+              { week: 2, videos: 5, time: 78 },
+              { week: 3, videos: 4, time: 62 },
+              { week: 4, videos: 6, time: 95 }
             ]
           }
-        ],
-        analytics: {
-          totalLearningTime: '9:22:30',
-          averageSessionTime: '45 minutes',
-          learningStreak: 7,
-          completionRate: 75,
-          lastActivity: '2 hours ago',
-          weeklyProgress: [
-            { week: 1, videos: 3, time: 45 },
-            { week: 2, videos: 5, time: 78 },
-            { week: 3, videos: 4, time: 62 },
-            { week: 4, videos: 6, time: 95 }
-          ]
-        }
-      };
-      
-      setProgressData(mockProgressData);
+        };
+
+        setProgressData(mockProgressData);
       } else {
         setProgressData(progressData);
       }
@@ -169,7 +169,7 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('Student Information', 20, 40);
-    
+
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
     doc.text(`Name: ${progressData.student.name}`, 20, 50);
@@ -181,14 +181,14 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
     // Course Progress
     doc.setFont('helvetica', 'bold');
     doc.text('Course Progress', 20, 100);
-    
+
     progressData.courses.forEach((course, index) => {
       const yPos = 110 + (index * 60);
-      
+
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text(course.title, 20, yPos);
-      
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.text(`Progress: ${course.progress}%`, 20, yPos + 8);
@@ -209,7 +209,7 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
         doc.addPage();
         yPos = 20;
       }
-      
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.text(`${module.title} - ${module.progress}%`, 20, yPos);
@@ -223,11 +223,11 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
       doc.addPage();
       yPos = 20;
     }
-    
+
     doc.setFont('helvetica', 'bold');
     doc.text('Learning Analytics', 20, yPos);
     yPos += 10;
-    
+
     doc.setFont('helvetica', 'normal');
     doc.text(`Total Learning Time: ${progressData.analytics.totalLearningTime}`, 20, yPos);
     doc.text(`Average Session: ${progressData.analytics.averageSessionTime}`, 20, yPos + 8);
@@ -287,11 +287,10 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setAutoRefresh(!autoRefresh)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  autoRefresh 
-                    ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${autoRefresh
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {autoRefresh ? '🔄 Auto-refresh ON' : '⏸️ Auto-refresh OFF'}
               </button>
@@ -383,7 +382,7 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
                   {/* Course Progress Bar */}
                   <div className="mb-6">
                     <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full ${getProgressBarColor(course.progress)} rounded-full transition-all duration-1000`}
                         style={{ width: `${course.progress}%` }}
                       />
@@ -407,7 +406,7 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                            <div 
+                            <div
                               className={`h-full ${getProgressBarColor(module.progress)} rounded-full transition-all duration-1000`}
                               style={{ width: `${module.progress}%` }}
                             />
@@ -436,11 +435,10 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
                         <div key={assessmentIndex} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
                             <h5 className="font-medium text-gray-900">{assessment.title}</h5>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              assessment.status === 'Completed' 
-                                ? 'bg-green-100 text-green-800' 
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${assessment.status === 'Completed'
+                                ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
-                            }`}>
+                              }`}>
                               {assessment.status}
                             </span>
                           </div>
@@ -465,13 +463,12 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
                         <div key={projectIndex} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
                             <h5 className="font-medium text-gray-900">{project.title}</h5>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              project.status === 'Completed' 
-                                ? 'bg-green-100 text-green-800' 
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${project.status === 'Completed'
+                                ? 'bg-green-100 text-green-800'
                                 : project.status === 'In Progress'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
                               {project.status}
                             </span>
                           </div>
@@ -533,7 +530,7 @@ const StudentProgressReport = ({ student, isOpen, onClose }) => {
                             <span>{week.time} min</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
+                            <div
                               className="bg-blue-500 h-2 rounded-full transition-all duration-1000"
                               style={{ width: `${(week.videos / 6) * 100}%` }}
                             />

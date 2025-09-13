@@ -7,7 +7,7 @@ export const AdminAuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   // Prefer env if provided; accept VITE_API_URL with or without /api suffix
-  const apiEnv = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+  const apiEnv = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
   const normalizedApi = apiEnv.endsWith("/api")
     ? apiEnv
     : `${apiEnv.replace(/\/$/, "")}/api`;

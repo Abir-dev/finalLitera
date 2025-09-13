@@ -1,6 +1,6 @@
 // src/services/courseService.js
 
-const BASE_URL = import.meta?.env?.VITE_API_BASE_URL || "http://localhost:5001/api"; 
+const BASE_URL = import.meta?.env?.VITE_API_BASE_URL || "https://finallitera.onrender.com/api";
 const COURSES_URL = `${BASE_URL}/courses`;
 
 // Implement according to the auth setup (cookie, localStorage, etc.)
@@ -111,9 +111,9 @@ export async function listCourses({ page = 1, limit = 12, q, category, level, in
   const res = await fetch(`${COURSES_URL}/${query}`, {
     method: "GET",
     credentials: "include",
-//     headers: {
-//       ...authHeaders(),
-//     },
+    //     headers: {
+    //       ...authHeaders(),
+    //     },
   });
   return handleResponse(res); // { status, data: { courses, pagination } }
 }

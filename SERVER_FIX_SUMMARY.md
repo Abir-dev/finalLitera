@@ -65,7 +65,7 @@ The new real-time dashboard functions are still available:
 
 2. **Check server health**:
    ```bash
-   curl http://localhost:5001/api/health
+   curl https://finallitera.onrender.com/api/health
    ```
 
 3. **Test admin dashboard**:

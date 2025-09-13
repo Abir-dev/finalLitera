@@ -23,7 +23,7 @@ npm start
 ```
 
 ### **Step 2: Verify Server is Running**
-- Server should start on `http://localhost:5001`
+- Server should start on `https://finallitera.onrender.com`
 - You should see: `✅ MongoDB Connected`
 - You should see: `✅ Admin account already exists`
 

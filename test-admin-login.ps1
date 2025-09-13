@@ -1,6 +1,6 @@
 # Test admin login and available courses endpoint
 
-$API_BASE = "http://localhost:5001/api"
+$API_BASE = "https://finallitera.onrender.com/api"
 
 Write-Host "🔐 Testing admin login..." -ForegroundColor Yellow
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiEnv = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+const apiEnv = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
 const normalizedApi = apiEnv.endsWith("/api")
   ? apiEnv
   : `${apiEnv.replace(/\/$/, "")}/api`;

@@ -11,7 +11,7 @@ export default function ExamDetails() {
   useEffect(() => {
     (async () => {
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
         const res = await fetch(`${API_BASE}/exams/${id}`);
         if (!res.ok) throw new Error('Failed to load exam');
         const json = await res.json();

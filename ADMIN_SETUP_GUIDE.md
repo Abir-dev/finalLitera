@@ -49,7 +49,7 @@ node add-admin.js admin@example.com password123 "Admin" "User"
 ### **If you still get 401 errors:**
 
 1. **Check if server is running:**
-   - Server should be running on `http://localhost:5001`
+   - Server should be running on `https://finallitera.onrender.com`
    - Check console for any server errors
 
 2. **Check admin token:**

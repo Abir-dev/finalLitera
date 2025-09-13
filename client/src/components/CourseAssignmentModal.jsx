@@ -18,16 +18,16 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
   const fetchAvailableCourses = async () => {
     setLoading(true);
     setError("");
-    
+
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
       const token = localStorage.getItem('adminToken');
-      
+
       console.log('Fetching available courses...');
       console.log('API_BASE:', API_BASE);
       console.log('Token exists:', !!token);
       console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
-      
+
       const response = await fetch(`${API_BASE}/admin/courses/available`, {
         method: 'GET',
         headers: {
@@ -68,9 +68,9 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
     setSuccess("");
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
       const token = localStorage.getItem('adminToken');
-      
+
       const response = await fetch(`${API_BASE}/admin/students/${student.id}/assign-course`, {
         method: 'POST',
         headers: {
@@ -88,12 +88,12 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
         if (response.status === 400 && data.message === "Student is already enrolled in this course") {
           throw new Error("This student is already enrolled in the selected course. Please choose a different course.");
         }
-        
+
         throw new Error(data.message || 'Failed to assign course');
       }
 
       setSuccess("Course assigned successfully!");
-      
+
       // Call the callback to refresh the student list
       if (onCourseAssigned) {
         onCourseAssigned(data.data);

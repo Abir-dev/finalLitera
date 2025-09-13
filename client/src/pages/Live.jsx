@@ -164,7 +164,7 @@ export default function LiveClasses() {
         }
 
         // Now fetch all courses with live sessions
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
         const response = await axios.get(`${API_BASE}/courses?liveClasses=true`);
 
         console.log('All courses with live sessions:', response.data.data.courses);

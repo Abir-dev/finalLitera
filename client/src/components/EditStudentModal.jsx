@@ -57,9 +57,9 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
     }
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
       const token = localStorage.getItem('adminToken');
-      
+
       const response = await fetch(`${API_BASE}/admin/students/${student.id}`, {
         method: 'PUT',
         headers: {
@@ -81,7 +81,7 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
       }
 
       setSuccess("Student updated successfully!");
-      
+
       // Call the onUpdate callback to refresh the student list
       if (onUpdate) {
         onUpdate(data.data.student);

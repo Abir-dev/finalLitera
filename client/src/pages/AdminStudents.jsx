@@ -19,7 +19,7 @@ export default function AdminStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showCourseAssignment, setShowCourseAssignment] = useState(false);
   const [assignmentStudent, setAssignmentStudent] = useState(null);
-  
+
   // Add Student Form State
   const [newStudent, setNewStudent] = useState({
     firstName: "",
@@ -52,47 +52,47 @@ export default function AdminStudents() {
       try {
         setLoading(true);
         setError("");
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
         const token = localStorage.getItem('adminToken');
-        
+
         // Debug logging
         console.log('API_BASE:', API_BASE);
         console.log('Token exists:', !!token);
         console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
-        
+
         if (!token) {
           setError('No admin token found. Redirecting to login...');
           setLoading(false);
           setTimeout(() => navigate('/admin/login'), 2000);
           return;
         }
-        
+
         const res = await fetch(`${API_BASE}/admin/students?limit=200`, {
           method: 'GET',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
+            'Authorization': `Bearer ${token}`
           },
           credentials: 'include'
         });
-        
+
         console.log('Response status:', res.status);
         console.log('Response ok:', res.ok);
-        
+
         if (!res.ok) {
           const errorText = await res.text();
           console.error('Error response:', errorText);
-          
+
           if (res.status === 401) {
             setError('Authentication failed. Please login again.');
             localStorage.removeItem('adminToken');
             setTimeout(() => navigate('/admin/login'), 2000);
             return;
           }
-          
+
           throw new Error(`Failed to load students: ${res.status} ${res.statusText}`);
         }
-        
+
         const json = await res.json();
         console.log('Response data:', json);
         const users = json.data?.users || [];
@@ -108,8 +108,8 @@ export default function AdminStudents() {
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.course.toLowerCase().includes(searchTerm.toLowerCase());
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.course.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || student.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -123,8 +123,8 @@ export default function AdminStudents() {
   };
 
   const handleStatusToggle = (id) => {
-    setStudents(students.map(student => 
-      student.id === id 
+    setStudents(students.map(student =>
+      student.id === id
         ? { ...student, status: student.status === "active" ? "inactive" : "active" }
         : student
     ));
@@ -168,9 +168,9 @@ export default function AdminStudents() {
     }
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
       const token = localStorage.getItem('adminToken');
-      
+
       const response = await fetch(`${API_BASE}/admin/students`, {
         method: 'POST',
         headers: {
@@ -206,7 +206,7 @@ export default function AdminStudents() {
 
       setStudents(prev => [transformedStudent, ...prev]);
       setSubmitSuccess("Student created successfully!");
-      
+
       // Reset form
       setNewStudent({
         firstName: "",
@@ -263,16 +263,16 @@ export default function AdminStudents() {
 
   const handleStudentUpdate = (updatedStudent) => {
     // Update the student in the local state
-    setStudents(prevStudents => 
-      prevStudents.map(student => 
-        student.id === updatedStudent.id 
+    setStudents(prevStudents =>
+      prevStudents.map(student =>
+        student.id === updatedStudent.id
           ? {
-              ...student,
-              name: `${updatedStudent.firstName} ${updatedStudent.lastName}`,
-              email: updatedStudent.email,
-              phone: updatedStudent.profile?.phone || "",
-              status: updatedStudent.isActive ? "active" : "inactive"
-            }
+            ...student,
+            name: `${updatedStudent.firstName} ${updatedStudent.lastName}`,
+            email: updatedStudent.email,
+            phone: updatedStudent.profile?.phone || "",
+            status: updatedStudent.isActive ? "active" : "inactive"
+          }
           : student
       )
     );
@@ -290,21 +290,21 @@ export default function AdminStudents() {
 
   const handleCourseAssigned = (assignmentData) => {
     // Update the student's course information in the local state
-    setStudents(prevStudents => 
-      prevStudents.map(student => 
-        student.id === assignmentData.student.id 
+    setStudents(prevStudents =>
+      prevStudents.map(student =>
+        student.id === assignmentData.student.id
           ? {
-              ...student,
-              course: assignmentData.course.title,
-              // You could also update other fields if needed
-            }
+            ...student,
+            course: assignmentData.course.title,
+            // You could also update other fields if needed
+          }
           : student
       )
     );
   };
 
   const getStatusBadge = (status) => {
-    return status === "active" 
+    return status === "active"
       ? <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
       : <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Inactive</span>;
   };
@@ -448,7 +448,7 @@ export default function AdminStudents() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full ${getProgressColor(student.progress)}`}
                           style={{ width: `${student.progress}%` }}
                         ></div>
@@ -487,11 +487,10 @@ export default function AdminStudents() {
                       </button>
                       <button
                         onClick={() => handleStatusToggle(student.id)}
-                        className={`px-2 py-1 rounded ${
-                          student.status === "active" 
+                        className={`px-2 py-1 rounded ${student.status === "active"
                             ? "text-orange-600 hover:text-orange-900 hover:bg-orange-50"
                             : "text-green-600 hover:text-green-900 hover:bg-green-50"
-                        }`}
+                          }`}
                       >
                         {student.status === "active" ? "⏸️ Pause" : "▶️ Activate"}
                       </button>

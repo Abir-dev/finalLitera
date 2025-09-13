@@ -45,7 +45,7 @@ node start-server.js
 ### **Server Health Check:**
 Once started, test the server:
 ```bash
-curl http://localhost:5001/api/health
+curl https://finallitera.onrender.com/api/health
 ```
 
 Expected response:

@@ -32,9 +32,9 @@ const RealTimeDashboard = () => {
   // Fetch real-time dashboard data
   const fetchDashboardData = useCallback(async () => {
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
       const token = localStorage.getItem('adminToken');
-      
+
       if (!token) {
         setError('No admin token found');
         return;
@@ -211,7 +211,7 @@ const RealTimeDashboard = () => {
       setError('');
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      
+
       // Check if it's a connection error
       if (err.message.includes('Failed to fetch') || err.message.includes('ERR_CONNECTION_REFUSED')) {
         setError('Server is not running. Please start the server and try again.');
@@ -226,7 +226,7 @@ const RealTimeDashboard = () => {
   // Auto-refresh every 30 seconds
   useEffect(() => {
     fetchDashboardData();
-    
+
     const interval = setInterval(() => {
       fetchDashboardData();
     }, 30000); // 30 seconds
@@ -244,7 +244,7 @@ const RealTimeDashboard = () => {
     const now = new Date();
     const time = new Date(timestamp);
     const diff = now - time;
-    
+
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)} minutes ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
@@ -457,7 +457,7 @@ const RealTimeDashboard = () => {
                   <span className="font-medium text-blue-600">{course.inProgress}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div 
+                  <div
                     className="bg-green-500 h-2 rounded-full transition-all duration-1000"
                     style={{ width: `${(course.completed / course.enrolled) * 100}%` }}
                   />
@@ -476,17 +476,17 @@ const RealTimeDashboard = () => {
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">👤</span>
             <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">Manage Students</span>
           </Link>
-          
+
           <Link to="/admin/courses" className="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50 transition-all duration-300 group">
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📚</span>
             <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">Manage Courses</span>
           </Link>
-          
+
           <Link to="/admin/exams" className="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 transition-all duration-300 group">
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📝</span>
             <span className="text-sm font-medium text-gray-700 group-hover:text-purple-700">Manage Exams</span>
           </Link>
-          
+
           <Link to="/admin/analytics" className="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group">
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">📊</span>
             <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">View Reports</span>

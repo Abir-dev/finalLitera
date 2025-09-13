@@ -25,7 +25,7 @@ export default function Home() {
     (async () => {
       try {
         const API_BASE =
-          import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+          import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
         const res = await fetch(`${API_BASE}/courses?limit=4`);
         if (!res.ok) return;
         const json = await res.json();
@@ -196,7 +196,7 @@ export default function Home() {
             <img
               src={pic6}
               alt="Mentor"
-              // className="rounded-2xl shadow-lg"
+            // className="rounded-2xl shadow-lg"
             />
           </div>
           <div>

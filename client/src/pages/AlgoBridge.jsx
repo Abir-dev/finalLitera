@@ -133,15 +133,14 @@ function ExamCard({ title, description, duration, questions, difficulty, type, s
               <span className="font-semibold">End: {endDate}</span>
             </div>
           </div>
-          
+
           <button
             onClick={onStart}
             disabled={!isActive}
-            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 transform ${
-              isActive
+            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 transform ${isActive
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
                 : 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-500 cursor-not-allowed'
-            }`}
+              }`}
           >
             {isActive ? '🚀 Start Exam Now' : '⏰ Coming Soon'}
           </button>
@@ -223,7 +222,7 @@ function ContestCard({ title, description, participants, prize, startTime, endTi
               <span className="font-semibold">Ends: {endTime}</span>
             </div>
           </div>
-          
+
           <button
             onClick={onJoin}
             className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-pink-700 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -241,8 +240,8 @@ function CompanyLogo({ company, logoImage, description }) {
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 group">
       <div className="text-center">
         <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
-          <img 
-            src={logoImage} 
+          <img
+            src={logoImage}
             alt={`${company} logo`}
             className="w-16 h-16 object-contain"
           />
@@ -288,7 +287,7 @@ export default function AlgoBridge() {
   useEffect(() => {
     (async () => {
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
         const res = await fetch(`${API_BASE}/exams/available`);
         if (res.ok) {
           const json = await res.json();
@@ -301,63 +300,63 @@ export default function AlgoBridge() {
     })();
   }, []);
 
-        const contests = useMemo(
-        () => [
-          {
-            id: 1,
-            title: "Winter Coding Championship 2024",
-            description: "Annual competitive programming contest with exciting prizes and global recognition. Test your skills against the best programmers worldwide.",
-            participants: 1250,
-            prize: "4,00,000",
-            startTime: "Dec 20, 2:00 PM",
-            endTime: "Dec 20, 6:00 PM",
-            isLive: true,
-            category: "Championship",
-            difficulty: "Expert",
-            duration: "4 hours"
-          },
-          {
-            id: 2,
-            title: "Algorithm Master Challenge",
-            description: "Intensive algorithmic thinking contest with complex problem sets. Push your limits and discover new problem-solving approaches.",
-            participants: 890,
-            prize: "2,50,000",
-            startTime: "Dec 25, 10:00 AM",
-            endTime: "Dec 25, 2:00 PM",
-            isLive: false,
-            category: "Challenge",
-            difficulty: "Hard",
-            duration: "4 hours"
-          },
-          {
-            id: 3,
-            title: "Data Structures Sprint",
-            description: "Fast-paced contest focusing on data structure implementation and optimization. Speed and accuracy matter in this exciting challenge.",
-            participants: 650,
-            prize: "1,50,000",
-            startTime: "Dec 28, 3:00 PM",
-            endTime: "Dec 28, 5:00 PM",
-            isLive: false,
-            category: "Sprint",
-            difficulty: "Medium",
-            duration: "2 hours"
-          },
-          {
-            id: 4,
-            title: "Mathematics in Programming",
-            description: "Unique contest combining mathematical concepts with programming. Solve complex mathematical problems using algorithmic approaches.",
-            participants: 420,
-            prize: "1,00,000",
-            startTime: "Jan 1, 2025, 9:00 AM",
-            endTime: "Jan 1, 2025, 1:00 PM",
-            isLive: false,
-            category: "Tournament",
-            difficulty: "Hard",
-            duration: "4 hours"
-          }
-        ],
-        []
-      );
+  const contests = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "Winter Coding Championship 2024",
+        description: "Annual competitive programming contest with exciting prizes and global recognition. Test your skills against the best programmers worldwide.",
+        participants: 1250,
+        prize: "4,00,000",
+        startTime: "Dec 20, 2:00 PM",
+        endTime: "Dec 20, 6:00 PM",
+        isLive: true,
+        category: "Championship",
+        difficulty: "Expert",
+        duration: "4 hours"
+      },
+      {
+        id: 2,
+        title: "Algorithm Master Challenge",
+        description: "Intensive algorithmic thinking contest with complex problem sets. Push your limits and discover new problem-solving approaches.",
+        participants: 890,
+        prize: "2,50,000",
+        startTime: "Dec 25, 10:00 AM",
+        endTime: "Dec 25, 2:00 PM",
+        isLive: false,
+        category: "Challenge",
+        difficulty: "Hard",
+        duration: "4 hours"
+      },
+      {
+        id: 3,
+        title: "Data Structures Sprint",
+        description: "Fast-paced contest focusing on data structure implementation and optimization. Speed and accuracy matter in this exciting challenge.",
+        participants: 650,
+        prize: "1,50,000",
+        startTime: "Dec 28, 3:00 PM",
+        endTime: "Dec 28, 5:00 PM",
+        isLive: false,
+        category: "Sprint",
+        difficulty: "Medium",
+        duration: "2 hours"
+      },
+      {
+        id: 4,
+        title: "Mathematics in Programming",
+        description: "Unique contest combining mathematical concepts with programming. Solve complex mathematical problems using algorithmic approaches.",
+        participants: 420,
+        prize: "1,00,000",
+        startTime: "Jan 1, 2025, 9:00 AM",
+        endTime: "Jan 1, 2025, 1:00 PM",
+        isLive: false,
+        category: "Tournament",
+        difficulty: "Hard",
+        duration: "4 hours"
+      }
+    ],
+    []
+  );
 
   const handleStartExam = (examId) => {
     navigate(`/dashboard/exam/${examId}`);
@@ -383,7 +382,7 @@ export default function AlgoBridge() {
           Master Algorithms Through Interactive Learning
         </p>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Experience the future of algorithmic education with our comprehensive exam platform, 
+          Experience the future of algorithmic education with our comprehensive exam platform,
           competitive contests, and real-time leaderboards designed to challenge and inspire.
         </p>
       </div>
@@ -398,13 +397,13 @@ export default function AlgoBridge() {
             Get certified by industry leaders and unlock opportunities at top tech companies
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center group">
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-blue-300">
               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
-                <img 
-                  src={GoogleLogo} 
+                <img
+                  src={GoogleLogo}
                   alt="Google logo"
                   className="w-20 h-20 object-contain"
                 />
@@ -416,12 +415,12 @@ export default function AlgoBridge() {
               </div>
             </div>
           </div>
-          
+
           <div className="text-center group">
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-purple-300">
               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
-                <img 
-                  src={MetaLogo} 
+                <img
+                  src={MetaLogo}
                   alt="Meta logo"
                   className="w-20 h-20 object-contain"
                 />
@@ -433,12 +432,12 @@ export default function AlgoBridge() {
               </div>
             </div>
           </div>
-          
+
           <div className="text-center group">
             <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-green-300">
               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
-                <img 
-                  src={MicrosoftLogo} 
+                <img
+                  src={MicrosoftLogo}
                   alt="Microsoft logo"
                   className="w-20 h-20 object-contain"
                 />
@@ -451,7 +450,7 @@ export default function AlgoBridge() {
             </div>
           </div>
         </div>
-        
+
         <div className="text-center mt-8">
           <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full font-bold shadow-lg">
             <span>🎯</span>
@@ -480,20 +479,20 @@ export default function AlgoBridge() {
               From Google, Meta, and Microsoft simultaneously, by scoring a minimum of 60% in our qualifying exam.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <CompanyLogo 
-              company="Google" 
+            <CompanyLogo
+              company="Google"
               logoImage={GoogleLogo}
               description="Master search algorithms and data structures"
             />
-            <CompanyLogo 
-              company="Meta" 
+            <CompanyLogo
+              company="Meta"
               logoImage={MetaLogo}
               description="Social media algorithms and AI systems"
             />
-            <CompanyLogo 
-              company="Microsoft" 
+            <CompanyLogo
+              company="Microsoft"
               logoImage={MicrosoftLogo}
               description="Enterprise software and cloud computing"
             />
@@ -536,19 +535,19 @@ export default function AlgoBridge() {
 
         {/* Benefits Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <BenefitCard 
+          <BenefitCard
             icon="🤝"
             title="Direct Referrals"
             description="Benefit from our strong industry connections, providing direct referrals to companies like Google, Meta, Microsoft, Infosys, Wipro, TCS, and Accenture."
             gradient="from-blue-500 to-blue-600"
           />
-          <BenefitCard 
+          <BenefitCard
             icon="🌐"
             title="Industry Networking"
             description="Participate in exclusive networking sessions to connect with key decision-makers and expand your professional circle."
             gradient="from-purple-500 to-purple-600"
           />
-          <BenefitCard 
+          <BenefitCard
             icon="🎯"
             title="Interview Preparation"
             description="Hone your skills with mock HR and technical interviews, ensuring you are fully prepared for real-world scenarios."
@@ -562,7 +561,7 @@ export default function AlgoBridge() {
             <h3 className="text-3xl font-black text-gray-900 mb-4">📊 Success Statistics</h3>
             <p className="text-lg text-gray-600">Join thousands of successful candidates who have transformed their careers</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center group">
               <div className="text-4xl font-black text-indigo-600 group-hover:scale-110 transition-transform duration-300">95%</div>
@@ -612,31 +611,28 @@ export default function AlgoBridge() {
       <div className="flex flex-wrap gap-4 mb-8 justify-center">
         <button
           onClick={() => setActiveTab('exams')}
-          className={`px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 ${
-            activeTab === 'exams'
+          className={`px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 ${activeTab === 'exams'
               ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
-          }`}
+            }`}
         >
           📚 Exams & Practice
         </button>
         <button
           onClick={() => setActiveTab('contests')}
-          className={`px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 ${
-            activeTab === 'contests'
+          className={`px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 ${activeTab === 'contests'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
-          }`}
+            }`}
         >
           🏆 Coding Contests
         </button>
         <button
           onClick={() => setActiveTab('leaderboard')}
-          className={`px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 ${
-            activeTab === 'leaderboard'
+          className={`px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 ${activeTab === 'leaderboard'
               ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-lg'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
-          }`}
+            }`}
         >
           🏅 Leaderboard
         </button>
@@ -723,7 +719,7 @@ export default function AlgoBridge() {
       <div className="mt-12 bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 border-2 border-green-200 rounded-3xl p-8">
         <h3 className="text-3xl font-black text-gray-900 mb-8 text-center">⚡ Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <button 
+          <button
             onClick={() => handleQuickAction('Create Practice Test')}
             className="p-6 bg-white rounded-2xl border-2 border-green-200 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:border-green-300 text-left group"
           >
@@ -740,7 +736,7 @@ export default function AlgoBridge() {
             </div>
           </button>
 
-          <button 
+          <button
             onClick={() => handleQuickAction('Join Live Contest')}
             className="p-6 bg-white rounded-2xl border-2 border-blue-200 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:border-blue-300 text-left group"
           >
@@ -757,7 +753,7 @@ export default function AlgoBridge() {
             </div>
           </button>
 
-          <button 
+          <button
             onClick={() => handleQuickAction('View Analytics')}
             className="p-6 bg-white rounded-2xl border-2 border-purple-200 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:border-purple-300 text-left group"
           >

@@ -34,7 +34,7 @@ npm start
 
 ### **Step 3: Test the Server**
 1. **Test Basic Functionality:**
-   - Open browser and go to: `http://localhost:5001/api/users/test`
+   - Open browser and go to: `https://finallitera.onrender.com/api/users/test`
    - You should see: `{"status":"success","message":"User routes are working"}`
 
 2. **Test Profile Endpoint:**

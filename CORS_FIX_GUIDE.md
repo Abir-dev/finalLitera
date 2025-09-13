@@ -82,12 +82,12 @@ You can test the API endpoints directly:
 
 ```bash
 # Test health endpoint
-curl http://localhost:5001/api/health
+curl https://finallitera.onrender.com/api/health
 
 # Test admin dashboard stats (with proper headers)
 curl -H "Origin: http://localhost:5173" \
      -H "Content-Type: application/json" \
-     http://localhost:5001/api/admin/dashboard/stats
+     https://finallitera.onrender.com/api/admin/dashboard/stats
 ```
 
 ## 🛠️ **Troubleshooting**
@@ -96,7 +96,7 @@ curl -H "Origin: http://localhost:5173" \
 
 1. **Check if server is running:**
    ```bash
-   curl http://localhost:5001/api/health
+   curl https://finallitera.onrender.com/api/health
    ```
 
 2. **Clear browser cache:**
