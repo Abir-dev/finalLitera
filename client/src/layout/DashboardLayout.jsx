@@ -100,12 +100,15 @@ export default function DashboardLayout() {
 
           {/* Bottom action (refresh) */}
           <div className="p-4">
-            <button className="ml-auto w-12 h-12 rounded-full bg-white/10 border-2 border-white flex items-center justify-center hover:bg-white/20 transition-colors">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                  d="M16 8a4 4 0 10-8 0v1H6l3 3 3-3h-2V8a2 2 0 114 0v2a6 6 0 11-6 6"/>
-              </svg>
-            </button>
+            <NavLink
+              to="/"
+              className="ml-auto w-12 h-12 rounded-full flex items-center justify-center cursor-pointer"
+            >
+              <img src="/icons/home.svg" alt="Home" className="w-6 h-6 invert" />
+            </NavLink>
+              {/* <button onClick={() => window.location.reload()}>
+            <img src="/icons/refresh.svg" alt="Refresh" className="w-6 h-6 rounded-full" />
+          </button> */}
           </div>
         </aside>
 
