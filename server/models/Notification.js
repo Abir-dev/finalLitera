@@ -19,7 +19,8 @@ const notificationSchema = new mongoose.Schema({
       'system_announcement',
       'payment_success',
       'payment_failed',
-      'subscription_expiry'
+      'subscription_expiry',
+      'new_course_available'
     ]
   },
   title: {

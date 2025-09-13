@@ -28,7 +28,7 @@ export default function AdminLayout() {
     { name: "Students", href: "/admin/students", icon: "👥" },
     { name: "Courses", href: "/admin/courses", icon: "📚" },
     { name: "Exams", href: "/admin/exams", icon: "📝" },
-    { name: "Analytics", href: "/admin/analytics", icon: "📈" },
+    // { name: "Analytics", href: "/admin/analytics", icon: "📈" },
     { name: "Settings", href: "/admin/settings", icon: "⚙️" },
   ];
 
