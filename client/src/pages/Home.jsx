@@ -285,21 +285,22 @@ export default function Home() {
             people who have used our product.
           </p>
           <div className="mt-8 grid md:grid-cols-3 gap-5">
-            <TestimonialCard
-              quote="Courses are well structured and easy to follow."
-              name="Aarav Sharma"
-              role="Product Designer"
+          <TestimonialCard
+              quote="Very nice courses at best price .. value for money .. trust worthy.."
+              name="swapnamoy Ghosh"
+              
             />
             <TestimonialCard
-              quote="Mentors are supportive and sessions are engaging."
-              name="Priya Verma"
-              role="Frontend Developer"
+              quote="I had a great experience while attending consultation...Thank you 🙂"
+              name="Bhaskar Ghosh"
+             
             />
             <TestimonialCard
-              quote="Integrating this component into our project was seamless and saved us countless hours of development and testing. Highly recommended!"
-              name="Rohit Singh"
-              role="Data Analyst"
+              quote="Best courses at Best price ❤"
+              name="Nilesh Dubey"
+              
             />
+
           </div>
         </div>
       </section>
