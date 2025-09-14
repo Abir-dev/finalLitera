@@ -62,6 +62,8 @@ const corsOptions = {
       "http://localhost:3000",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:3000",
+      "https://litera.in",
+      "https://www.litera.in",
       process.env.CLIENT_URL,
     ].filter(Boolean);
 

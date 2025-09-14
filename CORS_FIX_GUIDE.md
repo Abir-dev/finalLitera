@@ -7,7 +7,7 @@ You're seeing CORS (Cross-Origin Resource Sharing) errors because the backend se
 
 ### **1. Enhanced CORS Configuration**
 - Updated `server/server.js` with robust CORS handling
-- Added multiple allowed origins (localhost:5173, localhost:3000, etc.)
+- Added multiple allowed origins (localhost:5173, localhost:3000, https://litera.in, https://www.litera.in, etc.)
 - Enhanced preflight request handling
 - Added CORS headers middleware for all responses
 
