@@ -151,7 +151,7 @@ export default function About() {
       </section>
 
       {/* Team Section */}
-      <section className="py-16 bg-gradient-to-r from-slate-50 to-indigo-50">
+      {/* <section className="py-16 bg-gradient-to-r from-slate-50 to-indigo-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
             <div className="text-4xl mb-4 animate-bounce">👥</div>
@@ -182,7 +182,7 @@ export default function About() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
