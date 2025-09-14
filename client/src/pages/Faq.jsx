@@ -183,7 +183,7 @@ export default function Faq() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 bg-gradient-to-r from-slate-50 to-indigo-50">
+      {/* <section className="py-16 bg-gradient-to-r from-slate-50 to-indigo-50">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 shadow-lg">
             <div className="text-6xl mb-4 animate-bounce">🤖</div>
@@ -201,7 +201,7 @@ export default function Faq() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
