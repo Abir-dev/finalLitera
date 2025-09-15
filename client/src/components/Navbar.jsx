@@ -1,7 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Bell } from "lucide-react";
+import { Bell, Menu, X } from "lucide-react";
 import LoginModal from "./LoginModal.jsx";
 import SignupModal from "./SignupModal.jsx";
 import Logo from "../assets/kinglogo.png"
@@ -11,6 +11,7 @@ const navLink = "uppercase text-lg font-bold text-slate-700 hover:text-[#1B4A8B]
 export default function Navbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -28,10 +29,19 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 bg-white/30 backdrop-blur-sm bg-opacity-50 rounded-b-lg shadow-md border-b border-white/20 mb-4 ">
         <div className="max-w-6xl mx-auto px-4">
           <div className="h-16 flex items-center justify-between">
-            {/* Logo */}
-            <Link to="/">
+            {/* Logo (hidden on mobile) */}
+            <Link to="/" className="hidden md:block">
               <img src={Logo} alt="Logo" className="h-15 w-15 invert" />
             </Link>
+
+            {/* Mobile hamburger */}
+            <button
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-700 hover:text-[#1B4A8B] focus:outline-none"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={24} />
+            </button>
 
             {/* Nav Links */}
             <nav className="hidden md:flex gap-6">
@@ -79,7 +89,7 @@ export default function Navbar() {
                   </Link> */}
                   <button
                     onClick={() => setIsLoginModalOpen(true)}
-                    className="rounded-full bg-[#1B4A8B] hover:bg-[#1B4A8B]/90 text-white text-sm font-semibold px-5 py-2.5 shadow cursor-pointer"
+                    className="rounded-full bg-[#1B4A8B] hover:bg-[#1B4A8B]/90 text-white text-sm font-semibold px-5 py-2.5 shadow cursor-pointer hidden md:inline-flex"
                   >
                     Login
                   </button>
@@ -89,6 +99,41 @@ export default function Navbar() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Sidebar */}
+      <div className={`${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transition-transform duration-300 ease-in-out md:hidden`}>
+        <div className="flex items-center justify-between h-16 px-4 border-b">
+          <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2">
+            <img src={Logo} alt="Logo" className="h-8 w-8 invert" />
+            <span className="font-semibold text-slate-800">Litera</span>
+          </Link>
+          <button
+            className="p-2 rounded-md text-slate-700 hover:text-[#1B4A8B]"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <X size={22} />
+          </button>
+        </div>
+
+        <nav className="px-4 py-4 flex flex-col gap-2">
+          <NavLink to="/" end onClick={() => setIsMobileMenuOpen(false)} className={`${navLink} block w-full`}>Home</NavLink>
+          <NavLink to="/courses" onClick={() => setIsMobileMenuOpen(false)} className={`${navLink} block w-full`}>Courses</NavLink>
+          <NavLink to="/launchpad" onClick={() => setIsMobileMenuOpen(false)} className={`${navLink} block w-full`}>LaunchPad</NavLink>
+          <NavLink to="/about" onClick={() => setIsMobileMenuOpen(false)} className={`${navLink} block w-full`}>About</NavLink>
+          <NavLink to="/faq" onClick={() => setIsMobileMenuOpen(false)} className={`${navLink} block w-full`}>FAQ</NavLink>
+        </nav>
+
+        {/* Auth actions intentionally not shown in mobile sidebar; handled in right-side navbar on desktop */}
+      </div>
+
+      {/* Backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Modals */}
       <LoginModal
