@@ -17,10 +17,12 @@ const notificationSchema = new mongoose.Schema({
       'certificate_issued',
       'course_review',
       'system_announcement',
+      'maintenance_notice',
       'payment_success',
       'payment_failed',
       'subscription_expiry',
-      'new_course_available'
+      'new_course_available',
+      'live_class_scheduled'
     ]
   },
   title: {

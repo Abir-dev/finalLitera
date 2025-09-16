@@ -44,7 +44,9 @@ export default function AdminCourseManagement() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [meetLinkData, setMeetLinkData] = useState({
     meetLink: '',
-    isLiveClass: false
+    isLiveClass: false,
+    sessionDate: '',
+    sessionDuration: ''
   });
   const [linksSubmitting, setLinksSubmitting] = useState(false);
 
@@ -286,7 +288,11 @@ export default function AdminCourseManagement() {
     setSelectedCourse(course);
     setMeetLinkData({
       meetLink: course.schedule?.liveSessions?.[0]?.meetingLink || '',
-      isLiveClass: course.schedule?.liveSessions?.length > 0 || false
+      isLiveClass: course.schedule?.liveSessions?.length > 0 || false,
+      sessionDate: course.schedule?.liveSessions?.[0]?.date
+        ? new Date(course.schedule.liveSessions[0].date).toISOString().slice(0,16)
+        : '',
+      sessionDuration: course.schedule?.liveSessions?.[0]?.duration || ''
     });
     setShowLinksModal(true);
   };
@@ -330,7 +336,9 @@ export default function AdminCourseManagement() {
     setSelectedCourse(null);
     setMeetLinkData({
       meetLink: '',
-      isLiveClass: false
+      isLiveClass: false,
+      sessionDate: '',
+      sessionDuration: ''
     });
   };
 
@@ -1049,6 +1057,38 @@ export default function AdminCourseManagement() {
                         <p className="text-xs text-gray-500 mt-1 truncate">{meetLinkData.meetLink}</p>
                       </div>
                     )}
+
+                    {/* Live Session Date/Time */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Live Session Date & Time
+                      </label>
+                      <input
+                        type="datetime-local"
+                        name="sessionDate"
+                        value={meetLinkData.sessionDate}
+                        onChange={handleMeetLinkChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">Set when this course should go live.</p>
+                    </div>
+
+                    {/* Live Session Duration */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Duration (minutes)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        name="sessionDuration"
+                        value={meetLinkData.sessionDuration}
+                        onChange={handleMeetLinkChange}
+                        placeholder="60"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      />
+                    </div>
                   </div>
                 )}
 

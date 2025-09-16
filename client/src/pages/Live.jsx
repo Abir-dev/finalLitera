@@ -169,8 +169,8 @@ export default function LiveClasses() {
 
         console.log('All courses with live sessions:', response.data.data.courses);
 
-        // Filter to only show enrolled courses (if we have enrollment data)
-        let coursesToShow = response.data.data.courses;
+        // Only show live classes from enrolled courses
+        let coursesToShow = [];
         if (enrolledCourseIds.length > 0) {
           coursesToShow = response.data.data.courses.filter(course =>
             enrolledCourseIds.includes(course._id)
@@ -188,34 +188,36 @@ export default function LiveClasses() {
           return;
         }
 
-        // Transform courses to match our component structure
-        const transformedCourses = coursesToShow.map(course => {
-          const liveSession = course.schedule?.liveSessions?.[0];
+        // Transform courses to include ONLY sessions that are currently live
+        const transformedCourses = coursesToShow.flatMap(course => {
+          const sessions = Array.isArray(course.schedule?.liveSessions) ? course.schedule.liveSessions : [];
+          const now = new Date();
 
-          // Check if the live session is currently happening
-          let isLive = false;
-          if (liveSession && liveSession.date) {
-            const now = new Date();
-            const sessionStart = new Date(liveSession.date);
-            const sessionEnd = new Date(sessionStart.getTime() + (liveSession.duration || 60) * 60000);
-            isLive = now >= sessionStart && now <= sessionEnd;
-          }
+          // Find a session that is currently live
+          const currentSession = sessions.find(session => {
+            if (!session?.date) return false;
+            const sessionStart = new Date(session.date);
+            const sessionEnd = new Date(sessionStart.getTime() + (session.duration || 60) * 60000);
+            return now >= sessionStart && now <= sessionEnd;
+          });
 
-          return {
+          if (!currentSession) return [];
+
+          return [{
             id: course._id,
             title: course.title,
             instructor: course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : 'Instructor',
-            viewers: Math.floor(Math.random() * 5000) + 100, // Random viewer count for demo
+            viewers: Math.floor(Math.random() * 5000) + 100,
             thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
-            meetLink: liveSession?.meetingLink || "",
-            isLive: isLive,
-            startTime: liveSession ? new Date(liveSession.date).toLocaleTimeString('en-US', {
+            meetLink: currentSession.meetingLink || "",
+            isLive: true,
+            startTime: new Date(currentSession.date).toLocaleTimeString('en-US', {
               hour: 'numeric',
               minute: '2-digit',
               hour12: true
-            }) : "TBD",
-            duration: `${liveSession?.duration || course.duration || 60} minutes`
-          };
+            }),
+            duration: `${currentSession.duration || course.duration || 60} minutes`
+          }];
         });
 
         setCourses(transformedCourses);
@@ -223,21 +225,7 @@ export default function LiveClasses() {
       } catch (error) {
         console.error('Error fetching live classes:', error);
         setError('Failed to load live classes. Please try again.');
-
-        // Fallback to sample data if API fails
-        setCourses([
-          {
-            id: 1,
-            title: "Advanced React Development",
-            instructor: "Dr. Sarah Johnson",
-            viewers: "1.8K",
-            thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=300&fit=crop",
-            meetLink: "https://meet.google.com/abc-defg-hij",
-            isLive: true,
-            startTime: "10:00 AM",
-            duration: "2 hours"
-          }
-        ]);
+        setCourses([]);
       } finally {
         setLoading(false);
       }
@@ -247,7 +235,6 @@ export default function LiveClasses() {
   }, []);
 
   const liveClasses = courses.filter(item => item.isLive);
-  const upcomingClasses = courses.filter(item => !item.isLive);
 
   return (
     <>
@@ -287,20 +274,7 @@ export default function LiveClasses() {
           </div>
         )}
 
-        {/* Warning when showing all courses instead of enrolled only */}
-        {!loading && !error && enrolledCourses.length === 0 && courses.length > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md mb-6">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span className="font-medium">Showing all live classes</span>
-            </div>
-            <p className="text-sm mt-1">
-              Unable to load your enrolled courses. Showing all available live classes instead.
-            </p>
-          </div>
-        )}
+        {/* Only enrolled courses' live classes are shown; no fallback to all courses */}
 
         {/* No enrolled courses with live sessions */}
         {!loading && !error && courses.length === 0 && (
@@ -344,17 +318,7 @@ export default function LiveClasses() {
           </div>
         )}
 
-        {/* Upcoming Classes Section */}
-        {upcomingClasses.length > 0 && (
-          <div className="mt-10">
-            <h2 className="text-lg font-semibold text-slate-900 mb-3">Upcoming Classes</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingClasses.map((item) => (
-                <LiveClassCard key={item.id} {...item} />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Upcoming Classes section removed as per requirements */}
       </section>
 
       {/* AI Features List */}

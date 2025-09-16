@@ -9,6 +9,7 @@ import {
   updateAdmin,
   deleteAdmin,
 } from "../controllers/adminController.js";
+import { sendMaintenanceNotice } from "../controllers/notification.js";
 import {
   adminAuth,
   superAdminAuth,
@@ -43,6 +44,14 @@ router.post("/login", adminLogin);
 // @route   GET /api/admin/profile
 // @access  Private/Admin
 router.get("/profile", adminAuth, getAdminProfile);
+
+// Server maintenance notice to all students
+router.post(
+  "/notifications/maintenance",
+  adminAuth,
+  requirePermission("notifications"),
+  sendMaintenanceNotice
+);
 
 // @desc    Update admin profile
 // @route   PUT /api/admin/profile

@@ -1,10 +1,12 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Bell, Menu, X } from "lucide-react";
 import LoginModal from "./LoginModal.jsx";
 import SignupModal from "./SignupModal.jsx";
 import Logo from "../assets/kinglogo.png"
+import axios from "axios";
+import { io } from "socket.io-client";
 
 const navLink = "uppercase text-lg font-bold text-slate-700 hover:text-[#1B4A8B] px-4 py-2";
 
@@ -14,6 +16,76 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const dropdownRef = useRef(null);
+
+  const apiEnv = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+  const normalizedApi = apiEnv.endsWith("/api")
+    ? apiEnv
+    : `${apiEnv.replace(/\/$/, "")}/api`;
+  const backendURL = normalizedApi.replace(/\/api$/, "");
+
+  // Fetch recent notifications and subscribe to realtime
+  useEffect(() => {
+    if (!user) return;
+    const token = localStorage.getItem("token");
+    const fetchRecent = async () => {
+      try {
+        const res = await axios.get(`${backendURL}/api/notifications?limit=5`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+        const list = (res.data?.data?.notifications || []).map((n) => ({
+          id: n._id,
+          title: n.title,
+          message: n.message,
+          time: new Date(n.createdAt).toLocaleString(),
+          type: n.type,
+          isRead: n.isRead,
+        }));
+        setNotifications(list);
+        setUnreadCount(res.data?.data?.pagination?.unreadCount || 0);
+      } catch (e) {
+        // ignore
+      }
+    };
+    fetchRecent();
+
+    const socket = io(backendURL, { withCredentials: true, path: '/socket.io', transports: ['websocket'], reconnectionAttempts: 5 });
+    // Register room if available
+    if (user?.id || user?._id) {
+      socket.emit('register_user', user.id || user._id);
+    }
+    socket.on('new_notification', (payload) => {
+      setNotifications((prev) => [
+        {
+          id: payload.id,
+          title: payload.title,
+          message: payload.message,
+          time: new Date(payload.timestamp || Date.now()).toLocaleString(),
+          type: payload.type,
+          isRead: false,
+        },
+        ...prev.slice(0, 4),
+      ]);
+      setUnreadCount((c) => c + 1);
+    });
+
+    return () => socket.disconnect();
+  }, [user]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const onClick = (e) => {
+      if (notifOpen && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [notifOpen]);
 
   const handleProfileClick = () => {
     navigate("/dashboard/profile");
@@ -56,10 +128,49 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               {user ? (
                 <>
-                  <button className="relative p-2 text-slate-700">
-                    <Bell size={22} />
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
-                  </button>
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      className="relative p-2 text-slate-700"
+                      onClick={() => setNotifOpen((v) => !v)}
+                      aria-label="Open notifications"
+                    >
+                      <Bell size={22} />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
+                      )}
+                    </button>
+                    {notifOpen && (
+                      <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg border border-gray-200 z-50">
+                        <div className="p-3 border-b flex items-center justify-between">
+                          <span className="text-sm font-semibold text-slate-800">Notifications</span>
+                          {unreadCount > 0 && (
+                            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{unreadCount} new</span>
+                          )}
+                        </div>
+                        <div className="max-h-80 overflow-y-auto">
+                          {notifications.length === 0 ? (
+                            <div className="p-4 text-sm text-slate-500">No recent notifications</div>
+                          ) : (
+                            notifications.map((n) => (
+                              <div key={n.id} className="p-3 hover:bg-slate-50 cursor-default border-b last:border-b-0">
+                                <div className="text-sm font-medium text-slate-900 truncate">{n.title}</div>
+                                <div className="text-xs text-slate-600 truncate mt-0.5">{n.message}</div>
+                                <div className="text-[11px] text-slate-400 mt-1">{n.time}</div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        <div className="p-2">
+                          <button
+                            onClick={() => { setNotifOpen(false); navigate('/dashboard/notifications'); }}
+                            className="w-full text-center text-sm font-semibold text-[#1B4A8B] hover:bg-slate-50 rounded-lg py-2"
+                          >
+                            View all notifications
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="relative group">
                     <img

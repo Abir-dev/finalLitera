@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState({
@@ -280,6 +281,12 @@ export default function AdminSettings() {
         </div>
       </div>
 
+      {/* Server Maintenance Quick Action */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Server Maintenance</h3>
+        <MaintenanceNotice />
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4">Debug & Development</h3>
         <div className="space-y-4">
@@ -398,6 +405,70 @@ export default function AdminSettings() {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function MaintenanceNotice() {
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(30);
+  const [submitting, setSubmitting] = useState(false);
+
+  const apiEnv = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+  const normalizedApi = apiEnv.endsWith("/api") ? apiEnv : `${apiEnv.replace(/\/$/, "")}/api`;
+  const backendURL = normalizedApi.replace(/\/api$/, "");
+
+  const sendNotice = async () => {
+    try {
+      setSubmitting(true);
+      const token = localStorage.getItem('adminToken');
+      await axios.post(
+        `${backendURL}/api/admin/notifications/maintenance`,
+        { hours, minutes },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('Maintenance notice sent to all students');
+    } catch (e) {
+      alert(e?.response?.data?.message || 'Failed to send maintenance notice');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4 max-w-md">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Hours</label>
+          <input
+            type="number"
+            min="0"
+            max="24"
+            value={hours}
+            onChange={(e) => setHours(Math.max(0, Math.min(24, parseInt(e.target.value || '0'))))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Minutes</label>
+          <input
+            type="number"
+            min="0"
+            max="59"
+            value={minutes}
+            onChange={(e) => setMinutes(Math.max(0, Math.min(59, parseInt(e.target.value || '0'))))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+          />
+        </div>
+      </div>
+      <button
+        onClick={sendNotice}
+        disabled={submitting}
+        className="px-6 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300 disabled:opacity-50"
+      >
+        {submitting ? 'Sending...' : 'Server Maintenance'}
+      </button>
+      <p className="text-sm text-gray-500">Sends an urgent notification to all students indicating maintenance duration and expected resume time.</p>
     </div>
   );
 }

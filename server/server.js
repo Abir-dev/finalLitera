@@ -32,6 +32,33 @@ import Admin from "./models/Admin.js";
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:3000",
+      "https://litera.in",
+      "https://www.litera.in",
+      process.env.CLIENT_URL
+    ].filter(Boolean),
+    credentials: true
+  }
+});
+
+// Attach io for controllers to use
+app.set('io', io);
+
+io.on('connection', (socket) => {
+  // Optional: client can authenticate and join their room
+  socket.on('register_user', (userId) => {
+    if (userId) {
+      socket.join(`user_${userId}`);
+    }
+  });
+});
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 // --- SECURITY MIDDLEWARE ---
@@ -197,7 +224,7 @@ app.use((err, req, res, next) => {
 
 // --- SERVER START ---
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📚 LMS-kinG Backend API ready!`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);

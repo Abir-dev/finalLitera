@@ -1,5 +1,8 @@
 import Course from "../models/Course.js";
 import Admin from "../models/Admin.js";
+import Notification from "../models/Notification.js";
+import User from "../models/User.js";
+import Enrollment from "../models/Enrollment.js";
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -503,7 +506,7 @@ export const updateCourseMeetLinks = async (req, res) => {
       });
     }
 
-    const { meetLink, isLiveClass } = req.body;
+    const { meetLink, isLiveClass, sessionDate, sessionDuration } = req.body;
 
     // Handle live class settings
     let liveSessions = course.schedule?.liveSessions || [];
@@ -516,17 +519,28 @@ export const updateCourseMeetLinks = async (req, res) => {
         });
       }
 
-      // Update or create live session
+      // Compute date and duration overrides if provided
+      const parsedDate = sessionDate ? new Date(sessionDate) : null;
+      const parsedDuration = sessionDuration
+        ? Number(sessionDuration)
+        : (course.duration || 60);
+
+      // Update or create live session (single primary session supported)
       if (liveSessions.length > 0) {
         liveSessions[0].meetingLink = meetLink;
         liveSessions[0].title = course.title;
-        liveSessions[0].duration = course.duration || 60;
+        if (parsedDate && !isNaN(parsedDate.getTime())) {
+          liveSessions[0].date = parsedDate;
+        } else if (!liveSessions[0].date) {
+          liveSessions[0].date = new Date();
+        }
+        liveSessions[0].duration = !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60);
       } else {
         liveSessions = [
           {
             title: course.title,
-            date: new Date(),
-            duration: course.duration || 60,
+            date: parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : new Date(),
+            duration: !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60),
             meetingLink: meetLink,
           },
         ];
@@ -547,6 +561,61 @@ export const updateCourseMeetLinks = async (req, res) => {
       },
       { new: true, runValidators: true }
     ).populate("instructor", "firstName lastName email avatar");
+
+    // Create notifications for enrolled users when a live class is scheduled
+    if ((isLiveClass === true || isLiveClass === "true") && liveSessions.length > 0) {
+      const targetDate = liveSessions[0].date;
+      const durationMin = liveSessions[0].duration;
+
+      // Find users enrolled in this course (support both Enrollment model and User.enrolledCourses fallback)
+      let userIds = [];
+      try {
+        const enrollments = await Enrollment.find({ course: updatedCourse._id }, 'user').populate('user', '_id');
+        userIds = enrollments.map(e => e.user?._id).filter(Boolean);
+      } catch (e) {
+        // Fallback to scanning User model embedded enrollments
+        const users = await User.find({ 'enrolledCourses.course': updatedCourse._id }, '_id');
+        userIds = users.map(u => u._id);
+      }
+
+      if (userIds.length > 0) {
+        const notifications = userIds.map(uid => ({
+          user: uid,
+          type: 'live_class_scheduled',
+          title: `Live class scheduled: ${updatedCourse.title}`,
+          message: `A live class is scheduled on ${new Date(targetDate).toLocaleString()} for ${durationMin} minutes.`,
+          data: {
+            courseId: updatedCourse._id,
+            sessionDate: targetDate,
+            sessionDuration: durationMin,
+            meetingLink: liveSessions[0].meetingLink
+          },
+          priority: 'high',
+          actionUrl: `/live`,
+          actionText: 'View Live Classes'
+        }));
+
+        const created = await Notification.insertMany(notifications);
+
+        // Emit over Socket.IO if available
+        const io = req.app.get && req.app.get('io');
+        if (io) {
+          created.forEach(n => {
+            io.to(`user_${n.user}`).emit('new_notification', {
+              id: n._id,
+              type: n.type,
+              title: n.title,
+              message: n.message,
+              data: n.data,
+              priority: n.priority,
+              actionUrl: n.actionUrl,
+              actionText: n.actionText,
+              timestamp: n.createdAt
+            });
+          });
+        }
+      }
+    }
 
     res.status(200).json({
       status: "success",

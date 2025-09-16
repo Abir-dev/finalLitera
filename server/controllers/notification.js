@@ -337,3 +337,78 @@ export const sendNotification = async (req, res) => {
     });
   }
 };
+
+// @desc    Send server maintenance notification to all students
+// @route   POST /api/admin/notifications/maintenance
+// @access  Private (Admin only)
+export const sendMaintenanceNotice = async (req, res) => {
+  try {
+    const { hours = 0, minutes = 0 } = req.body || {};
+    const durationMinutes = (Number(hours) || 0) * 60 + (Number(minutes) || 0);
+
+    if (durationMinutes <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please provide a valid maintenance duration'
+      });
+    }
+
+    const startAt = new Date();
+    const endAt = new Date(startAt.getTime() + durationMinutes * 60000);
+
+    // All students (users with role === 'student')
+    const users = await User.find({ role: 'student' }, '_id');
+    if (!users || users.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'No students found to notify'
+      });
+    }
+
+    const title = 'Scheduled Server Maintenance';
+    const message = `The server will undergo maintenance starting now for approximately ${hours}h ${minutes}m. Expected restore by ${endAt.toLocaleString()}.`;
+
+    const notifications = users.map(u => ({
+      user: u._id,
+      type: 'maintenance_notice',
+      title,
+      message,
+      data: {
+        startAt,
+        endAt,
+        durationMinutes
+      },
+      priority: 'urgent',
+      actionUrl: `/dashboard/notifications`,
+      actionText: 'View Details'
+    }));
+
+    const created = await Notification.insertMany(notifications);
+
+    const io = req.app.get && req.app.get('io');
+    if (io) {
+      created.forEach((n) => {
+        io.to(`user_${n.user}`).emit('new_notification', {
+          id: n._id,
+          type: n.type,
+          title: n.title,
+          message: n.message,
+          data: n.data,
+          priority: n.priority,
+          actionUrl: n.actionUrl,
+          actionText: n.actionText,
+          timestamp: n.createdAt
+        });
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Maintenance notification sent',
+      data: { recipientsCount: created.length, startAt, endAt }
+    });
+  } catch (error) {
+    console.error('Maintenance notice error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to send maintenance notice' });
+  }
+};

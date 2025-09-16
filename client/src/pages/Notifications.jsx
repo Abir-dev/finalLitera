@@ -1,5 +1,7 @@
 // src/pages/Notifications.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { io } from "socket.io-client";
 
 const brand = { blue: "#18457A", green: "#16a34a", red: "#dc2626" };
 
@@ -112,43 +114,56 @@ export default function Notifications() {
     marketingEmails: false,
   });
 
-  const notifications = [
-    {
-      id: 1,
-      title: "New Course Available",
-      message: "Advanced Machine Learning course is now available for enrollment.",
-      time: "2 hours ago",
-      type: "course",
-      isRead: false,
-    },
-    {
-      id: 2,
-      title: "Payment Successful",
-      message: "Your payment of ₹4,999 for Machine Learning Course has been processed successfully.",
-      time: "1 day ago",
-      type: "payment",
-      isRead: true,
-    },
-    {
-      id: 3,
-      title: "System Maintenance",
-      message: "Scheduled maintenance will occur on December 20th from 2-4 AM IST.",
-      time: "2 days ago",
-      type: "system",
-      isRead: true,
-    },
-    {
-      id: 4,
-      title: "Course Progress Update",
-      message: "You've completed 60% of the Machine Learning course. Keep up the great work!",
-      time: "3 days ago",
-      type: "course",
-      isRead: false,
-    },
-  ];
+  const [notifications, setNotifications] = useState([]);
 
-  const filteredNotifications = activeTab === "all" 
-    ? notifications 
+  useEffect(() => {
+    const apiEnv = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+    const normalizedApi = apiEnv.endsWith("/api") ? apiEnv : `${apiEnv.replace(/\/$/, "")}/api`;
+    const backendURL = normalizedApi.replace(/\/api$/, "");
+    const token = localStorage.getItem("token");
+
+    const fetchNotifications = async () => {
+      try {
+        const res = await axios.get(`${backendURL}/api/notifications`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+        const items = (res.data?.data?.notifications || []).map((n) => ({
+          id: n._id,
+          title: n.title,
+          message: n.message,
+          time: new Date(n.createdAt).toLocaleString(),
+          type: n.type?.includes("payment") ? "payment" : n.type?.includes("system") ? "system" : "course",
+          isRead: n.isRead,
+        }));
+        setNotifications(items);
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    fetchNotifications();
+
+    const socket = io(backendURL, { withCredentials: true, path: '/socket.io', transports: ['websocket'], reconnectionAttempts: 5 });
+    socket.on("new_notification", (payload) => {
+      setNotifications((prev) => [
+        {
+          id: payload.id,
+          title: payload.title,
+          message: payload.message,
+          time: new Date(payload.timestamp || Date.now()).toLocaleString(),
+          type: payload.type?.includes("payment") ? "payment" : payload.type?.includes("system") ? "system" : "course",
+          isRead: false,
+        },
+        ...prev,
+      ]);
+    });
+
+    return () => socket.disconnect();
+  }, []);
+
+  const filteredNotifications = activeTab === "all"
+    ? notifications
     : notifications.filter(n => n.type === activeTab);
 
   const togglePreference = (key) => {

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import axios from "axios";
 
 const AuthContext = createContext();
@@ -17,6 +18,27 @@ export const AuthProvider = ({ children }) => {
     headers: { "Content-Type": "application/json" },
     withCredentials: true, // Include cookies in requests
   });
+
+  // Socket connection for real-time notifications
+  useEffect(() => {
+    let socket;
+    try {
+      socket = io(backendURL, {
+        withCredentials: true,
+        path: '/socket.io',
+        transports: ['websocket'],
+        reconnectionAttempts: 5,
+      });
+      if (user?.id || user?._id) {
+        socket.emit('register_user', user.id || user._id);
+      }
+    } catch (_) {
+      // ignore
+    }
+    return () => {
+      try { socket && socket.disconnect(); } catch (_) {}
+    };
+  }, [backendURL, user?.id, user?._id]);
 
   // Fetch current user on load
   useEffect(() => {
