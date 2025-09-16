@@ -1,7 +1,14 @@
-import { uploadToCloudinary, deleteFromCloudinary, getCloudinaryInfo, getOptimizedImageUrl, generateVideoThumbnail } from '../utils/cloudinary.js';
-import { cleanupTempFiles, validateFile } from '../middleware/upload.js';
-import fs from 'fs';
-import path from 'path';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  getCloudinaryInfo,
+  getOptimizedImageUrl,
+  generateVideoThumbnail,
+} from "../utils/cloudinary.js";
+import { uploadToS3 } from "../utils/s3.js";
+import { cleanupTempFiles, validateFile } from "../middleware/upload.js";
+import fs from "fs";
+import path from "path";
 
 // @desc    Upload single file to Cloudinary
 // @route   POST /api/upload/single
@@ -10,33 +17,33 @@ export const uploadSingleFile = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
-        status: 'error',
-        message: 'No file provided'
+        status: "error",
+        message: "No file provided",
       });
     }
 
     const file = req.file;
     const { folder, options } = req.body;
-    
+
     // Determine folder based on file type
-    let uploadFolder = folder || 'lms-king';
-    if (file.fieldname === 'avatar') {
-      uploadFolder = 'lms-king/avatars';
-    } else if (file.fieldname === 'thumbnail') {
-      uploadFolder = 'lms-king/thumbnails';
-    } else if (file.fieldname === 'video') {
-      uploadFolder = 'lms-king/videos';
-    } else if (file.fieldname === 'document') {
-      uploadFolder = 'lms-king/documents';
+    let uploadFolder = folder || "lms-king";
+    if (file.fieldname === "avatar") {
+      uploadFolder = "lms-king/avatars";
+    } else if (file.fieldname === "thumbnail") {
+      uploadFolder = "lms-king/thumbnails";
+    } else if (file.fieldname === "video") {
+      uploadFolder = "lms-king/videos";
+    } else if (file.fieldname === "document") {
+      uploadFolder = "lms-king/documents";
     } else {
-      uploadFolder = 'lms-king/images';
+      uploadFolder = "lms-king/images";
     }
 
     // Upload to Cloudinary
     const uploadOptions = {
       folder: uploadFolder,
-      resource_type: 'auto',
-      ...(options ? JSON.parse(options) : {})
+      resource_type: "auto",
+      ...(options ? JSON.parse(options) : {}),
     };
 
     const result = await uploadToCloudinary(file, uploadFolder, uploadOptions);
@@ -44,9 +51,9 @@ export const uploadSingleFile = async (req, res) => {
     if (!result.success) {
       cleanupTempFiles(file);
       return res.status(500).json({
-        status: 'error',
-        message: 'Upload failed',
-        error: result.error
+        status: "error",
+        message: "Upload failed",
+        error: result.error,
       });
     }
 
@@ -54,8 +61,8 @@ export const uploadSingleFile = async (req, res) => {
     cleanupTempFiles(file);
 
     res.status(200).json({
-      status: 'success',
-      message: 'File uploaded successfully',
+      status: "success",
+      message: "File uploaded successfully",
       data: {
         file: {
           id: result.data.public_id,
@@ -64,16 +71,16 @@ export const uploadSingleFile = async (req, res) => {
           size: result.data.bytes,
           width: result.data.width,
           height: result.data.height,
-          created_at: result.data.created_at
-        }
-      }
+          created_at: result.data.created_at,
+        },
+      },
     });
   } catch (error) {
-    console.error('Upload single file error:', error);
+    console.error("Upload single file error:", error);
     cleanupTempFiles(req.file);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during file upload'
+      status: "error",
+      message: "Server error during file upload",
     });
   }
 };
@@ -84,16 +91,16 @@ export const uploadSingleFile = async (req, res) => {
 export const uploadMultipleFiles = async (req, res) => {
   try {
     const files = req.files;
-    
+
     if (!files || files.length === 0) {
       return res.status(400).json({
-        status: 'error',
-        message: 'No files provided'
+        status: "error",
+        message: "No files provided",
       });
     }
 
     const { folder } = req.body;
-    const uploadFolder = folder || 'lms-king/images';
+    const uploadFolder = folder || "lms-king/images";
     const uploadResults = [];
     const errors = [];
 
@@ -101,7 +108,7 @@ export const uploadMultipleFiles = async (req, res) => {
     const uploadPromises = files.map(async (file) => {
       try {
         const result = await uploadToCloudinary(file, uploadFolder);
-        
+
         if (result.success) {
           uploadResults.push({
             originalName: file.originalname,
@@ -110,18 +117,18 @@ export const uploadMultipleFiles = async (req, res) => {
             format: result.data.format,
             size: result.data.bytes,
             width: result.data.width,
-            height: result.data.height
+            height: result.data.height,
           });
         } else {
           errors.push({
             originalName: file.originalname,
-            error: result.error
+            error: result.error,
           });
         }
       } catch (error) {
         errors.push({
           originalName: file.originalname,
-          error: error.message
+          error: error.message,
         });
       }
     });
@@ -132,19 +139,19 @@ export const uploadMultipleFiles = async (req, res) => {
     cleanupTempFiles(files);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       message: `${uploadResults.length} files uploaded successfully`,
       data: {
         uploaded: uploadResults,
-        errors: errors
-      }
+        errors: errors,
+      },
     });
   } catch (error) {
-    console.error('Upload multiple files error:', error);
+    console.error("Upload multiple files error:", error);
     cleanupTempFiles(req.files);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during file upload'
+      status: "error",
+      message: "Server error during file upload",
     });
   }
 };
@@ -156,60 +163,64 @@ export const uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
-        status: 'error',
-        message: 'No avatar file provided'
+        status: "error",
+        message: "No avatar file provided",
       });
     }
 
     const file = req.file;
-    
+
     // Validate file type for avatar
-    const validation = validateFile(file, ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
+    const validation = validateFile(
+      file,
+      ["image/jpeg", "image/jpg", "image/png", "image/webp"],
+      5 * 1024 * 1024
+    );
     if (!validation.valid) {
       cleanupTempFiles(file);
       return res.status(400).json({
-        status: 'error',
-        message: validation.error
+        status: "error",
+        message: validation.error,
       });
     }
 
     // Upload to Cloudinary with avatar-specific options
-    const result = await uploadToCloudinary(file, 'lms-king/avatars', {
+    const result = await uploadToCloudinary(file, "lms-king/avatars", {
       transformation: [
-        { width: 200, height: 200, crop: 'fill', gravity: 'face' },
-        { quality: 'auto', fetch_format: 'auto' }
-      ]
+        { width: 200, height: 200, crop: "fill", gravity: "face" },
+        { quality: "auto", fetch_format: "auto" },
+      ],
     });
 
     if (!result.success) {
       cleanupTempFiles(file);
       return res.status(500).json({
-        status: 'error',
-        message: 'Avatar upload failed',
-        error: result.error
+        status: "error",
+        message: "Avatar upload failed",
+        error: result.error,
       });
     }
 
     cleanupTempFiles(file);
 
     res.status(200).json({
-      status: 'success',
-      message: 'Avatar uploaded successfully',
+      status: "success",
+      message: "Avatar uploaded successfully",
       data: {
         avatar: {
           id: result.data.public_id,
           url: result.data.secure_url,
           format: result.data.format,
-          size: result.data.bytes
-        }
-      }
+          size: result.data.bytes,
+        },
+      },
     });
   } catch (error) {
-    console.error('Upload avatar error:', error);
+    console.error("Upload avatar error:", error);
     cleanupTempFiles(req.file);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during avatar upload'
+      status: "error",
+      message: "Server error during avatar upload",
     });
   }
 };
@@ -221,60 +232,64 @@ export const uploadThumbnail = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
-        status: 'error',
-        message: 'No thumbnail file provided'
+        status: "error",
+        message: "No thumbnail file provided",
       });
     }
 
     const file = req.file;
-    
+
     // Validate file type for thumbnail
-    const validation = validateFile(file, ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
+    const validation = validateFile(
+      file,
+      ["image/jpeg", "image/jpg", "image/png", "image/webp"],
+      5 * 1024 * 1024
+    );
     if (!validation.valid) {
       cleanupTempFiles(file);
       return res.status(400).json({
-        status: 'error',
-        message: validation.error
+        status: "error",
+        message: validation.error,
       });
     }
 
     // Upload to Cloudinary with thumbnail-specific options
-    const result = await uploadToCloudinary(file, 'lms-king/thumbnails', {
+    const result = await uploadToCloudinary(file, "lms-king/thumbnails", {
       transformation: [
-        { width: 800, height: 450, crop: 'fill' },
-        { quality: 'auto', fetch_format: 'auto' }
-      ]
+        { width: 800, height: 450, crop: "fill" },
+        { quality: "auto", fetch_format: "auto" },
+      ],
     });
 
     if (!result.success) {
       cleanupTempFiles(file);
       return res.status(500).json({
-        status: 'error',
-        message: 'Thumbnail upload failed',
-        error: result.error
+        status: "error",
+        message: "Thumbnail upload failed",
+        error: result.error,
       });
     }
 
     cleanupTempFiles(file);
 
     res.status(200).json({
-      status: 'success',
-      message: 'Thumbnail uploaded successfully',
+      status: "success",
+      message: "Thumbnail uploaded successfully",
       data: {
         thumbnail: {
           id: result.data.public_id,
           url: result.data.secure_url,
           format: result.data.format,
-          size: result.data.bytes
-        }
-      }
+          size: result.data.bytes,
+        },
+      },
     });
   } catch (error) {
-    console.error('Upload thumbnail error:', error);
+    console.error("Upload thumbnail error:", error);
     cleanupTempFiles(req.file);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during thumbnail upload'
+      status: "error",
+      message: "Server error during thumbnail upload",
     });
   }
 };
@@ -286,64 +301,59 @@ export const uploadVideo = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
-        status: 'error',
-        message: 'No video file provided'
+        status: "error",
+        message: "No video file provided",
       });
     }
 
     const file = req.file;
-    
+
     // Validate file type for video
-    const validation = validateFile(file, ['video/mp4', 'video/avi', 'video/mov', 'video/webm'], 100 * 1024 * 1024);
+    const validation = validateFile(
+      file,
+      ["video/mp4", "video/avi", "video/mov", "video/webm"],
+      100 * 1024 * 1024
+    );
     if (!validation.valid) {
       cleanupTempFiles(file);
       return res.status(400).json({
-        status: 'error',
-        message: validation.error
+        status: "error",
+        message: validation.error,
       });
     }
 
-    // Upload to Cloudinary with video-specific options
-    const result = await uploadToCloudinary(file, 'lms-king/videos', {
-      resource_type: 'video',
-      chunk_size: 6000000, // 6MB chunks
-      eager: [
-        { width: 300, height: 300, crop: 'pad', audio_codec: 'none' },
-        { width: 160, height: 100, crop: 'crop', gravity: 'south', audio_codec: 'none' }
-      ],
-      eager_async: true
-    });
+    // Upload to S3
+    const result = await uploadToS3(file, "lms-king/videos");
 
     if (!result.success) {
       cleanupTempFiles(file);
       return res.status(500).json({
-        status: 'error',
-        message: 'Video upload failed',
-        error: result.error
+        status: "error",
+        message: "Video upload failed",
+        error: result.error,
       });
     }
 
     cleanupTempFiles(file);
 
     res.status(200).json({
-      status: 'success',
-      message: 'Video uploaded successfully',
+      status: "success",
+      message: "Video uploaded successfully",
       data: {
         video: {
-          id: result.data.public_id,
-          url: result.data.secure_url,
+          key: result.data.key,
+          url: result.data.url,
           format: result.data.format,
           size: result.data.bytes,
-          duration: result.data.duration
-        }
-      }
+        },
+      },
     });
   } catch (error) {
-    console.error('Upload video error:', error);
+    console.error("Upload video error:", error);
     cleanupTempFiles(req.file);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during video upload'
+      status: "error",
+      message: "Server error during video upload",
     });
   }
 };
@@ -355,61 +365,65 @@ export const uploadDocument = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
-        status: 'error',
-        message: 'No document file provided'
+        status: "error",
+        message: "No document file provided",
       });
     }
 
     const file = req.file;
-    
+
     // Validate file type for document
-    const validation = validateFile(file, [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
-    ], 20 * 1024 * 1024);
-    
+    const validation = validateFile(
+      file,
+      [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+      ],
+      20 * 1024 * 1024
+    );
+
     if (!validation.valid) {
       cleanupTempFiles(file);
       return res.status(400).json({
-        status: 'error',
-        message: validation.error
+        status: "error",
+        message: validation.error,
       });
     }
 
     // Upload to Cloudinary
-    const result = await uploadToCloudinary(file, 'lms-king/documents');
+    const result = await uploadToCloudinary(file, "lms-king/documents");
 
     if (!result.success) {
       cleanupTempFiles(file);
       return res.status(500).json({
-        status: 'error',
-        message: 'Document upload failed',
-        error: result.error
+        status: "error",
+        message: "Document upload failed",
+        error: result.error,
       });
     }
 
     cleanupTempFiles(file);
 
     res.status(200).json({
-      status: 'success',
-      message: 'Document uploaded successfully',
+      status: "success",
+      message: "Document uploaded successfully",
       data: {
         document: {
           id: result.data.public_id,
           url: result.data.secure_url,
           format: result.data.format,
-          size: result.data.bytes
-        }
-      }
+          size: result.data.bytes,
+        },
+      },
     });
   } catch (error) {
-    console.error('Upload document error:', error);
+    console.error("Upload document error:", error);
     cleanupTempFiles(req.file);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during document upload'
+      status: "error",
+      message: "Server error during document upload",
     });
   }
 };
@@ -423,8 +437,8 @@ export const deleteFile = async (req, res) => {
 
     if (!publicId) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Public ID is required'
+        status: "error",
+        message: "Public ID is required",
       });
     }
 
@@ -432,22 +446,22 @@ export const deleteFile = async (req, res) => {
 
     if (!result.success) {
       return res.status(500).json({
-        status: 'error',
-        message: 'File deletion failed',
-        error: result.error
+        status: "error",
+        message: "File deletion failed",
+        error: result.error,
       });
     }
 
     res.status(200).json({
-      status: 'success',
-      message: 'File deleted successfully',
-      data: result.data
+      status: "success",
+      message: "File deleted successfully",
+      data: result.data,
     });
   } catch (error) {
-    console.error('Delete file error:', error);
+    console.error("Delete file error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during file deletion'
+      status: "error",
+      message: "Server error during file deletion",
     });
   }
 };
@@ -461,8 +475,8 @@ export const getFileInfo = async (req, res) => {
 
     if (!publicId) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Public ID is required'
+        status: "error",
+        message: "Public ID is required",
       });
     }
 
@@ -470,23 +484,23 @@ export const getFileInfo = async (req, res) => {
 
     if (!result.success) {
       return res.status(404).json({
-        status: 'error',
-        message: 'File not found',
-        error: result.error
+        status: "error",
+        message: "File not found",
+        error: result.error,
       });
     }
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
-        file: result.data
-      }
+        file: result.data,
+      },
     });
   } catch (error) {
-    console.error('Get file info error:', error);
+    console.error("Get file info error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error while fetching file information'
+      status: "error",
+      message: "Server error while fetching file information",
     });
   }
 };
@@ -501,8 +515,8 @@ export const getOptimizedImage = async (req, res) => {
 
     if (!publicId) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Public ID is required'
+        status: "error",
+        message: "Public ID is required",
       });
     }
 
@@ -515,16 +529,16 @@ export const getOptimizedImage = async (req, res) => {
     const optimizedUrl = getOptimizedImageUrl(publicId, options);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
-        optimized_url: optimizedUrl
-      }
+        optimized_url: optimizedUrl,
+      },
     });
   } catch (error) {
-    console.error('Get optimized image error:', error);
+    console.error("Get optimized image error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error while generating optimized image URL'
+      status: "error",
+      message: "Server error while generating optimized image URL",
     });
   }
 };
@@ -539,26 +553,26 @@ export const listFiles = async (req, res) => {
 
     if (!folder) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Folder name is required'
+        status: "error",
+        message: "Folder name is required",
       });
     }
 
     // This would require Cloudinary Admin API
     // For now, we'll return a placeholder response
     res.status(200).json({
-      status: 'success',
-      message: 'File listing feature requires Cloudinary Admin API setup',
+      status: "success",
+      message: "File listing feature requires Cloudinary Admin API setup",
       data: {
         files: [],
-        next_cursor: null
-      }
+        next_cursor: null,
+      },
     });
   } catch (error) {
-    console.error('List files error:', error);
+    console.error("List files error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error while listing files'
+      status: "error",
+      message: "Server error while listing files",
     });
   }
 };
@@ -573,26 +587,27 @@ export const updateFileMetadata = async (req, res) => {
 
     if (!publicId) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Public ID is required'
+        status: "error",
+        message: "Public ID is required",
       });
     }
 
     // This would require Cloudinary Admin API
     // For now, we'll return a placeholder response
     res.status(200).json({
-      status: 'success',
-      message: 'File metadata update feature requires Cloudinary Admin API setup',
+      status: "success",
+      message:
+        "File metadata update feature requires Cloudinary Admin API setup",
       data: {
         public_id: publicId,
-        updated: false
-      }
+        updated: false,
+      },
     });
   } catch (error) {
-    console.error('Update file metadata error:', error);
+    console.error("Update file metadata error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error while updating file metadata'
+      status: "error",
+      message: "Server error while updating file metadata",
     });
   }
 };
@@ -607,8 +622,8 @@ export const generateThumbnail = async (req, res) => {
 
     if (!publicId) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Public ID is required'
+        status: "error",
+        message: "Public ID is required",
       });
     }
 
@@ -616,24 +631,24 @@ export const generateThumbnail = async (req, res) => {
 
     if (!result.success) {
       return res.status(500).json({
-        status: 'error',
-        message: 'Thumbnail generation failed',
-        error: result.error
+        status: "error",
+        message: "Thumbnail generation failed",
+        error: result.error,
       });
     }
 
     res.status(200).json({
-      status: 'success',
-      message: 'Thumbnail generated successfully',
+      status: "success",
+      message: "Thumbnail generated successfully",
       data: {
-        thumbnail: result.data
-      }
+        thumbnail: result.data,
+      },
     });
   } catch (error) {
-    console.error('Generate thumbnail error:', error);
+    console.error("Generate thumbnail error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error while generating thumbnail'
+      status: "error",
+      message: "Server error while generating thumbnail",
     });
   }
 };
@@ -646,23 +661,23 @@ export const getUploadStats = async (req, res) => {
     // This would require Cloudinary Admin API
     // For now, we'll return a placeholder response
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         total_files: 0,
         total_size: 0,
         files_by_type: {
           images: 0,
           videos: 0,
-          documents: 0
+          documents: 0,
         },
-        message: 'Upload statistics require Cloudinary Admin API setup'
-      }
+        message: "Upload statistics require Cloudinary Admin API setup",
+      },
     });
   } catch (error) {
-    console.error('Get upload stats error:', error);
+    console.error("Get upload stats error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error while fetching upload statistics'
+      status: "error",
+      message: "Server error while fetching upload statistics",
     });
   }
 };

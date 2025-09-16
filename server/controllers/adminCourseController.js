@@ -7,6 +7,11 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
+import {
+  uploadToS3,
+  deleteFromS3,
+  parseKeyFromUrlIfNeeded,
+} from "../utils/s3.js";
 import fs from "fs";
 import path from "path";
 
@@ -176,20 +181,12 @@ export const createCourse = async (req, res) => {
 
     // Thumbnail is optional - no fallback needed
 
-    // Handle video uploads
+    // Handle video uploads (S3)
     if (req.files && req.files.videos) {
       for (const video of req.files.videos) {
-        const videoResult = await uploadToCloudinary(
-          video,
-          "lms-king/courses/videos",
-          {
-            resource_type: "video",
-            chunk_size: 6000000,
-          }
-        );
+        const videoResult = await uploadToS3(video, "lms-king/courses/videos");
         if (videoResult.success) {
-          videoUrls.push(videoResult.data.secure_url);
-          // Delete local file if it exists
+          videoUrls.push(videoResult.data.url);
           if (video.path && fs.existsSync(video.path)) {
             try {
               fs.unlinkSync(video.path);
@@ -333,20 +330,12 @@ export const updateCourse = async (req, res) => {
       thumbnailUrl = imageUrl;
     }
 
-    // Handle new video uploads
+    // Handle new video uploads (S3)
     if (req.files && req.files.videos) {
       for (const video of req.files.videos) {
-        const videoResult = await uploadToCloudinary(
-          video,
-          "lms-king/courses/videos",
-          {
-            resource_type: "video",
-            chunk_size: 6000000,
-          }
-        );
+        const videoResult = await uploadToS3(video, "lms-king/courses/videos");
         if (videoResult.success) {
-          videoUrls.push(videoResult.data.secure_url);
-          // Delete local file
+          videoUrls.push(videoResult.data.url);
           fs.unlinkSync(video.path);
         }
       }
@@ -434,11 +423,18 @@ export const deleteCourse = async (req, res) => {
       await deleteFromCloudinary(`lms-king/courses/thumbnails/${publicId}`);
     }
 
-    // Delete videos from Cloudinary
+    // Delete videos from storage
     for (const videoUrl of course.videos) {
-      if (videoUrl.includes("cloudinary")) {
+      if (typeof videoUrl === "string" && videoUrl.includes("cloudinary")) {
         const publicId = videoUrl.split("/").pop().split(".")[0];
         await deleteFromCloudinary(`lms-king/courses/videos/${publicId}`);
+      } else if (typeof videoUrl === "string") {
+        try {
+          const key = parseKeyFromUrlIfNeeded(videoUrl);
+          await deleteFromS3(key);
+        } catch (e) {
+          console.error("Error deleting from S3:", e);
+        }
       }
     }
 
@@ -523,7 +519,7 @@ export const updateCourseMeetLinks = async (req, res) => {
       const parsedDate = sessionDate ? new Date(sessionDate) : null;
       const parsedDuration = sessionDuration
         ? Number(sessionDuration)
-        : (course.duration || 60);
+        : course.duration || 60;
 
       // Update or create live session (single primary session supported)
       if (liveSessions.length > 0) {
@@ -534,13 +530,20 @@ export const updateCourseMeetLinks = async (req, res) => {
         } else if (!liveSessions[0].date) {
           liveSessions[0].date = new Date();
         }
-        liveSessions[0].duration = !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60);
+        liveSessions[0].duration = !isNaN(parsedDuration)
+          ? parsedDuration
+          : course.duration || 60;
       } else {
         liveSessions = [
           {
             title: course.title,
-            date: parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : new Date(),
-            duration: !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60),
+            date:
+              parsedDate && !isNaN(parsedDate.getTime())
+                ? parsedDate
+                : new Date(),
+            duration: !isNaN(parsedDuration)
+              ? parsedDuration
+              : course.duration || 60,
             meetingLink: meetLink,
           },
         ];
@@ -563,45 +566,56 @@ export const updateCourseMeetLinks = async (req, res) => {
     ).populate("instructor", "firstName lastName email avatar");
 
     // Create notifications for enrolled users when a live class is scheduled
-    if ((isLiveClass === true || isLiveClass === "true") && liveSessions.length > 0) {
+    if (
+      (isLiveClass === true || isLiveClass === "true") &&
+      liveSessions.length > 0
+    ) {
       const targetDate = liveSessions[0].date;
       const durationMin = liveSessions[0].duration;
 
       // Find users enrolled in this course (support both Enrollment model and User.enrolledCourses fallback)
       let userIds = [];
       try {
-        const enrollments = await Enrollment.find({ course: updatedCourse._id }, 'user').populate('user', '_id');
-        userIds = enrollments.map(e => e.user?._id).filter(Boolean);
+        const enrollments = await Enrollment.find(
+          { course: updatedCourse._id },
+          "user"
+        ).populate("user", "_id");
+        userIds = enrollments.map((e) => e.user?._id).filter(Boolean);
       } catch (e) {
         // Fallback to scanning User model embedded enrollments
-        const users = await User.find({ 'enrolledCourses.course': updatedCourse._id }, '_id');
-        userIds = users.map(u => u._id);
+        const users = await User.find(
+          { "enrolledCourses.course": updatedCourse._id },
+          "_id"
+        );
+        userIds = users.map((u) => u._id);
       }
 
       if (userIds.length > 0) {
-        const notifications = userIds.map(uid => ({
+        const notifications = userIds.map((uid) => ({
           user: uid,
-          type: 'live_class_scheduled',
+          type: "live_class_scheduled",
           title: `Live class scheduled: ${updatedCourse.title}`,
-          message: `A live class is scheduled on ${new Date(targetDate).toLocaleString()} for ${durationMin} minutes.`,
+          message: `A live class is scheduled on ${new Date(
+            targetDate
+          ).toLocaleString()} for ${durationMin} minutes.`,
           data: {
             courseId: updatedCourse._id,
             sessionDate: targetDate,
             sessionDuration: durationMin,
-            meetingLink: liveSessions[0].meetingLink
+            meetingLink: liveSessions[0].meetingLink,
           },
-          priority: 'high',
+          priority: "high",
           actionUrl: `/live`,
-          actionText: 'View Live Classes'
+          actionText: "View Live Classes",
         }));
 
         const created = await Notification.insertMany(notifications);
 
         // Emit over Socket.IO if available
-        const io = req.app.get && req.app.get('io');
+        const io = req.app.get && req.app.get("io");
         if (io) {
-          created.forEach(n => {
-            io.to(`user_${n.user}`).emit('new_notification', {
+          created.forEach((n) => {
+            io.to(`user_${n.user}`).emit("new_notification", {
               id: n._id,
               type: n.type,
               title: n.title,
@@ -610,7 +624,7 @@ export const updateCourseMeetLinks = async (req, res) => {
               priority: n.priority,
               actionUrl: n.actionUrl,
               actionText: n.actionText,
-              timestamp: n.createdAt
+              timestamp: n.createdAt,
             });
           });
         }

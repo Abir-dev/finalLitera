@@ -24,6 +24,7 @@ function CourseCard({ course, enrollment }) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
+    if (!course?._id) return;
     navigate(`/dashboard/selected-course/${course._id}`);
   };
 
@@ -41,13 +42,20 @@ function CourseCard({ course, enrollment }) {
 
   const getProgressValue = (enrollment) => {
     // Handle different progress structures
-    if (typeof enrollment.progress === 'number') {
+    if (typeof enrollment.progress === "number") {
       return enrollment.progress;
     }
-    if (enrollment.progress && typeof enrollment.progress === 'object') {
+    if (enrollment.progress && typeof enrollment.progress === "object") {
       // User model structure: progress.completedVideos / progress.totalVideos
-      if (enrollment.progress.completedVideos && enrollment.progress.totalVideos) {
-        return Math.round((enrollment.progress.completedVideos / enrollment.progress.totalVideos) * 100);
+      if (
+        enrollment.progress.completedVideos &&
+        enrollment.progress.totalVideos
+      ) {
+        return Math.round(
+          (enrollment.progress.completedVideos /
+            enrollment.progress.totalVideos) *
+            100
+        );
       }
     }
     return 0;
@@ -60,33 +68,34 @@ function CourseCard({ course, enrollment }) {
     >
       <div className="w-full h-36 bg-slate-200 rounded-lg mb-3 overflow-hidden">
         <img
-          src={course.thumbnail || "/src/assets/courses1.jpg"}
-          alt={course.title}
+          src={course?.thumbnail || "/src/assets/courses1.jpg"}
+          alt={course?.title || "Course thumbnail"}
           className="w-full h-full object-cover"
         />
       </div>
 
       <div className="space-y-2">
         <h3 className="text-sm font-semibold text-slate-900 line-clamp-2">
-          {course.title}
+          {course?.title || "Untitled course"}
         </h3>
 
         <div className="flex items-center space-x-2 text-xs text-slate-600">
           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-            {course.level || "Beginner"}
+            {course?.level || "Beginner"}
           </span>
           <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full">
-            {course.category || "General"}
+            {course?.category || "General"}
           </span>
         </div>
 
         <p className="text-xs text-indigo-600">
-          By {course.instructor?.firstName} {course.instructor?.lastName}
+          By {course?.instructor?.firstName || ""}{" "}
+          {course?.instructor?.lastName || ""}
         </p>
 
         <div className="text-xs text-slate-500">
-          <p>Enrolled: {formatDate(enrollment.enrolledAt)}</p>
-          <p>Last accessed: {formatDate(enrollment.lastAccessed)}</p>
+          <p>Enrolled: {formatDate(enrollment?.enrolledAt)}</p>
+          <p>Last accessed: {formatDate(enrollment?.lastAccessed)}</p>
         </div>
       </div>
 
@@ -246,7 +255,9 @@ export default function Subscription() {
     if (filters.progress !== "all") {
       switch (filters.progress) {
         case "not-started":
-          filtered = filtered.filter((course) => getProgressValue(course) === 0);
+          filtered = filtered.filter(
+            (course) => getProgressValue(course) === 0
+          );
           break;
         case "in-progress":
           filtered = filtered.filter(

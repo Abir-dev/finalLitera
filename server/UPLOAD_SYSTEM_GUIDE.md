@@ -2,12 +2,13 @@
 
 ## Overview
 
-The LMS-kinG backend now includes a comprehensive file upload system powered by Cloudinary and Multer. This system supports uploading images, videos, documents, and other file types with proper validation, storage, and management.
+The LMS-kinG backend includes a comprehensive file upload system powered by Cloudinary (images/documents) and Amazon S3 (videos) with Multer for ingestion. This system supports uploading images, videos, documents, and other file types with proper validation, storage, and management.
 
 ## Features
 
 - ✅ **Multiple File Types**: Images, videos, documents, avatars, thumbnails
-- ✅ **Cloudinary Integration**: Cloud storage with CDN and transformations
+- ✅ **Cloudinary Integration**: Cloud storage with CDN and transformations (images/documents)
+- ✅ **Amazon S3 for Videos**: Durable storage and public delivery for course videos
 - ✅ **File Validation**: Type, size, and format validation
 - ✅ **Security**: Authentication and authorization for uploads
 - ✅ **File Management**: Delete, update metadata, get file info
@@ -21,10 +22,16 @@ The LMS-kinG backend now includes a comprehensive file upload system powered by 
 Add these to your `.env` file:
 
 ```env
-# Cloudinary Configuration
+# Cloudinary Configuration (images/documents)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Amazon S3 Configuration (videos)
+AWS_REGION=ap-south-1
+S3_BUCKET_NAME=your_bucket
+# Optional: if using CloudFront or custom domain for the bucket
+S3_PUBLIC_BASE_URL=https://your-distribution-or-bucket.s3.ap-south-1.amazonaws.com
 
 # File Upload Configuration
 MAX_FILE_SIZE=10485760  # 10MB
@@ -42,6 +49,7 @@ UPLOAD_PATH=./uploads
 ### Upload Endpoints
 
 #### Upload Single File
+
 ```http
 POST /api/upload/single
 Content-Type: multipart/form-data
@@ -54,6 +62,7 @@ Body:
 ```
 
 #### Upload Multiple Files
+
 ```http
 POST /api/upload/multiple
 Content-Type: multipart/form-data
@@ -65,6 +74,7 @@ Body:
 ```
 
 #### Upload Avatar
+
 ```http
 POST /api/upload/avatar
 Content-Type: multipart/form-data
@@ -75,6 +85,7 @@ Body:
 ```
 
 #### Upload Course Thumbnail
+
 ```http
 POST /api/upload/thumbnail
 Content-Type: multipart/form-data
@@ -86,6 +97,7 @@ Body:
 ```
 
 #### Upload Course Video
+
 ```http
 POST /api/upload/video
 Content-Type: multipart/form-data
@@ -97,6 +109,7 @@ Body:
 ```
 
 #### Upload Document
+
 ```http
 POST /api/upload/document
 Content-Type: multipart/form-data
@@ -109,29 +122,34 @@ Body:
 ### File Management Endpoints
 
 #### Delete File
+
 ```http
 DELETE /api/upload/:publicId
 Authorization: Bearer <token>
 ```
 
 #### Get File Information
+
 ```http
 GET /api/upload/:publicId/info
 Authorization: Bearer <token>
 ```
 
 #### Get Optimized Image URL
+
 ```http
 GET /api/upload/:publicId/optimized?width=300&height=200&quality=auto
 ```
 
 #### List Files in Folder
+
 ```http
 GET /api/upload/list/:folder?maxResults=50&nextCursor=<cursor>
 Authorization: Bearer <token>
 ```
 
 #### Update File Metadata
+
 ```http
 PUT /api/upload/:publicId
 Authorization: Bearer <token>
@@ -147,6 +165,7 @@ Body:
 ```
 
 #### Generate Video Thumbnail
+
 ```http
 POST /api/upload/:publicId/thumbnail
 Authorization: Bearer <token>
@@ -159,6 +178,7 @@ Body:
 ```
 
 #### Get Upload Statistics
+
 ```http
 GET /api/upload/stats
 Authorization: Bearer <token>
@@ -170,16 +190,19 @@ Role: admin
 ### Supported File Types
 
 #### Images
+
 - **Types**: JPEG, JPG, PNG, GIF, WebP
 - **Max Size**: 5MB
 - **Use Cases**: Avatars, thumbnails, course images
 
 #### Videos
+
 - **Types**: MP4, AVI, MOV, WMV, WebM
 - **Max Size**: 100MB
 - **Use Cases**: Course videos, lesson content
 
 #### Documents
+
 - **Types**: PDF, DOC, DOCX, TXT
 - **Max Size**: 20MB
 - **Use Cases**: Course materials, assignments
@@ -187,6 +210,7 @@ Role: admin
 ### File Organization
 
 Files are organized in Cloudinary folders:
+
 - `lms-king/avatars/` - User profile pictures
 - `lms-king/thumbnails/` - Course thumbnails
 - `lms-king/videos/` - Course videos
@@ -198,44 +222,47 @@ Files are organized in Cloudinary folders:
 ### Frontend Integration
 
 #### Upload Avatar (React)
+
 ```javascript
 const uploadAvatar = async (file) => {
   const formData = new FormData();
-  formData.append('avatar', file);
-  
-  const response = await fetch('/api/upload/avatar', {
-    method: 'POST',
+  formData.append("avatar", file);
+
+  const response = await fetch("/api/upload/avatar", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
-    body: formData
+    body: formData,
   });
-  
+
   const result = await response.json();
   return result.data.avatar;
 };
 ```
 
 #### Upload Course Thumbnail (Admin Only)
+
 ```javascript
 const uploadThumbnail = async (file) => {
   const formData = new FormData();
-  formData.append('thumbnail', file);
-  
-  const response = await fetch('/api/upload/thumbnail', {
-    method: 'POST',
+  formData.append("thumbnail", file);
+
+  const response = await fetch("/api/upload/thumbnail", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${adminToken}`
+      Authorization: `Bearer ${adminToken}`,
     },
-    body: formData
+    body: formData,
   });
-  
+
   const result = await response.json();
   return result.data.thumbnail;
 };
 ```
 
 #### Get Optimized Image
+
 ```javascript
 const getOptimizedImage = (publicId, width = 300, height = 200) => {
   return `https://res.cloudinary.com/${cloudName}/image/upload/w_${width},h_${height},c_fill,q_auto,f_auto/${publicId}`;
@@ -245,24 +272,25 @@ const getOptimizedImage = (publicId, width = 300, height = 200) => {
 ### Backend Integration
 
 #### Update User Avatar
+
 ```javascript
 // In userController.js
 export const updateUserAvatar = async (req, res) => {
   try {
     const { publicId, url } = req.body;
-    
+
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { 
+      {
         avatar: url,
-        avatarFile: publicId 
+        avatarFile: publicId,
       },
       { new: true }
     );
-    
-    res.json({ status: 'success', data: { user } });
+
+    res.json({ status: "success", data: { user } });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: "error", message: error.message });
   }
 };
 ```
@@ -272,6 +300,7 @@ export const updateUserAvatar = async (req, res) => {
 ### Common Errors
 
 #### File Too Large
+
 ```json
 {
   "status": "error",
@@ -280,6 +309,7 @@ export const updateUserAvatar = async (req, res) => {
 ```
 
 #### Invalid File Type
+
 ```json
 {
   "status": "error",
@@ -288,6 +318,7 @@ export const updateUserAvatar = async (req, res) => {
 ```
 
 #### Upload Failed
+
 ```json
 {
   "status": "error",
@@ -314,6 +345,7 @@ export const updateUserAvatar = async (req, res) => {
 ## Monitoring and Analytics
 
 The system tracks:
+
 - File upload statistics
 - File access patterns
 - Storage usage
@@ -324,10 +356,12 @@ The system tracks:
 ### Common Issues
 
 1. **Cloudinary Configuration Error**
+
    - Check environment variables
    - Verify Cloudinary credentials
 
 2. **File Upload Fails**
+
    - Check file size and type
    - Verify network connection
    - Check server logs
@@ -339,6 +373,7 @@ The system tracks:
 ### Debug Mode
 
 Enable debug logging by setting:
+
 ```env
 NODE_ENV=development
 ```
@@ -355,6 +390,7 @@ NODE_ENV=development
 ## Support
 
 For issues or questions about the file upload system:
+
 1. Check the server logs
 2. Verify Cloudinary configuration
 3. Test with smaller files first
