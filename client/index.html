@@ -28,6 +28,20 @@
     ></script>
     <title>LITERA - Learning Made Easy!</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      // Reveal animation on scroll
+      document.addEventListener('DOMContentLoaded', function() {
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('show');
+            }
+          });
+        }, { threshold: 0.1 });
+        reveals.forEach(reveal => observer.observe(reveal));
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

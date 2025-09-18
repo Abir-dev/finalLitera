@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import profileService from "../services/profileService.js";
+import { User, BookOpen, CheckCircle, Award, TrendingUp, Link, Settings, Lock, Mail, Globe, Github, Twitter } from "lucide-react";
 
 const brand = { blue: "#18457A" };
 
@@ -261,102 +262,107 @@ export default function Profile() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       {/* Header with Real-time Stats */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white mb-8">
+      <div className="card-premium p-8 mb-8" style={{ background: 'linear-gradient(135deg, var(--brand-strong), var(--brand))', color: 'white' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
-            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)' }}>
               <img 
                 src={user?.avatar || "/icons/profile.svg"} 
                 alt="Profile" 
-                className="w-16 h-16 rounded-full border-2 border-white/30"
+                className="w-16 h-16 rounded-full border-2"
+                style={{ borderColor: 'rgba(255,255,255,0.3)' }}
               />
             </div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">
+              <h1 className="text-3xl font-bold mb-2 text-white">
                 {form.firstName} {form.lastName}
               </h1>
-              <p className="text-blue-100 text-lg">{form.email}</p>
-              <p className="text-blue-200 text-sm">
+              <p className="text-white/80 text-lg">{form.email}</p>
+              <p className="text-white/60 text-sm">
                 Member since {new Date(user?.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold">{stats?.enrolledCourses || 0}</div>
-            <div className="text-blue-200 text-sm">Enrolled Courses</div>
+            <div className="text-2xl font-bold text-white">{stats?.enrolledCourses || 0}</div>
+            <div className="text-white/60 text-sm">Enrolled Courses</div>
           </div>
         </div>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Active Courses</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.enrolledCourses || 0}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Active Courses</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.enrolledCourses || 0}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">📚</span>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
+              <BookOpen size={20} style={{ color: 'var(--brand)' }} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.completedCourses || 0}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Completed</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.completedCourses || 0}</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">✅</span>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)', border: '1px solid var(--accent-gold)30' }}>
+              <CheckCircle size={20} style={{ color: 'var(--accent-gold)' }} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Certificates</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.certificates || 0}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Certificates</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.certificates || 0}</p>
             </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">🏆</span>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
+              <Award size={20} style={{ color: 'var(--accent-rose)' }} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Avg Progress</p>
-              <p className="text-2xl font-bold text-gray-900">{stats?.averageProgress || 0}%</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Avg Progress</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.averageProgress || 0}%</p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">📈</span>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)', border: '1px solid var(--brand-strong)30' }}>
+              <TrendingUp size={20} style={{ color: 'var(--brand-strong)' }} />
             </div>
           </div>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-xl shadow-sm border mb-6">
+      <div className="card-premium mb-6">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             {[
-              { id: 'personal', label: 'Personal Info', icon: '👤' },
-              { id: 'social', label: 'Social Links', icon: '🔗' },
-              { id: 'preferences', label: 'Preferences', icon: '⚙️' },
-              { id: 'security', label: 'Security', icon: '🔒' }
+              { id: 'personal', label: 'Personal Info', icon: <User size={16} style={{ color: 'var(--brand)' }} /> },
+              { id: 'social', label: 'Social Links', icon: <Link size={16} style={{ color: 'var(--brand)' }} /> },
+              { id: 'preferences', label: 'Preferences', icon: <Settings size={16} style={{ color: 'var(--brand)' }} /> },
+              { id: 'security', label: 'Security', icon: <Lock size={16} style={{ color: 'var(--brand)' }} /> }
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-300 ${
                   activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent hover:text-brand hover:border-brand/30'
                 }`}
+                style={{ 
+                  borderBottomColor: activeTab === tab.id ? 'var(--brand)' : 'transparent',
+                  color: activeTab === tab.id ? 'var(--brand)' : 'var(--text-secondary)'
+                }}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.label}
@@ -367,14 +373,14 @@ export default function Profile() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-xl shadow-sm border p-6">
+      <div className="card-premium p-6">
         {activeTab === 'personal' && (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Personal Information</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   First Name
                 </label>
                 <input
@@ -382,12 +388,12 @@ export default function Profile() {
                   name="firstName"
                   value={form.firstName}
                   onChange={onChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-premium"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   Last Name
                 </label>
                 <input
@@ -395,13 +401,13 @@ export default function Profile() {
                   name="lastName"
                   value={form.lastName}
                   onChange={onChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-premium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                 Email Address
               </label>
               <input
@@ -409,12 +415,12 @@ export default function Profile() {
                 name="email"
                 value={form.email}
                 onChange={onChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="input-premium"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                 Bio
               </label>
               <textarea
@@ -422,7 +428,7 @@ export default function Profile() {
                 value={form.profile.bio}
                 onChange={onChange}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="input-premium"
                 placeholder="Tell us about yourself..."
               />
             </div>
@@ -431,11 +437,11 @@ export default function Profile() {
 
         {activeTab === 'social' && (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Links</h3>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Social Links</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   Website
                 </label>
                 <input
@@ -443,13 +449,13 @@ export default function Profile() {
                   name="profile.socialLinks.website"
                   value={form.profile.socialLinks.website}
                   onChange={onChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-premium"
                   placeholder="https://yourwebsite.com"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   LinkedIn
                 </label>
                 <input
@@ -457,13 +463,13 @@ export default function Profile() {
                   name="profile.socialLinks.linkedin"
                   value={form.profile.socialLinks.linkedin}
                   onChange={onChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-premium"
                   placeholder="https://linkedin.com/in/yourprofile"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   GitHub
                 </label>
                 <input
@@ -471,13 +477,13 @@ export default function Profile() {
                   name="profile.socialLinks.github"
                   value={form.profile.socialLinks.github}
                   onChange={onChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-premium"
                   placeholder="https://github.com/yourusername"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                   Twitter
                 </label>
                 <input
@@ -485,7 +491,7 @@ export default function Profile() {
                   name="profile.socialLinks.twitter"
                   value={form.profile.socialLinks.twitter}
                   onChange={onChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="input-premium"
                   placeholder="https://twitter.com/yourusername"
                 />
               </div>
@@ -495,13 +501,13 @@ export default function Profile() {
 
         {activeTab === 'preferences' && (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Notification Preferences</h3>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Email Notifications</label>
-                  <p className="text-sm text-gray-500">Receive notifications via email</p>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Email Notifications</label>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Receive notifications via email</p>
                 </div>
                 <input
                   type="checkbox"
@@ -514,8 +520,8 @@ export default function Profile() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Push Notifications</label>
-                  <p className="text-sm text-gray-500">Receive push notifications in browser</p>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Push Notifications</label>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Receive push notifications in browser</p>
                 </div>
                 <input
                   type="checkbox"
@@ -542,8 +548,8 @@ export default function Profile() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Marketing Emails</label>
-                  <p className="text-sm text-gray-500">Receive promotional content and offers</p>
+                  <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Marketing Emails</label>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Receive promotional content and offers</p>
                 </div>
                 <input
                   type="checkbox"
@@ -559,24 +565,24 @@ export default function Profile() {
 
         {activeTab === 'security' && (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Settings</h3>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Security Settings</h3>
             
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+            <div className="card-premium p-4" style={{ background: 'linear-gradient(135deg, var(--accent-gold)10, var(--accent-gold)5)', border: '1px solid var(--accent-gold)30' }}>
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <span className="text-yellow-400">⚠️</span>
+                  <Lock size={20} style={{ color: 'var(--accent-gold)' }} />
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-yellow-800">
+                  <h3 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     Password Security
                   </h3>
-                  <div className="mt-2 text-sm text-yellow-700">
+                  <div className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                     <p>Keep your account secure by regularly updating your password.</p>
                   </div>
                   <div className="mt-4">
                     <button
                       onClick={() => setShowPasswordModal(true)}
-                      className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-yellow-200 transition-colors"
+                      className="btn-premium px-4 py-2 text-sm font-medium"
                     >
                       Change Password
                     </button>
@@ -585,16 +591,16 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+            <div className="card-premium p-4" style={{ background: 'linear-gradient(135deg, var(--brand)10, var(--brand)5)', border: '1px solid var(--brand)30' }}>
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <span className="text-blue-400">ℹ️</span>
+                  <User size={20} style={{ color: 'var(--brand)' }} />
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-800">
+                  <h3 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                     Account Information
                   </h3>
-                  <div className="mt-2 text-sm text-blue-700">
+                  <div className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                     <p>Account created: {new Date(user?.createdAt).toLocaleDateString()}</p>
                     <p>Last updated: {new Date(user?.updatedAt).toLocaleDateString()}</p>
                   </div>
@@ -609,7 +615,7 @@ export default function Profile() {
           <button
             onClick={handleSaveProfile}
             disabled={saving}
-            className="bg-indigo-600 text-white px-6 py-2 rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-premium px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
@@ -619,44 +625,44 @@ export default function Profile() {
       {/* Password Change Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md card-premium">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+              <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Change Password</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                     Current Password
                   </label>
                   <input
                     type="password"
                     value={passwordForm.currentPassword}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="input-premium"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                     New Password
                   </label>
                   <input
                     type="password"
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="input-premium"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
                     Confirm New Password
                   </label>
                   <input
                     type="password"
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="input-premium"
                   />
                 </div>
               </div>
@@ -664,14 +670,14 @@ export default function Profile() {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowPasswordModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                  className="btn-outline-premium px-4 py-2"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleChangePassword}
                   disabled={saving}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                  className="btn-premium px-4 py-2 disabled:opacity-50"
                 >
                   {saving ? 'Changing...' : 'Change Password'}
                 </button>

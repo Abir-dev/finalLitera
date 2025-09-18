@@ -3,6 +3,7 @@ import StatCard from "../components/StatCard.jsx";
 import CourseCard from "../components/CourseCard.jsx";
 import { useEffect, useState } from "react";
 import TestimonialCard from "../components/TestimonialCard.jsx";
+import RevealOnScroll from "../components/RevealOnScroll.jsx";
 import { Link } from "react-router-dom";
 import pic5 from "../assets/pic5.png";
 import pic6 from "../assets/pic6.png";
@@ -38,59 +39,122 @@ export default function Home() {
   }, []);
   return (
     <div>
-      {/* Hero */}
-      <section className="bg-white">
-        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center py-5 md:py-5">
-          <div>
-            <h1 className="text-4xl md:text-8xl font-extrabold leading-tight text-[#1B4A8B]">
-              LITERA
-            </h1>
-            <p className="mt-6 text-lg md:text-2xl font-semibold leading-relaxed text-slate-700 tracking-wide">
-              Welcome to{" "}
-              <span className="text-indigo-600">the best platform</span>{" "}
-              designed to empower your learning journey. <br />
-              Discover a wide range of{" "}
-              <span className="text-teal-600">special courses</span>
-              tailored to your goals and interests. <br />
-              Enroll today and take the next step toward
-              <span className="text-rose-600">skill development</span> and
-              success.
-            </p>
+      {/* Premium Hero Section */}
+      <section className="relative overflow-hidden min-h-screen flex items-center">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse-float"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse-float animation-delay-2000"></div>
+          <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-pulse-float animation-delay-1000"></div>
+        </div>
 
-            <div className="mt-6">
-              <Link
-                to="/courses"
-                className="inline-flex rounded-full border-2 border-[#1B4A8B] bg-white text-[#1B4A8B] font-semibold px-6 py-3 shadow 
-                      hover:bg-[#1B4A8B] hover:text-white hover:border-transparent transition-colors duration-300"
-              >
-                Enroll Your Courses
-              </Link>
-            </div>
-            {/* <div className="mt-8">
-               <h3 className="text-center text-xl font-extrabold tracking-wide text-slate-800 mb-6">
-                 Why Choose LITERA?
-               </h3>
-               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                 <StatCard
-                   icon="🎥"
-                   title="Daily Live"
-                   desc="Interactive classes"
-                 />
-                 <StatCard icon="⏱️" title="24/7" desc="Doubt solving support" />
-                 <StatCard
-                   icon="📊"
-                   title="1 Million+"
-                   desc="Tests, reports & more"
-                 />
-                 <StatCard icon="🖥️" title="20+" desc="Online courses" />
-               </div>
-             </div> */}
-          </div>
-          <div className="relative">
-            <div className="absolute -top-6 -right-6 w-40 h-40 bg-amber-100 rounded-full -z-10" />
-            <div className="rounded-2xl overflow-hidden">
-              <img src={pic5} alt="Student" className="w-[481px] h-[381px] " />
-            </div>
+        <div className="container-premium relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center py-20">
+            {/* Left Content */}
+            <RevealOnScroll direction="left" delay={200}>
+              {/* Premium Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full mb-8">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-white">Premium Learning Platform</span>
+              </div>
+
+              <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
+                Transform Your Future with{" "}
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  LITERA
+                </span>
+              </h1>
+              
+              <p className="text-xl leading-relaxed text-gray-300 mb-10 max-w-2xl">
+                Welcome to the <span className="text-blue-400 font-semibold">premium platform</span> designed to elevate your learning journey. 
+                Discover our curated collection of <span className="text-yellow-400 font-semibold">expert-led courses</span> tailored to your professional goals. 
+                Begin your transformation toward <span className="text-pink-400 font-semibold">mastery and success</span> today.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                <Link
+                  to="/courses"
+                  className="btn-premium btn-lg group"
+                >
+                  <span>Explore Courses</span>
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  to="/launchpad"
+                  className="btn-outline-premium btn-lg"
+                >
+                  View LaunchPad
+                </Link>
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="flex items-center gap-8 text-sm text-gray-400">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <span className="text-green-400 text-xs">✓</span>
+                  </div>
+                  <span>10,000+ Students</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <span className="text-blue-400 text-xs">★</span>
+                  </div>
+                  <span>4.9/5 Rating</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+                    <span className="text-purple-400 text-xs">🏆</span>
+                  </div>
+                  <span>50+ Courses</span>
+                </div>
+              </div>
+            </RevealOnScroll>
+
+            {/* Right Content - Hero Image */}
+            <RevealOnScroll direction="right" delay={400}>
+              {/* Floating Elements */}
+              <div className="absolute -top-8 -right-8 w-48 h-48 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-float"></div>
+              <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-gradient-to-br from-pink-500/20 to-yellow-500/20 rounded-full blur-2xl animate-float animation-delay-1000"></div>
+              
+              {/* Main Image Container */}
+              <div className="relative">
+                <div className="card-premium p-4 group hover-lift">
+                  <img 
+                    src={pic5} 
+                    alt="Student Learning" 
+                    className="w-full h-auto rounded-2xl group-hover:scale-105 transition-transform duration-700" 
+                  />
+                  
+                  {/* Floating Stats Cards */}
+                  <div className="absolute -top-4 -left-4 card-glass p-4 animate-float">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">✓</span>
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-white">95%</div>
+                        <div className="text-xs text-gray-400">Success Rate</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="absolute -bottom-4 -right-4 card-glass p-4 animate-float animation-delay-1000">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">📚</span>
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-white">24/7</div>
+                        <div className="text-xs text-gray-400">Support</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </RevealOnScroll>
           </div>
         </div>
       </section>
@@ -98,24 +162,23 @@ export default function Home() {
       <StatCard />
 
       {/* Explore Courses section */}
-      <section className="py-12 md:py-8 bg-white">
+      <section className="py-16 md:py-20">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-center text-5xl font-extrabold tracking-wide text-[#1B4A8B]">
-            Explore Our Courses
-          </h2>
-          <p className="mt-2 text-center text-lg text-slate-500">
-            From Beginner to advanced , in all industries , we have the right
-            courses just for you and
-            <br /> preparing your entire journey for learning and making the
-            most
-          </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+              Explore Our Courses
+            </h2>
+            <p className="text-lg md:text-xl leading-relaxed max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              From beginner to expert level, across all industries, we curate the perfect learning path for your professional growth and success.
+            </p>
+          </div>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            {["New Beginners", "Intermediate", "Advanced", "Data Science"].map(
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
+            {["Beginner", "Intermediate", "Advanced", "Expert"].map(
               (t) => (
                 <button
                   key={t}
-                  className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-indigo-500 hover:text-indigo-700"
+                  className="btn-outline-premium px-6 py-3 text-sm font-semibold rounded-full hover:scale-105 transition-all duration-300"
                 >
                   {t}
                 </button>
@@ -123,7 +186,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredCourses.length > 0 ? (
               featuredCourses.map((c) => (
                 <CourseCard
@@ -188,119 +251,153 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Coaching by Skilled Advisors */}
-      <section className="py-12 md:py-8 bg-white">
-        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
-          <div className="relative">
-            <div className="absolute -left-6 -bottom-6 w-40 h-40 bg-indigo-100 rounded-full -z-10" />
-            <img
-              src={pic6}
-              alt="Mentor"
-            // className="rounded-2xl shadow-lg"
-            />
+      {/* Expert Coaching Section */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
+          <div className="relative reveal">
+            <div className="absolute -left-8 -bottom-8 w-48 h-48 rounded-full opacity-15 blur-3xl" style={{ background: 'linear-gradient(135deg, var(--brand), var(--accent-rose))' }} />
+            <div className="card-premium p-4">
+              <img
+                src={pic6}
+                alt="Expert Mentor"
+                className="w-full h-auto rounded-xl"
+              />
+            </div>
           </div>
-          <div>
-            <h3 className="text-5xl font-extrabold text-[#1B4A8B]">
-              We offering Coaching by Skilled Advisors
+          <div className="reveal">
+            <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+              Expert Coaching by Industry Leaders
             </h3>
-            <p className="mt-3 text-slate-600">
-              From Beginner to advanced , in all industries , we have the right
-              courses just for you and preparing your entire journey for
-              learning and making the most
+            <p className="text-lg leading-relaxed mb-8" style={{ color: 'var(--text-secondary)' }}>
+              From beginner to expert level, across all industries, we provide the perfect learning path tailored to your professional goals and career aspirations.
             </p>
 
-            <ul className="mt-5 grid sm:grid-cols-2 gap-4">
-              <li className="flex gap-3">
-                <span className="text-[#1B4A8B]">
-                  <BiSolidCheckCircle />
-                </span>
-                <div>
-                  <div className="font-semibold text-slate-800">
-                    PERSONALIZED LEARNING
-                  </div>
-                  <p className="text-sm text-slate-600">
-                    Offer tailor learning experiences through AI and machine
-                    learning to cater to individual students' needs.
-                  </p>
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="card-premium p-6 group hover:scale-105 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl mb-4 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
+                  <BiSolidCheckCircle size={24} style={{ color: 'var(--brand)' }} />
                 </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-[#1B4A8B]">
-                  <BiSolidCheckCircle />
-                </span>
-                <div>
-                  <div className="font-semibold text-slate-800">
-                    INNOVATIVE TECHNOLOGY
-                  </div>
-                  <p className="text-sm text-slate-600">
-                    Utilize cutting-edge technology, such as augmented reality
-                    or virtual reality, to create immersive learning
-                    experiences.
-                  </p>
+                <h4 className="text-lg font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+                  Personalized Learning
+                </h4>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  Tailored learning experiences through AI and machine learning to cater to individual students' unique needs and learning styles.
+                </p>
+              </div>
+              
+              <div className="card-premium p-6 group hover:scale-105 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl mb-4 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
+                  <BiSolidCheckCircle size={24} style={{ color: 'var(--accent-rose)' }} />
                 </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-[#1B4A8B]">
-                  <BiSolidCheckCircle />
-                </span>
-                <div>
-                  <div className="font-semibold text-slate-800">
-                    ANALYTICS AND INSIGHTS
-                  </div>
-                  <p className="text-sm text-slate-600">
-                    Offer detailed progress tracking and analytics to help
-                    students and teachers monitor performance and make
-                    data-driven decisions.
-                  </p>
+                <h4 className="text-lg font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+                  Innovative Technology
+                </h4>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  Cutting-edge technology including augmented reality and virtual reality to create immersive and engaging learning experiences.
+                </p>
+              </div>
+              
+              <div className="card-premium p-6 group hover:scale-105 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl mb-4 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)', border: '1px solid var(--accent-gold)30' }}>
+                  <BiSolidCheckCircle size={24} style={{ color: 'var(--accent-gold)' }} />
                 </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-[#1B4A8B]">
-                  <BiSolidCheckCircle />
-                </span>
-                <div>
-                  <div className="font-semibold text-slate-800">
-                    INDUSTRY PARTNERSHIPS
-                  </div>
-                  <p className="text-sm text-slate-600">
-                    Collaborate with well-known companies and institutions to
-                    offer accredited courses and certifications, adding
-                    credibility to your offerings.
-                  </p>
+                <h4 className="text-lg font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+                  Analytics & Insights
+                </h4>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  Comprehensive progress tracking and analytics to help students and instructors monitor performance and make data-driven decisions.
+                </p>
+              </div>
+              
+              <div className="card-premium p-6 group hover:scale-105 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl mb-4 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)', border: '1px solid var(--brand-strong)30' }}>
+                  <BiSolidCheckCircle size={24} style={{ color: 'var(--brand-strong)' }} />
                 </div>
-              </li>
-            </ul>
+                <h4 className="text-lg font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+                  Industry Partnerships
+                </h4>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  Strategic collaborations with leading companies and institutions to offer accredited courses and certifications that add credibility to your profile.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Positive Impact / Testimonials */}
-      <section className="py-12 md:py-16 bg-white">
+      {/* Success Stories / Testimonials */}
+      <section className="py-16 md:py-20">
         <div className="max-w-6xl mx-auto px-4">
-          <h3 className="text-center text-5xl font-extrabold text-[#1B4A8B]">
-            Our Positive Impact
-          </h3>
-          <p className="mt-2 text-center text-xl text-slate-600">
-            We have collected some testimonials from our users. They are real
-            people who have used our product.
-          </p>
-          <div className="mt-8 grid md:grid-cols-3 gap-5">
-          <TestimonialCard
-              quote="Very nice courses at best price .. value for money .. trust worthy.."
-              name="swapnamoy Ghosh"
-              
+          <div className="text-center mb-12">
+            <h3 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+              Success Stories
+            </h3>
+            <p className="text-lg md:text-xl leading-relaxed max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              Hear from our students who have transformed their careers and achieved their professional goals with LITERA.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <TestimonialCard
+              quote="Exceptional courses at competitive prices. The value for money is outstanding, and the platform is completely trustworthy."
+              name="Swapnamoy Ghosh"
+              role="Software Developer"
             />
             <TestimonialCard
-              quote="I had a great experience while attending consultation...Thank you 🙂"
+              quote="I had an amazing experience during the consultation sessions. The mentors are incredibly knowledgeable and supportive."
               name="Bhaskar Ghosh"
-             
+              role="Data Analyst"
             />
             <TestimonialCard
-              quote="Best courses at Best price ❤"
+              quote="Premium courses at the best prices. The quality of education here is unmatched in the industry."
               name="Nilesh Dubey"
-              
+              role="Full Stack Developer"
             />
+          </div>
+        </div>
+      </section>
 
+      {/* Premium CTA Section */}
+      <section className="py-16 md:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent" style={{ background: 'radial-gradient(800px 400px at 50% 50%, rgba(79,140,255,0.1), transparent 60%)' }}></div>
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+          <div className="card-premium p-12 md:p-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+              Ready to Transform Your Career?
+            </h2>
+            <p className="text-lg md:text-xl leading-relaxed mb-8 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              Join thousands of professionals who have already started their journey to success with our premium courses and expert mentorship.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                to="/courses"
+                className="btn-premium px-8 py-4 text-lg font-semibold"
+              >
+                Start Learning Today
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+              <Link
+                to="/launchpad"
+                className="btn-outline-premium px-8 py-4 text-lg font-semibold"
+              >
+                Explore LaunchPad
+              </Link>
+            </div>
+            <div className="mt-8 flex items-center justify-center gap-8 text-sm" style={{ color: 'var(--text-muted)' }}>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--brand)' }}></div>
+                <span>10,000+ Students</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent-gold)' }}></div>
+                <span>95% Success Rate</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent-rose)' }}></div>
+                <span>24/7 Support</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

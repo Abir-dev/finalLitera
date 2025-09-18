@@ -300,10 +300,10 @@ export default function AlgoBridge() {
     })();
   }, []);
 
-  const contests = useMemo(
-    () => [
+  // Dynamic contest generation with premium content
+  const generateDynamicContests = () => {
+    const contestTemplates = [
       {
-        id: 1,
         title: "Winter Coding Championship 2024",
         description: "Annual competitive programming contest with exciting prizes and global recognition. Test your skills against the best programmers worldwide.",
         participants: 1250,
@@ -313,10 +313,11 @@ export default function AlgoBridge() {
         isLive: true,
         category: "Championship",
         difficulty: "Expert",
-        duration: "4 hours"
+        duration: "4 hours",
+        sponsors: ["Google", "Microsoft", "Amazon"],
+        languages: ["C++", "Java", "Python", "JavaScript"]
       },
       {
-        id: 2,
         title: "Algorithm Master Challenge",
         description: "Intensive algorithmic thinking contest with complex problem sets. Push your limits and discover new problem-solving approaches.",
         participants: 890,
@@ -326,10 +327,11 @@ export default function AlgoBridge() {
         isLive: false,
         category: "Challenge",
         difficulty: "Hard",
-        duration: "4 hours"
+        duration: "4 hours",
+        sponsors: ["Meta", "Netflix"],
+        languages: ["C++", "Python", "Go"]
       },
       {
-        id: 3,
         title: "Data Structures Sprint",
         description: "Fast-paced contest focusing on data structure implementation and optimization. Speed and accuracy matter in this exciting challenge.",
         participants: 650,
@@ -339,10 +341,11 @@ export default function AlgoBridge() {
         isLive: false,
         category: "Sprint",
         difficulty: "Medium",
-        duration: "2 hours"
+        duration: "2 hours",
+        sponsors: ["Uber", "Airbnb"],
+        languages: ["C++", "Java", "Python"]
       },
       {
-        id: 4,
         title: "Mathematics in Programming",
         description: "Unique contest combining mathematical concepts with programming. Solve complex mathematical problems using algorithmic approaches.",
         participants: 420,
@@ -352,11 +355,40 @@ export default function AlgoBridge() {
         isLive: false,
         category: "Tournament",
         difficulty: "Hard",
-        duration: "4 hours"
+        duration: "4 hours",
+        sponsors: ["IBM", "Oracle"],
+        languages: ["Python", "MATLAB", "R"]
+      },
+      {
+        title: "AI & Machine Learning Hackathon",
+        description: "Build innovative AI solutions and compete with the brightest minds in machine learning. Showcase your creativity and technical skills.",
+        participants: 320,
+        prize: "3,00,000",
+        startTime: "Jan 5, 2025, 9:00 AM",
+        endTime: "Jan 6, 2025, 9:00 AM",
+        isLive: false,
+        category: "Hackathon",
+        difficulty: "Expert",
+        duration: "24 hours",
+        sponsors: ["OpenAI", "NVIDIA", "Tesla"],
+        languages: ["Python", "R", "Julia"]
       }
-    ],
-    []
-  );
+    ];
+
+    return contestTemplates.map((contest, index) => ({
+      id: `contest-${index + 1}`,
+      ...contest,
+      // Add dynamic elements
+      registrationCount: contest.participants + Math.floor(Math.random() * 200),
+      views: Math.floor(Math.random() * 5000) + 1000,
+      rating: 4.5 + Math.random() * 0.5,
+      tags: contest.languages.slice(0, 2),
+      isFeatured: index < 2,
+      registrationDeadline: new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+    }));
+  };
+
+  const contests = useMemo(() => generateDynamicContests(), []);
 
   const handleStartExam = (examId) => {
     navigate(`/dashboard/exam/${examId}`);

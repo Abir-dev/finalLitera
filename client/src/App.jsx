@@ -1,7 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import RootLayout from "./layout/RootLayout.jsx";
 import DashboardLayout from "./layout/DashboardLayout.jsx";
 import AdminLayout from "./layout/AdminLayout.jsx";
+import { setupRevealAnimations } from "./utils/revealAnimations.js";
 import Home from "./pages/Home.jsx";
 import Courses from "./pages/Courses.jsx";
 import CourseDetails from "./pages/CourseDetails.jsx";
@@ -37,6 +39,10 @@ import AdminAnalytics from "./pages/AdminAnalytics.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
 
 export default function App() {
+  useEffect(() => {
+    setupRevealAnimations();
+  }, []);
+
   return (
     <Routes>
       <Route element={<RootLayout />}>

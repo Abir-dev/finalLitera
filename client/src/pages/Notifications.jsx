@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { Bell, Mail, BookOpen, CreditCard, Settings2, Megaphone } from "lucide-react";
 
 const brand = { blue: "#18457A", green: "#16a34a", red: "#dc2626" };
 
@@ -10,26 +11,26 @@ function NotificationCard({ title, message, time, type, isRead }) {
     switch (type) {
       case "course":
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-lg">📚</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
+            <BookOpen size={18} style={{ color: 'var(--brand)' }} />
           </div>
         );
       case "payment":
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-lg">💰</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)', border: '1px solid var(--accent-gold)30' }}>
+            <CreditCard size={18} style={{ color: 'var(--accent-gold)' }} />
           </div>
         );
       case "system":
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-lg">⚙️</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
+            <Settings2 size={18} style={{ color: 'var(--accent-rose)' }} />
           </div>
         );
       default:
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-gray-500 to-slate-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-lg">🔔</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)', border: '1px solid var(--brand-strong)30' }}>
+            <Bell size={18} style={{ color: 'var(--brand-strong)' }} />
           </div>
         );
     }
@@ -45,25 +46,25 @@ function NotificationCard({ title, message, time, type, isRead }) {
   };
 
   return (
-    <div className={`bg-gradient-to-r ${getTypeColor(type)} border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${!isRead ? 'border-l-4 border-l-blue-500 ring-2 ring-blue-100' : ''}`}>
+    <div className={`card-premium p-6 hover:scale-105 transition-all duration-300`}>
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0">
           {getTypeIcon(type)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-2">
-            <h3 className={`text-lg font-bold ${!isRead ? 'text-slate-900' : 'text-slate-700'}`}>
+            <h3 className={`text-lg font-bold`} style={{ color: 'var(--text-primary)' }}>
               {title}
             </h3>
-            <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded-full shadow-sm">
+            <span className="text-xs px-2 py-1 rounded-full shadow-sm" style={{ color: 'var(--text-muted)', background: 'var(--surface)' }}>
               {time}
             </span>
           </div>
-          <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{message}</p>
           {!isRead && (
             <div className="mt-4 flex items-center gap-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <button className="text-sm text-blue-600 hover:text-blue-800 font-semibold bg-white px-3 py-1 rounded-full shadow-sm transition-all duration-300 hover:shadow-md">
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--brand)' }}></div>
+              <button className="text-sm font-semibold px-3 py-1 rounded-full shadow-sm transition-all duration-300 hover:shadow-md" style={{ color: 'var(--brand)', background: 'var(--surface)' }}>
                 Mark as read
               </button>
             </div>
@@ -174,66 +175,63 @@ export default function Notifications() {
   };
 
   return (
-    <section className="max-w-6xl mx-auto px-6 md:px-10 py-8 bg-gradient-to-br from-slate-50 to-indigo-50 min-h-screen">
+    <section className="max-w-6xl mx-auto px-6 md:px-10 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 bg-white rounded-2xl p-6 shadow-lg border border-indigo-100">
+      <div className="card-premium p-6 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="text-3xl">🔔</div>
-            <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <Bell size={24} style={{ color: 'var(--brand)' }} />
+            <h1 className="heading-2 text-2xl md:text-3xl" style={{ color: 'var(--text-primary)' }}>
               Notifications
             </h1>
           </div>
-          <p className="text-[12px] text-slate-500 mt-1">Manage your notification preferences and view recent updates</p>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>Manage your notification preferences and view recent updates</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-full border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:from-indigo-100 hover:to-purple-100 transition-all duration-300 shadow-sm">
-          <span className="text-lg">✅</span>
-          Mark All as Read
-        </button>
+        <button className="btn-premium px-6 py-2 text-sm font-semibold">Mark All as Read</button>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-2xl p-2 shadow-lg border border-indigo-100 mb-8">
+      <div className="card-premium p-2 mb-8">
         <div className="flex flex-wrap gap-2">
           <button
             className={`px-6 py-3 text-sm font-bold rounded-xl transition-all duration-300 ${
               activeTab === "all" 
-                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "btn-premium" 
+                : "btn-outline-premium"
             }`}
             onClick={() => setActiveTab("all")}
           >
-            📋 All Notifications
+            All Notifications
           </button>
           <button
             className={`px-6 py-3 text-sm font-bold rounded-xl transition-all duration-300 ${
               activeTab === "course" 
-                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "btn-premium" 
+                : "btn-outline-premium"
             }`}
             onClick={() => setActiveTab("course")}
           >
-            📚 Course Updates
+            Course Updates
           </button>
           <button
             className={`px-6 py-3 text-sm font-bold rounded-xl transition-all duration-300 ${
               activeTab === "payment" 
-                ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "btn-premium" 
+                : "btn-outline-premium"
             }`}
             onClick={() => setActiveTab("payment")}
           >
-            💰 Payment Alerts
+            Payment Alerts
           </button>
           <button
             className={`px-6 py-3 text-sm font-bold rounded-xl transition-all duration-300 ${
               activeTab === "system" 
-                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg" 
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "btn-premium" 
+                : "btn-outline-premium"
             }`}
             onClick={() => setActiveTab("system")}
           >
-            ⚙️ System Notifications
+            System Notifications
           </button>
         </div>
       </div>
@@ -242,10 +240,10 @@ export default function Notifications() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Notifications List */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-indigo-100">
+          <div className="card-premium p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="text-2xl">📬</div>
-              <h2 className="text-xl font-bold text-slate-900">Recent Notifications</h2>
+              <Bell size={20} style={{ color: 'var(--brand)' }} />
+              <h2 className="heading-3 text-xl" style={{ color: 'var(--text-primary)' }}>Recent Notifications</h2>
             </div>
             <div className="space-y-4">
               {filteredNotifications.map((notification) => (
@@ -257,10 +255,10 @@ export default function Notifications() {
 
         {/* Preferences Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-indigo-100">
+          <div className="card-premium p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="text-2xl">⚙️</div>
-              <h2 className="text-xl font-bold text-slate-900">Notification Preferences</h2>
+              <Settings2 size={20} style={{ color: 'var(--brand)' }} />
+              <h2 className="heading-3 text-xl" style={{ color: 'var(--text-primary)' }}>Notification Preferences</h2>
             </div>
             <div className="space-y-4">
               <NotificationPreference
@@ -268,35 +266,35 @@ export default function Notifications() {
                 description="Receive notifications via email"
                 enabled={preferences.emailNotifications}
                 onToggle={() => togglePreference('emailNotifications')}
-                icon="📧"
+                icon={<Mail size={18} style={{ color: 'var(--brand)' }} />}
               />
               <NotificationPreference
                 title="Push Notifications"
                 description="Receive push notifications in browser"
                 enabled={preferences.pushNotifications}
                 onToggle={() => togglePreference('pushNotifications')}
-                icon="🔔"
+                icon={<Bell size={18} style={{ color: 'var(--brand)' }} />}
               />
               <NotificationPreference
                 title="Course Updates"
                 description="Get notified about new courses and updates"
                 enabled={preferences.courseUpdates}
                 onToggle={() => togglePreference('courseUpdates')}
-                icon="📚"
+                icon={<BookOpen size={18} style={{ color: 'var(--brand)' }} />}
               />
               <NotificationPreference
                 title="Payment Reminders"
                 description="Receive payment due reminders"
                 enabled={preferences.paymentReminders}
                 onToggle={() => togglePreference('paymentReminders')}
-                icon="💰"
+                icon={<CreditCard size={18} style={{ color: 'var(--brand)' }} />}
               />
               <NotificationPreference
                 title="Marketing Emails"
                 description="Receive promotional and marketing emails"
                 enabled={preferences.marketingEmails}
                 onToggle={() => togglePreference('marketingEmails')}
-                icon="📢"
+                icon={<Megaphone size={18} style={{ color: 'var(--brand)' }} />}
               />
             </div>
           </div>

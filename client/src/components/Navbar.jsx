@@ -8,7 +8,7 @@ import Logo from "../assets/kinglogo.png"
 import axios from "axios";
 import { io } from "socket.io-client";
 
-const navLink = "uppercase text-lg font-bold text-slate-700 hover:text-[#1B4A8B] px-4 py-2";
+const navLink = "nav-link-premium text-sm tracking-wider px-3 py-2 rounded-full transition-colors";
 
 export default function Navbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -98,17 +98,17 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/30 backdrop-blur-sm bg-opacity-50 rounded-b-lg shadow-md border-b border-white/20 mb-4 ">
+      <header className="sticky top-0 z-50 nav-translucent rounded-b-2xl shadow-md mb-6">
         <div className="max-w-6xl mx-auto px-4">
           <div className="h-16 flex items-center justify-between">
             {/* Logo (hidden on mobile) */}
             <Link to="/" className="hidden md:block">
-              <img src={Logo} alt="Logo" className="h-15 w-15 invert" />
+              <img src={Logo} alt="Logo" className="h-10 w-10" />
             </Link>
 
             {/* Mobile hamburger */}
             <button
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-700 hover:text-[#1B4A8B] focus:outline-none"
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-200 hover:text-white focus:outline-none"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open menu"
             >
@@ -116,7 +116,7 @@ export default function Navbar() {
             </button>
 
             {/* Nav Links */}
-            <nav className="hidden md:flex gap-6">
+            <nav className="hidden md:flex gap-2">
               <NavLink to="/" end className={navLink}>Home</NavLink>
               <NavLink to="/courses" className={navLink}>Courses</NavLink>
               <NavLink to="/launchpad" className={navLink}>LaunchPad</NavLink>
@@ -130,32 +130,32 @@ export default function Navbar() {
                 <>
                   <div className="relative" ref={dropdownRef}>
                     <button
-                      className="relative p-2 text-slate-700"
+                      className="relative p-2 text-slate-200 hover:text-white"
                       onClick={() => setNotifOpen((v) => !v)}
                       aria-label="Open notifications"
                     >
                       <Bell size={22} />
                       {unreadCount > 0 && (
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
+                        <span className="absolute top-1 right-1 w-2 h-2" style={{ background: 'conic-gradient(from 45deg, #ff6b7a, #ffb86b, #ffd166, #ff6b7a)' }}></span>
                       )}
                     </button>
                     {notifOpen && (
-                      <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg border border-gray-200 z-50">
-                        <div className="p-3 border-b flex items-center justify-between">
-                          <span className="text-sm font-semibold text-slate-800">Notifications</span>
+                      <div className="absolute right-0 mt-2 w-80 card-premium z-50">
+                        <div className="p-3 border-b border-[color:var(--border)] flex items-center justify-between">
+                          <span className="text-sm font-semibold">Notifications</span>
                           {unreadCount > 0 && (
-                            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">{unreadCount} new</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(79,140,255,0.18)', color: 'var(--text-primary)' }}>{unreadCount} new</span>
                           )}
                         </div>
                         <div className="max-h-80 overflow-y-auto">
                           {notifications.length === 0 ? (
-                            <div className="p-4 text-sm text-slate-500">No recent notifications</div>
+                            <div className="p-4 text-sm text-[color:var(--text-muted)]">No recent notifications</div>
                           ) : (
                             notifications.map((n) => (
-                              <div key={n.id} className="p-3 hover:bg-slate-50 cursor-default border-b last:border-b-0">
-                                <div className="text-sm font-medium text-slate-900 truncate">{n.title}</div>
-                                <div className="text-xs text-slate-600 truncate mt-0.5">{n.message}</div>
-                                <div className="text-[11px] text-slate-400 mt-1">{n.time}</div>
+                              <div key={n.id} className="p-3 hover:bg-white/5 cursor-default border-b border-[color:var(--border)] last:border-b-0">
+                                <div className="text-sm font-medium truncate">{n.title}</div>
+                                <div className="text-xs text-[color:var(--text-secondary)] truncate mt-0.5">{n.message}</div>
+                                <div className="text-[11px] text-[color:var(--text-muted)] mt-1">{n.time}</div>
                               </div>
                             ))
                           )}
@@ -163,7 +163,7 @@ export default function Navbar() {
                         <div className="p-2">
                           <button
                             onClick={() => { setNotifOpen(false); navigate('/dashboard/notifications'); }}
-                            className="w-full text-center text-sm font-semibold text-[#1B4A8B] hover:bg-slate-50 rounded-lg py-2"
+                            className="w-full text-center text-sm font-semibold btn-outline-premium rounded-full py-2"
                           >
                             View all notifications
                           </button>
@@ -200,7 +200,7 @@ export default function Navbar() {
                   </Link> */}
                   <button
                     onClick={() => setIsLoginModalOpen(true)}
-                    className="rounded-full bg-[#1B4A8B] hover:bg-[#1B4A8B]/90 text-white text-sm font-semibold px-5 py-2.5 shadow cursor-pointer hidden md:inline-flex"
+                    className="btn-premium text-sm px-5 py-2.5 cursor-pointer hidden md:inline-flex"
                   >
                     Login
                   </button>
@@ -212,14 +212,14 @@ export default function Navbar() {
       </header>
 
       {/* Mobile Sidebar */}
-      <div className={`${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transition-transform duration-300 ease-in-out md:hidden`}>
-        <div className="flex items-center justify-between h-16 px-4 border-b">
+      <div className={`${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-72 card-premium transition-transform duration-300 ease-in-out md:hidden`}>
+        <div className="flex items-center justify-between h-16 px-4 border-b border-[color:var(--border)]">
           <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2">
-            <img src={Logo} alt="Logo" className="h-8 w-8 invert" />
-            <span className="font-semibold text-slate-800">Litera</span>
+            <img src={Logo} alt="Logo" className="h-8 w-8" />
+            <span className="font-semibold">Litera</span>
           </Link>
           <button
-            className="p-2 rounded-md text-slate-700 hover:text-[#1B4A8B]"
+            className="p-2 rounded-md text-slate-200 hover:text-white"
             onClick={() => setIsMobileMenuOpen(false)}
             aria-label="Close menu"
           >

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import StudentProgressReport from "../components/StudentProgressReport.jsx";
 import EditStudentModal from "../components/EditStudentModal.jsx";
 import CourseAssignmentModal from "../components/CourseAssignmentModal.jsx";
+import { Users, UserCheck, GraduationCap, TrendingUp, Plus, Search, Filter, Edit, Trash2, Eye, BookOpen, BarChart3 } from "lucide-react";
 
 export default function AdminStudents() {
   const navigate = useNavigate();
@@ -305,101 +306,127 @@ export default function AdminStudents() {
 
   const getStatusBadge = (status) => {
     return status === "active"
-      ? <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
-      : <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Inactive</span>;
+      ? <span className="px-3 py-1 text-xs rounded-full flex items-center gap-1" style={{ background: 'var(--accent-gold)10', color: 'var(--accent-gold)' }}>
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent-gold)' }}></div>
+          Active
+        </span>
+      : <span className="px-3 py-1 text-xs rounded-full flex items-center gap-1" style={{ background: 'var(--text-muted)10', color: 'var(--text-muted)' }}>
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--text-muted)' }}></div>
+          Inactive
+        </span>;
   };
 
   const getProgressColor = (progress) => {
-    if (progress >= 80) return "bg-green-500";
-    if (progress >= 60) return "bg-blue-500";
-    if (progress >= 40) return "bg-yellow-500";
-    return "bg-red-500";
+    if (progress >= 80) return "var(--accent-gold)";
+    if (progress >= 60) return "var(--brand)";
+    if (progress >= 40) return "var(--accent-rose)";
+    return "var(--brand-strong)";
   };
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Premium Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Student Management</h1>
-          <p className="text-gray-600 mt-1">Manage all registered students and their progress</p>
+          <h1 className="heading-1 text-3xl" style={{ color: 'var(--text-primary)' }}>Student Management</h1>
+          <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>Manage all registered students and their progress</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300"
+          className="btn-premium px-6 py-3 font-semibold flex items-center gap-2"
         >
-          👤 Add New Student
+          <Plus size={20} />
+          Add New Student
         </button>
       </div>
 
       {loading ? (
-        <div className="p-3 bg-blue-50 text-blue-700 rounded-md border border-blue-200">Loading students...</div>
+        <div className="card-premium p-4" style={{ background: 'linear-gradient(135deg, var(--brand)10, var(--brand)5)', border: '1px solid var(--brand)30' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
+            <span style={{ color: 'var(--text-primary)' }}>Loading students...</span>
+          </div>
+        </div>
       ) : null}
       {error ? (
-        <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200">{error}</div>
+        <div className="card-premium p-4" style={{ background: 'linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)', border: '1px solid var(--accent-rose)30' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: 'var(--accent-rose)' }}></div>
+            <span style={{ color: 'var(--text-primary)' }}>{error}</span>
+          </div>
+        </div>
       ) : null}
 
-      {/* Filters and Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      {/* Premium Filters and Search */}
+      <div className="card-premium p-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search students by name, email, or course..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+              className="input-premium pl-10"
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+          <div className="relative">
+            <Filter size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="input-premium pl-10"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Students Enrolled In Courses */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Students Enrolled In Courses</h2>
-          <span className="text-sm text-gray-600">{enrolledStudentsOnly.length} students</span>
+      {/* Premium Students Enrolled In Courses */}
+      <div className="card-premium overflow-hidden">
+        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
+              <BookOpen size={16} style={{ color: 'var(--brand)' }} />
+            </div>
+            <h2 className="heading-3 text-lg" style={{ color: 'var(--text-primary)' }}>Students Enrolled In Courses</h2>
+          </div>
+          <span className="text-sm px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{enrolledStudentsOnly.length} students</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead style={{ background: 'var(--surface)', borderColor: 'var(--border)' }} className="border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Course</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {enrolledStudentsOnly.map((student) => (
-                <tr key={`enrolled-${student.id}`} className="hover:bg-gray-50 transition-colors duration-200">
+                <tr key={`enrolled-${student.id}`} className="hover:scale-[1.01] transition-all duration-300" style={{ background: 'var(--bg-primary)' }}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
                         {student.name.charAt(0)}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{student.name}</div>
-                        <div className="text-sm text-gray-500">{student.email}</div>
+                        <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{student.course}</div>
+                    <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(student.status)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-primary)' }}>
                     {new Date(student.joinDate).toLocaleDateString()}
                   </td>
                 </tr>
@@ -409,96 +436,119 @@ export default function AdminStudents() {
         </div>
       </div>
 
-      {/* Students Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {/* Premium Students Table */}
+      <div className="card-premium overflow-hidden">
+        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
+              <Users size={16} style={{ color: 'var(--accent-rose)' }} />
+            </div>
+            <h2 className="heading-3 text-lg" style={{ color: 'var(--text-primary)' }}>All Students</h2>
+          </div>
+          <span className="text-sm px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{filteredStudents.length} students</span>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead style={{ background: 'var(--surface)', borderColor: 'var(--border)' }} className="border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Active</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Course</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Progress</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Last Active</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {filteredStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50 transition-colors duration-200">
+                <tr key={student.id} className="hover:scale-[1.01] transition-all duration-300" style={{ background: 'var(--bg-primary)' }}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
                         {student.name.charAt(0)}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{student.name}</div>
-                        <div className="text-sm text-gray-500">{student.email}</div>
-                        <div className="text-xs text-gray-400">{student.phone}</div>
+                        <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
+                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{student.phone}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{student.course}</div>
+                    <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(student.status)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                      <div className="w-16 rounded-full h-2 mr-2" style={{ background: 'var(--surface)' }}>
                         <div
-                          className={`h-2 rounded-full ${getProgressColor(student.progress)}`}
-                          style={{ width: `${student.progress}%` }}
+                          className="h-2 rounded-full transition-all duration-1000"
+                          style={{ width: `${student.progress}%`, background: getProgressColor(student.progress) }}
                         ></div>
                       </div>
-                      <span className="text-sm text-gray-900">{student.progress}%</span>
+                      <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{student.progress}%</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-primary)' }}>
                     {new Date(student.joinDate).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
                     {student.lastActive}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => handleViewProgressReport(student)}
-                        className="text-purple-600 hover:text-purple-900 px-2 py-1 rounded hover:bg-purple-50"
+                        className="btn-outline-premium px-3 py-1 text-xs flex items-center gap-1"
                         title="View Progress Report"
                       >
-                        📊 Progress
+                        <BarChart3 size={12} />
+                        Progress
                       </button>
                       <button
                         onClick={() => handleAssignCourse(student)}
-                        className="text-green-600 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50"
+                        className="btn-outline-premium px-3 py-1 text-xs flex items-center gap-1"
                         title="Assign Course to Student"
                       >
-                        📚 Assign Course
+                        <BookOpen size={12} />
+                        Assign
                       </button>
                       <button
                         onClick={() => handleEditStudent(student)}
-                        className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50"
+                        className="btn-outline-premium px-3 py-1 text-xs flex items-center gap-1"
                         title="Edit Student Details"
                       >
-                        ✏️ Edit
+                        <Edit size={12} />
+                        Edit
                       </button>
                       <button
                         onClick={() => handleStatusToggle(student.id)}
-                        className={`px-2 py-1 rounded ${student.status === "active"
-                            ? "text-orange-600 hover:text-orange-900 hover:bg-orange-50"
-                            : "text-green-600 hover:text-green-900 hover:bg-green-50"
+                        className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 transition-all duration-300 ${student.status === "active"
+                            ? "hover:bg-orange-100 text-orange-600"
+                            : "hover:bg-green-100 text-green-600"
                           }`}
                       >
-                        {student.status === "active" ? "⏸️ Pause" : "▶️ Activate"}
+                        {student.status === "active" ? (
+                          <>
+                            <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                            Pause
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                            Activate
+                          </>
+                        )}
                       </button>
                       <button
                         onClick={() => handleDeleteStudent(student.id)}
-                        className="text-red-600 hover:text-red-900 px-2 py-1 rounded hover:bg-red-50"
+                        className="px-3 py-1 text-xs rounded-full flex items-center gap-1 hover:bg-red-100 text-red-600 transition-all duration-300"
                       >
-                        🗑️ Delete
+                        <Trash2 size={12} />
+                        Delete
                       </button>
                     </div>
                   </td>

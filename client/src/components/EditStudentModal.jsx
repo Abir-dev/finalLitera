@@ -117,14 +117,14 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
   if (!isOpen || !student) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="card-premium w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Edit Student</h2>
+            <h2 className="text-2xl font-bold">Edit Student</h2>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -134,7 +134,7 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="firstName" className="block text-sm font-medium mb-1">
                 First Name *
               </label>
               <input
@@ -144,13 +144,13 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
                 value={formData.firstName}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                className="w-full input-premium"
                 placeholder="Enter first name"
               />
             </div>
 
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="lastName" className="block text-sm font-medium mb-1">
                 Last Name *
               </label>
               <input
@@ -160,13 +160,13 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
                 value={formData.lastName}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                className="w-full input-premium"
                 placeholder="Enter last name"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium mb-1">
                 Email *
               </label>
               <input
@@ -176,13 +176,13 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                className="w-full input-premium"
                 placeholder="Enter email address"
               />
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="phone" className="block text-sm font-medium mb-1">
                 Phone Number
               </label>
               <input
@@ -191,7 +191,7 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                className="w-full input-premium"
                 placeholder="Enter phone number"
               />
             </div>
@@ -203,21 +203,21 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
                 name="isActive"
                 checked={formData.isActive}
                 onChange={handleInputChange}
-                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                className="h-4 w-4 text-[color:var(--brand)] focus:ring-[color:var(--brand)] border-[color:var(--border)] rounded"
               />
-              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+              <label htmlFor="isActive" className="ml-2 block text-sm">
                 Active Student
               </label>
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
+              <div className="p-3 rounded-md" style={{ color: '#ff6b7a', background: 'rgba(255,107,122,0.08)', border: '1px solid rgba(255,107,122,0.25)' }}>
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="p-3 bg-green-50 text-green-700 rounded-md border border-green-200">
+              <div className="p-3 rounded-md" style={{ color: '#7ed957', background: 'rgba(126,217,87,0.08)', border: '1px solid rgba(126,217,87,0.25)' }}>
                 {success}
               </div>
             )}
@@ -226,7 +226,7 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-2 btn-outline-premium rounded-lg"
                 disabled={isSubmitting}
               >
                 Cancel
@@ -234,7 +234,7 @@ export default function EditStudentModal({ student, isOpen, onClose, onUpdate })
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 btn-premium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

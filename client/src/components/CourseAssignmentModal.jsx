@@ -125,19 +125,19 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
   if (!isOpen || !student) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="card-premium w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Assign Course to Student</h2>
-              <p className="text-gray-600 mt-1">
+              <h2 className="text-2xl font-bold">Assign Course to Student</h2>
+              <p className="text-[color:var(--text-secondary)] mt-1">
                 Assign a course to <span className="font-semibold">{student.name}</span>
               </p>
             </div>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -147,21 +147,21 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-              <span className="ml-3 text-gray-600">Loading available courses...</span>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'var(--brand)' }}></div>
+              <span className="ml-3 text-[color:var(--text-secondary)]">Loading available courses...</span>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Course Selection */}
               <div>
-                <label htmlFor="courseSelect" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="courseSelect" className="block text-sm font-medium mb-2">
                   Select Course to Assign *
                 </label>
                 <select
                   id="courseSelect"
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                  className="w-full input-premium"
                 >
                   <option value="">Choose a course...</option>
                   {courses.map((course) => (
@@ -174,8 +174,8 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
 
               {/* Selected Course Preview */}
               {selectedCourse && (
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Selected Course</h3>
+                <div className="rounded-lg p-4 btn-outline-premium">
+                  <h3 className="text-lg font-semibold mb-2">Selected Course</h3>
                   <div className="flex items-start space-x-4">
                     {selectedCourse.thumbnail && (
                       <img
@@ -185,18 +185,18 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
                       />
                     )}
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{selectedCourse.title}</h4>
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                      <h4 className="font-medium">{selectedCourse.title}</h4>
+                      <p className="text-sm text-[color:var(--text-secondary)] mt-1 line-clamp-2">
                         {selectedCourse.description}
                       </p>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                      <div className="flex items-center space-x-4 mt-2 text-sm text-[color:var(--text-muted)]">
                         <span>📚 {selectedCourse.level}</span>
                         <span>🏷️ {selectedCourse.category}</span>
                         <span>⏱️ {selectedCourse.duration}</span>
-                        <span>💰 ₹{selectedCourse.price}</span>
+                        <span style={{ color: 'var(--accent-gold)' }}>💰 ₹{selectedCourse.price}</span>
                       </div>
                       {selectedCourse.instructor && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-[color:var(--text-muted)] mt-1">
                           👨‍🏫 Instructor: {selectedCourse.instructor.firstName} {selectedCourse.instructor.lastName}
                         </p>
                       )}
@@ -206,16 +206,16 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
               )}
 
               {/* Student Info */}
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Student Information</h3>
+              <div className="rounded-lg p-4 btn-outline-premium">
+                <h3 className="text-lg font-semibold mb-2">Student Information</h3>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
                     {student.name.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">{student.name}</h4>
-                    <p className="text-sm text-gray-600">{student.email}</p>
-                    <p className="text-sm text-gray-500">
+                    <h4 className="font-medium">{student.name}</h4>
+                    <p className="text-sm text-[color:var(--text-secondary)]">{student.email}</p>
+                    <p className="text-sm text-[color:var(--text-muted)]">
                       Current courses: {student.course !== "-" ? "1" : "0"}
                     </p>
                   </div>
@@ -224,13 +224,13 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
 
               {/* Error and Success Messages */}
               {error && (
-                <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
+                <div className="p-3 rounded-md" style={{ color: '#ff6b7a', background: 'rgba(255,107,122,0.08)', border: '1px solid rgba(255,107,122,0.25)' }}>
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="p-3 bg-green-50 text-green-700 rounded-md border border-green-200">
+                <div className="p-3 rounded-md" style={{ color: '#7ed957', background: 'rgba(126,217,87,0.08)', border: '1px solid rgba(126,217,87,0.25)' }}>
                   {success}
                 </div>
               )}
@@ -240,7 +240,7 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 btn-outline-premium rounded-lg"
                   disabled={isAssigning}
                 >
                   Cancel
@@ -248,7 +248,7 @@ export default function CourseAssignmentModal({ student, isOpen, onClose, onCour
                 <button
                   onClick={handleAssignCourse}
                   disabled={!selectedCourseId || isAssigning}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 btn-premium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAssigning ? (
                     <span className="flex items-center justify-center">

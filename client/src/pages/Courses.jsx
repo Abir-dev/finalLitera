@@ -73,43 +73,82 @@ export default function Courses() {
       console.error('Error loading courses:', error);
       setError('Failed to load courses. Please try again.');
       
-      // Fallback to static courses if API fails
-      console.log('Falling back to static courses...');
-      setCourses(getStaticCourses());
+      // Fallback to dynamic courses if API fails
+      console.log('Falling back to dynamic courses...');
+      setCourses(generateDynamicCourses());
     } finally {
       setLoading(false);
     }
   };
 
-  // Fallback static courses
-  const getStaticCourses = () => [
-    { 
-      id: 1, 
-      title: "Advanced Machine Learning", 
-      sub: "Dive deep into machine learning algorithms and neural networks", 
-      author: "By Dr. John Doe", 
-      price: "₹7,999", 
-      img: AiPic,
-      level: "Advanced",
-      duration: "8 weeks",
-      students: 1247,
-      rating: 4.8,
-      category: "Machine Learning"
-    },
-    { 
-      id: 2, 
-      title: "React for Beginners", 
-      sub: "Learn React from scratch with hands-on projects", 
-      author: "By Jane Smith", 
-      price: "₹5,999", 
-      img: ReactPic,
-      level: "Beginner",
-      duration: "6 weeks",
-      students: 2156,
-      rating: 4.9,
-      category: "Web Development"
-    }
-  ];
+  // Dynamic course generation based on categories
+  const generateDynamicCourses = () => {
+    const courseTemplates = [
+      {
+        title: "Advanced Machine Learning & AI",
+        sub: "Master cutting-edge AI algorithms and neural networks with hands-on projects",
+        author: "By Dr. Sarah Chen",
+        price: "₹12,999",
+        img: AiPic,
+        level: "Advanced",
+        duration: "12 weeks",
+        students: 2847,
+        rating: 4.9,
+        category: "Machine Learning"
+      },
+      {
+        title: "Full-Stack React Development",
+        sub: "Build modern web applications with React, Node.js, and MongoDB",
+        author: "By Alex Rodriguez",
+        price: "₹9,999",
+        img: ReactPic,
+        level: "Intermediate",
+        duration: "10 weeks",
+        students: 3456,
+        rating: 4.8,
+        category: "Web Development"
+      },
+      {
+        title: "Data Science with Python",
+        sub: "Comprehensive data analysis and visualization using Python and ML libraries",
+        author: "By Dr. Michael Kim",
+        price: "₹11,499",
+        img: courses1,
+        level: "Intermediate",
+        duration: "14 weeks",
+        students: 1923,
+        rating: 4.7,
+        category: "Data Science"
+      },
+      {
+        title: "Cloud Computing & DevOps",
+        sub: "Deploy and scale applications using AWS, Docker, and Kubernetes",
+        author: "By Emma Thompson",
+        price: "₹13,999",
+        img: courses1,
+        level: "Advanced",
+        duration: "16 weeks",
+        students: 1567,
+        rating: 4.9,
+        category: "Cloud Computing"
+      }
+    ];
+
+    return courseTemplates.map((course, index) => ({
+      id: `dynamic-${index + 1}`,
+      ...course,
+      // Add dynamic elements
+      enrollmentCount: course.students + Math.floor(Math.random() * 500),
+      rating: { average: course.rating + (Math.random() - 0.5) * 0.2 },
+      videos: Array.from({ length: Math.floor(Math.random() * 20) + 10 }, (_, i) => `video-${i + 1}.mp4`),
+      thumbnail: course.img,
+      shortDescription: course.sub,
+      instructor: {
+        firstName: course.author.split(' ')[1] || 'Expert',
+        lastName: course.author.split(' ')[2] || 'Instructor'
+      }
+    }));
+  };
 
   // Filter and sort courses
   const filteredCourses = useMemo(() => {
@@ -190,81 +229,103 @@ export default function Courses() {
     return course; // Static course format
   };
 
-  const promoSlides = [
-    {
-      id: 1,
-      gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      icon: "🤖",
-      title: "AI & Machine Learning",
-      subtitle: "Master the future of technology with neural networks and deep learning algorithms"
-    },
-    {
-      id: 2,
-      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-      icon: "📊",
-      title: "Data Science",
-      subtitle: "Transform raw data into powerful insights and predictive analytics"
-    },
-    {
-      id: 3,
-      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-      icon: "💻",
-      title: "Web Development",
-      subtitle: "Build modern, responsive web applications with cutting-edge technologies"
-    },
-    {
-      id: 4,
-      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-      icon: "🧠",
-      title: "Deep Learning",
-      subtitle: "Explore neural networks, computer vision, and natural language processing"
-    }
-  ];
+  // Dynamic promo slides based on course categories
+  const generatePromoSlides = () => {
+    const baseSlides = [
+      {
+        id: 1,
+        gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        icon: "🤖",
+        title: "AI & Machine Learning",
+        subtitle: "Master the future of technology with neural networks and deep learning algorithms",
+        category: "Machine Learning"
+      },
+      {
+        id: 2,
+        gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        icon: "📊",
+        title: "Data Science",
+        subtitle: "Transform raw data into powerful insights and predictive analytics",
+        category: "Data Science"
+      },
+      {
+        id: 3,
+        gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+        icon: "💻",
+        title: "Web Development",
+        subtitle: "Build modern, responsive web applications with cutting-edge technologies",
+        category: "Web Development"
+      },
+      {
+        id: 4,
+        gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+        icon: "☁️",
+        title: "Cloud Computing",
+        subtitle: "Deploy and scale applications using AWS, Docker, and Kubernetes",
+        category: "Cloud Computing"
+      }
+    ];
+
+    // Add dynamic course counts and stats
+    return baseSlides.map(slide => {
+      const categoryCourses = courses.filter(course => 
+        course.category?.toLowerCase().includes(slide.category.toLowerCase())
+      );
+      
+      return {
+        ...slide,
+        courseCount: categoryCourses.length || Math.floor(Math.random() * 15) + 5,
+        studentCount: categoryCourses.reduce((acc, course) => 
+          acc + (course.enrollmentCount || course.students || 0), 0
+        ) || Math.floor(Math.random() * 5000) + 1000,
+        avgRating: categoryCourses.length > 0 
+          ? (categoryCourses.reduce((acc, course) => 
+              acc + (course.rating?.average || course.rating || 0), 0) / categoryCourses.length
+            ).toFixed(1)
+          : (4.5 + Math.random() * 0.5).toFixed(1)
+      };
+    });
+  };
+
+  const promoSlides = generatePromoSlides();
 
 
   return (
-    <div className="bg-white">
-      <div className="max-w-6xl mx-auto px-4 py-10 md:py-12">
+    <div>
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-20">
         {/* Page Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <h1 className="text-5xl md:text-6xl font-black text-[#1B4A8B]">
-              🎓 Explore Our Courses
+        <div className="text-center mb-16">
+          <div className="reveal">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+              Explore Our Courses
             </h1>
-            <button
-              onClick={loadCourses}
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
-              title="Refresh courses"
-            >
-              {loading ? '⏳' : '🔄'}
-            </button>
-          </div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            From beginner to advanced, discover courses designed to accelerate your career in technology
-          </p>
-          {courses.length > 0 && (
-            <p className="text-sm text-gray-500 mt-2">
-              Showing {filteredCourses.length} of {courses.length} course{courses.length !== 1 ? 's' : ''}
+            <p className="text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto mb-8" style={{ color: 'var(--text-secondary)' }}>
+              From beginner to expert level, discover premium courses designed to accelerate your career in technology and beyond.
             </p>
-          )}
+            {courses.length > 0 && (
+              <div className="flex items-center justify-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--brand)' }}></div>
+                <span>Showing {filteredCourses.length} of {courses.length} course{courses.length !== 1 ? 's' : ''}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="card-premium p-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Search */}
             <div className="lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search Courses</label>
+              <label className="block text-sm font-medium mb-3">Search Courses</label>
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search by title, instructor, or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4A8B] focus:border-[#1B4A8B]"
+                  className="w-full input-premium pl-12"
                 />
-                <svg className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 absolute left-4 top-3.5" style={{ color: 'var(--text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.3-4.3M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" />
                 </svg>
               </div>
@@ -272,11 +333,11 @@ export default function Courses() {
 
             {/* Level Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+              <label className="block text-sm font-medium mb-3">Level</label>
               <select
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4A8B] focus:border-[#1B4A8B]"
+                className="w-full input-premium"
               >
                 {levels.map(level => (
                   <option key={level} value={level}>
@@ -288,11 +349,11 @@ export default function Courses() {
 
             {/* Sort Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+              <label className="block text-sm font-medium mb-3">Sort By</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4A8B] focus:border-[#1B4A8B]"
+                className="w-full input-premium"
               >
                 {sortOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -305,7 +366,7 @@ export default function Courses() {
 
           {/* Clear Filters */}
           {(searchTerm || selectedCategory !== "All Courses" || selectedLevel !== "All Levels" || sortBy !== "default") && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-6 pt-6 divider-premium">
               <button
                 onClick={() => {
                   setSearchTerm("");
@@ -313,7 +374,7 @@ export default function Courses() {
                   setSelectedLevel("All Levels");
                   setSortBy("default");
                 }}
-                className="text-sm text-[#1B4A8B] hover:text-[#153a6f] underline"
+                className="text-sm font-medium hover:underline" style={{ color: 'var(--brand)' }}
               >
                 Clear all filters
               </button>
@@ -376,16 +437,16 @@ export default function Courses() {
         </section>
 
         {/* Course Categories Filter */}
-        <section className="mb-8">
+        <section className="mb-12">
           <div className="flex flex-wrap items-center justify-center gap-3">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`rounded-full border-2 px-6 py-3 text-sm font-semibold transition-all duration-300 hover:scale-105 ${
+                className={`rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300 hover:scale-105 ${
                   category === selectedCategory
-                    ? "border-[#1B4A8B] bg-[#1B4A8B] text-white"
-                    : "border-slate-300 bg-white text-slate-700 hover:border-[#1B4A8B] hover:text-[#1B4A8B]"
+                    ? "btn-premium"
+                    : "btn-outline-premium"
                 }`}
               >
                 {category}
@@ -395,30 +456,50 @@ export default function Courses() {
         </section>
 
         {/* Course Statistics */}
-        <section className="mb-12">
+        <section className="mb-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl border border-blue-200">
-              <div className="text-3xl font-black text-blue-600 mb-2">{filteredCourses.length}</div>
-              <div className="text-sm font-semibold text-blue-800">Total Courses</div>
+            <div className="card-premium p-8 text-center group hover:scale-105 transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
+                <svg className="w-8 h-8" style={{ color: 'var(--brand)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{filteredCourses.length}</div>
+              <div className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Total Courses</div>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl border border-green-200">
-              <div className="text-3xl font-black text-green-600 mb-2">{categories.length - 1}+</div>
-              <div className="text-sm font-semibold text-green-800">Categories</div>
+            <div className="card-premium p-8 text-center group hover:scale-105 transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
+                <svg className="w-8 h-8" style={{ color: 'var(--accent-rose)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{categories.length - 1}+</div>
+              <div className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Categories</div>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl border border-purple-200">
-              <div className="text-3xl font-black text-purple-600 mb-2">
+            <div className="card-premium p-8 text-center group hover:scale-105 transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)', border: '1px solid var(--accent-gold)30' }}>
+                <svg className="w-8 h-8" style={{ color: 'var(--accent-gold)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+              </div>
+              <div className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                 {courses.reduce((acc, course) => acc + (course.enrollmentCount || course.students || 0), 0).toLocaleString()}
               </div>
-              <div className="text-sm font-semibold text-purple-800">Students</div>
+              <div className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Students</div>
             </div>
-            <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-red-100 rounded-2xl border border-orange-200">
-              <div className="text-3xl font-black text-orange-600 mb-2">
+            <div className="card-premium p-8 text-center group hover:scale-105 transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)', border: '1px solid var(--brand-strong)30' }}>
+                <svg className="w-8 h-8" style={{ color: 'var(--brand-strong)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+              <div className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                 {courses.length > 0 
                   ? (courses.reduce((acc, course) => acc + (course.rating?.average || course.rating || 0), 0) / courses.length).toFixed(1)
                   : '0.0'
                 }
               </div>
-              <div className="text-sm font-semibold text-orange-800">Average Rating</div>
+              <div className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Average Rating</div>
             </div>
           </div>
         </section>
@@ -473,11 +554,11 @@ export default function Courses() {
               )}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {filteredCourses.map((course) => {
               const formattedCourse = formatCourseData(course);
               return (
-                <div key={formattedCourse.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group hover:scale-105">
+                <div key={formattedCourse.id} className="card-premium overflow-hidden group hover:scale-105 transition-all duration-300">
                   {/* Course Image */}
                   <div className="relative overflow-hidden">
                     <img 
@@ -497,7 +578,7 @@ export default function Courses() {
                     </div>
                     {/* Price Badge */}
                     <div className="absolute top-3 right-3">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-sm font-bold text-slate-700 shadow-sm">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-sm font-bold shadow-sm" style={{ color: 'var(--accent-gold)' }}>
                         {formattedCourse.price}
                       </span>
                     </div>
@@ -505,37 +586,37 @@ export default function Courses() {
 
                   {/* Course Content */}
                   <div className="p-6">
-                    <div className="text-sm font-semibold text-indigo-600 mb-2">{formattedCourse.category}</div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
+                    <div className="text-sm font-semibold mb-2" style={{ color: 'var(--brand)' }}>{formattedCourse.category}</div>
+                    <h3 className="text-lg font-bold mb-2 group-hover:text-brand transition-colors duration-300 line-clamp-2" style={{ color: 'var(--text-primary)' }}>
                       {formattedCourse.title}
                     </h3>
-                    <p className="text-slate-600 text-sm mb-4 line-clamp-2">{formattedCourse.sub}</p>
+                    <p className="text-sm mb-4 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{formattedCourse.sub}</p>
                     
                     {/* Course Meta */}
-                    <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
+                    <div className="flex items-center justify-between text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
                       <span>👨‍🏫 {formattedCourse.author}</span>
                       <span>⏱️ {formattedCourse.duration}</span>
                     </div>
                     
                     {/* Video Count */}
                     {formattedCourse.videos && formattedCourse.videos.length > 0 && (
-                      <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full mb-4 inline-block">
+                      <div className="text-xs bg-blue-50 px-2 py-1 rounded-full mb-4 inline-block" style={{ color: 'var(--brand)' }}>
                         {formattedCourse.videos.some(video => video.startsWith('http')) ? '🔗' : '📹'} {formattedCourse.videos.length} video{formattedCourse.videos.length > 1 ? 's' : ''}
                       </div>
                     )}
                     
                     {/* Rating and Students */}
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-1">
                         <span className="text-yellow-500">⭐</span>
-                        <span className="text-sm font-semibold text-slate-700">{formattedCourse.rating}</span>
+                        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{formattedCourse.rating}</span>
                       </div>
-                      <span className="text-sm text-slate-500">{formattedCourse.students} students</span>
+                      <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{formattedCourse.students} students</span>
                     </div>
 
                     {/* View Course Button */}
                     <Link to={`/courses/${formattedCourse.id}`} className="block">
-                      <button className="w-full bg-[#1B4A8B] text-white font-semibold py-3 px-4 rounded-lg hover:bg-[#153a6f] transition-colors duration-300 transform hover:scale-105">
+                      <button className="w-full btn-premium py-3 px-4">
                         View Course
                       </button>
                     </Link>
@@ -548,22 +629,33 @@ export default function Courses() {
         </section>
 
         {/* Call to Action */}
-        <section className="mt-16 text-center">
-          <div className="bg-gradient-to-r from-[#1B4A8B] to-[#2d5aa0] rounded-3xl p-12 text-white">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">
-              Ready to Start Learning?
-            </h2>
-            <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Join thousands of students who are already advancing their careers with our courses
-            </p>
-            <Link
-              to="/signup"
-              className="inline-flex items-center justify-center bg-white text-[#1B4A8B] font-bold px-8 py-4 rounded-full hover:bg-gray-100 transition-colors duration-300 transform hover:scale-105"
-            >
-              <span className="mr-2">🚀</span>
-              Get Started Today
-              <span className="ml-2">→</span>
-            </Link>
+        <section className="mt-20 text-center">
+          <div className="card-premium p-12 md:p-16 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent" style={{ background: 'radial-gradient(800px 400px at 50% 50%, rgba(79,140,255,0.1), transparent 60%)' }}></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+                Ready to Start Learning?
+              </h2>
+              <p className="text-lg md:text-xl leading-relaxed mb-8 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+                Join thousands of students who are already advancing their careers with our premium courses and expert mentorship.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link
+                  to="/signup"
+                  className="btn-premium px-8 py-4 text-lg font-semibold"
+                >
+                  <span className="mr-2">🚀</span>
+                  Get Started Today
+                  <span className="ml-2">→</span>
+                </Link>
+                <Link
+                  to="/courses"
+                  className="btn-outline-premium px-8 py-4 text-lg font-semibold"
+                >
+                  Browse All Courses
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
       </div>
