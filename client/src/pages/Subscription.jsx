@@ -2,7 +2,19 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import profileService from "../services/profileService.js";
-import { Search, Filter, Calendar, User, BookOpen, Clock, TrendingUp, Play, Star, Award, Target } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Calendar,
+  User,
+  BookOpen,
+  Clock,
+  TrendingUp,
+  Play,
+  Star,
+  Award,
+  Target,
+} from "lucide-react";
 
 // Debounce hook for search
 const useDebounce = (value, delay) => {
@@ -42,13 +54,20 @@ function CourseCard({ course, enrollment }) {
 
   const getProgressValue = (enrollment) => {
     // Handle different progress structures
-    if (typeof enrollment.progress === 'number') {
+    if (typeof enrollment.progress === "number") {
       return enrollment.progress;
     }
-    if (enrollment.progress && typeof enrollment.progress === 'object') {
+    if (enrollment.progress && typeof enrollment.progress === "object") {
       // User model structure: progress.completedVideos / progress.totalVideos
-      if (enrollment.progress.completedVideos && enrollment.progress.totalVideos) {
-        return Math.round((enrollment.progress.completedVideos / enrollment.progress.totalVideos) * 100);
+      if (
+        enrollment.progress.completedVideos &&
+        enrollment.progress.totalVideos
+      ) {
+        return Math.round(
+          (enrollment.progress.completedVideos /
+            enrollment.progress.totalVideos) *
+            100
+        );
       }
     }
     return 0;
@@ -66,51 +85,69 @@ function CourseCard({ course, enrollment }) {
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute top-3 left-3">
-          <span className="px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm" style={{ 
-            background: 'var(--brand)',
-            color: 'white'
-          }}>
+          <span
+            className="px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm"
+            style={{
+              background: "var(--brand)",
+              color: "white",
+            }}
+          >
             {course.level || "Beginner"}
           </span>
         </div>
         <div className="absolute top-3 right-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ 
-            background: 'rgba(255,255,255,0.9)',
-            backdropFilter: 'blur(4px)'
-          }}>
-            <Play size={16} style={{ color: 'var(--brand)' }} />
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{
+              background: "rgba(255,255,255,0.9)",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            <Play size={16} style={{ color: "var(--brand)" }} />
           </div>
         </div>
       </div>
 
       <div className="p-6">
-        <h3 className="text-lg font-bold mb-3 line-clamp-2 group-hover:text-brand transition-colors" style={{ color: 'var(--text-primary)' }}>
+        <h3
+          className="text-lg font-bold mb-3 line-clamp-2 group-hover:text-brand transition-colors"
+          style={{ color: "var(--text-primary)" }}
+        >
           {course.title}
         </h3>
 
         <div className="flex items-center gap-2 mb-3">
-          <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ 
-            background: 'var(--brand)20', 
-            color: 'var(--brand)' 
-          }}>
+          <span
+            className="px-3 py-1 rounded-full text-xs font-medium"
+            style={{
+              background: "var(--brand)20",
+              color: "var(--brand)",
+            }}
+          >
             {course.level || "Beginner"}
           </span>
-          <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ 
-            background: 'var(--accent-rose)20', 
-            color: 'var(--accent-rose)' 
-          }}>
+          <span
+            className="px-3 py-1 rounded-full text-xs font-medium"
+            style={{
+              background: "var(--accent-rose)20",
+              color: "var(--accent-rose)",
+            }}
+          >
             {course.category || "General"}
           </span>
         </div>
 
-        <div className="flex items-center gap-2 mb-4" style={{ color: 'var(--text-muted)' }}>
+        <div
+          className="flex items-center gap-2 mb-4"
+          style={{ color: "var(--text-muted)" }}
+        >
           <User size={14} />
           <span className="text-sm">
             By {course.instructor?.firstName} {course.instructor?.lastName}
           </span>
         </div>
 
-        <div className="space-y-2 mb-4" style={{ color: 'var(--text-muted)' }}>
+        <div className="space-y-2 mb-4" style={{ color: "var(--text-muted)" }}>
           <div className="flex items-center gap-2 text-xs">
             <Calendar size={12} />
             <span>Enrolled: {formatDate(enrollment.enrolledAt)}</span>
@@ -123,21 +160,33 @@ function CourseCard({ course, enrollment }) {
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Progress</span>
-            <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>
+            <span
+              className="text-sm font-medium"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Progress
+            </span>
+            <span
+              className="text-sm font-bold"
+              style={{ color: "var(--brand)" }}
+            >
               {getProgressValue(enrollment)}%
             </span>
           </div>
-          <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+          <div
+            className="h-2 w-full rounded-full overflow-hidden"
+            style={{ background: "var(--bg-secondary)" }}
+          >
             <div
               className="h-full transition-all duration-500 rounded-full"
-              style={{ 
+              style={{
                 width: `${getProgressValue(enrollment)}%`,
-                background: getProgressValue(enrollment) === 100 
-                  ? 'var(--accent-gold)' 
-                  : getProgressValue(enrollment) > 50 
-                    ? 'var(--brand)' 
-                    : 'var(--accent-rose)'
+                background:
+                  getProgressValue(enrollment) === 100
+                    ? "var(--accent-gold)"
+                    : getProgressValue(enrollment) > 50
+                    ? "var(--brand)"
+                    : "var(--accent-rose)",
               }}
             />
           </div>
@@ -283,7 +332,9 @@ export default function Subscription() {
     if (filters.progress !== "all") {
       switch (filters.progress) {
         case "not-started":
-          filtered = filtered.filter((course) => getProgressValue(course) === 0);
+          filtered = filtered.filter(
+            (course) => getProgressValue(course) === 0
+          );
           break;
         case "in-progress":
           filtered = filtered.filter(
@@ -389,10 +440,16 @@ export default function Subscription() {
       {/* Premium Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
         <div>
-          <h1 className="heading-1 text-3xl md:text-4xl mb-2" style={{ color: 'var(--text-primary)' }}>
+          <h1
+            className="heading-1 text-3xl md:text-4xl mb-2"
+            style={{ color: "var(--text-primary)" }}
+          >
             Your Enrolled Courses
           </h1>
-          <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
+          <p
+            className="text-lg mb-4"
+            style={{ color: "var(--text-secondary)" }}
+          >
             {filteredCourses.length} of {enrolledCourses.length} courses
           </p>
           {enrolledCourses.length === 0 && (
@@ -417,11 +474,14 @@ export default function Subscription() {
           <Search
             size={20}
             className="absolute left-4 top-3.5"
-            style={{ color: 'var(--text-muted)' }}
+            style={{ color: "var(--text-muted)" }}
           />
           {filters.search && filters.search !== debouncedSearch && (
             <div className="absolute right-4 top-3.5">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: 'var(--brand)' }}></div>
+              <div
+                className="animate-spin rounded-full h-4 w-4 border-b-2"
+                style={{ borderColor: "var(--brand)" }}
+              ></div>
             </div>
           )}
         </div>
@@ -435,46 +495,62 @@ export default function Subscription() {
         <div className="card-premium p-6 mb-6">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <Filter size={16} style={{ color: 'var(--brand)' }} />
-              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              <Filter size={16} style={{ color: "var(--brand)" }} />
+              <span
+                className="text-sm font-medium"
+                style={{ color: "var(--text-primary)" }}
+              >
                 Active filters:
               </span>
             </div>
             {filters.search && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ 
-                background: 'var(--brand)20', 
-                color: 'var(--brand)' 
-              }}>
+              <span
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                style={{
+                  background: "var(--brand)20",
+                  color: "var(--brand)",
+                }}
+              >
                 Search: "{filters.search}"
               </span>
             )}
             {filters.category !== "all" && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ 
-                background: 'var(--accent-rose)20', 
-                color: 'var(--accent-rose)' 
-              }}>
+              <span
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                style={{
+                  background: "var(--accent-rose)20",
+                  color: "var(--accent-rose)",
+                }}
+              >
                 Category: {filters.category}
               </span>
             )}
             {filters.level !== "all" && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ 
-                background: 'var(--accent-gold)20', 
-                color: 'var(--accent-gold)' 
-              }}>
+              <span
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                style={{
+                  background: "var(--accent-gold)20",
+                  color: "var(--accent-gold)",
+                }}
+              >
                 Level: {filters.level}
               </span>
             )}
             {filters.progress !== "all" && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium" style={{ 
-                background: 'var(--brand-strong)20', 
-                color: 'var(--brand-strong)' 
-              }}>
+              <span
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                style={{
+                  background: "var(--brand-strong)20",
+                  color: "var(--brand-strong)",
+                }}
+              >
                 Progress: {filters.progress.replace("-", " ")}
               </span>
             )}
             <button
               onClick={clearFilters}
-              className="text-xs font-medium hover:underline" style={{ color: 'var(--brand)' }}
+              className="text-xs font-medium hover:underline"
+              style={{ color: "var(--brand)" }}
             >
               Clear all
             </button>
@@ -485,13 +561,21 @@ export default function Subscription() {
       {/* Premium Filters */}
       <div className="card-premium p-8 mb-8">
         <div className="flex items-center gap-3 mb-6">
-          <Filter size={20} style={{ color: 'var(--brand)' }} />
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Filter & Sort</h3>
+          <Filter size={20} style={{ color: "var(--brand)" }} />
+          <h3
+            className="text-lg font-semibold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Filter & Sort
+          </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {/* Category Filter */}
           <div>
-            <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <label
+              className="block text-sm font-medium mb-3"
+              style={{ color: "var(--text-secondary)" }}
+            >
               Category
             </label>
             <select
@@ -510,7 +594,10 @@ export default function Subscription() {
 
           {/* Level Filter */}
           <div>
-            <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <label
+              className="block text-sm font-medium mb-3"
+              style={{ color: "var(--text-secondary)" }}
+            >
               Level
             </label>
             <select
@@ -529,7 +616,10 @@ export default function Subscription() {
 
           {/* Progress Filter */}
           <div>
-            <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <label
+              className="block text-sm font-medium mb-3"
+              style={{ color: "var(--text-secondary)" }}
+            >
               Progress
             </label>
             <select
@@ -546,7 +636,10 @@ export default function Subscription() {
 
           {/* Sort Filter */}
           <div>
-            <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <label
+              className="block text-sm font-medium mb-3"
+              style={{ color: "var(--text-secondary)" }}
+            >
               Sort By
             </label>
             <select
@@ -578,16 +671,26 @@ export default function Subscription() {
       {filteredCourses.length === 0 ? (
         <div className="text-center py-16">
           <div className="card-premium p-12 max-w-md mx-auto">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ 
-              background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)',
-              border: '1px solid var(--accent-rose)30'
-            }}>
-              <BookOpen size={40} style={{ color: 'var(--accent-rose)' }} />
+            <div
+              className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)",
+                border: "1px solid var(--accent-rose)30",
+              }}
+            >
+              <BookOpen size={40} style={{ color: "var(--accent-rose)" }} />
             </div>
-            <h3 className="heading-3 text-2xl mb-4" style={{ color: 'var(--text-primary)' }}>
+            <h3
+              className="heading-3 text-2xl mb-4"
+              style={{ color: "var(--text-primary)" }}
+            >
               No courses found
             </h3>
-            <p className="text-lg mb-6" style={{ color: 'var(--text-secondary)' }}>
+            <p
+              className="text-lg mb-6"
+              style={{ color: "var(--text-secondary)" }}
+            >
               {enrolledCourses.length === 0
                 ? "You haven't enrolled in any courses yet."
                 : "Try adjusting your filters to see more results."}
@@ -604,13 +707,15 @@ export default function Subscription() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filteredCourses.map((enrollment) => (
-            <CourseCard
-              key={enrollment._id || enrollment.course?._id}
-              course={enrollment.course}
-              enrollment={enrollment}
-            />
-          ))}
+          {filteredCourses.map((enrollment) =>
+            enrollment?.course ? (
+              <CourseCard
+                key={enrollment._id || enrollment.course?._id}
+                course={enrollment.course}
+                enrollment={enrollment}
+              />
+            ) : null
+          )}
         </div>
       )}
     </section>
