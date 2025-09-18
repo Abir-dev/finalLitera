@@ -38,13 +38,13 @@ export default function StatCard() {
   ];
 
   return (
-    <section className="container-premium py-20 relative overflow-hidden">
+    <section className="container-premium py-20 relative overflow-hidden ">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div>
-      <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl animate-pulse-float"></div>
-      <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl animate-pulse-float animation-delay-2000"></div>
-      
-      <div className="relative z-10">
+      {/* <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div> */}
+      {/* <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl animate-pulse-float"></div> */}
+      {/* <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl animate-pulse-float animation-delay-2000"></div>
+       */}
+      <div className="relative z-10 ">
         {/* Premium Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full mb-6">

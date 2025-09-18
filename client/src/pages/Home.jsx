@@ -42,11 +42,11 @@ export default function Home() {
       {/* Premium Hero Section */}
       <section className="relative overflow-hidden min-h-screen flex items-center">
         {/* Animated Background Elements */}
-        <div className="absolute inset-0">
+        {/* <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse-float"></div>
           <div className="absolute top-40 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse-float animation-delay-2000"></div>
           <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-pulse-float animation-delay-1000"></div>
-        </div>
+        </div> */}
 
         <div className="container-premium relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center py-20">
