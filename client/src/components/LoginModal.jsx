@@ -130,7 +130,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
 
           <div className="space-y-2">
             <button className="w-full flex items-center justify-center gap-2 btn-outline-premium font-semibold py-2.5 px-3 rounded-lg hover:scale-[1.01] cursor-pointer">
-              <img src="/icons/google.svg" alt="Google Logo" className="w-5 h-4 mb-0.5 invert items-center justify-center" />
+              <img src="/icons/google.svg" alt="Google Logo" className="w-5 h-4 mb-0.5 items-center justify-center" />
             </button>
           </div>
 
