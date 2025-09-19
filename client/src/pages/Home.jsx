@@ -7,7 +7,7 @@ import RevealOnScroll from "../components/RevealOnScroll.jsx";
 import { Link } from "react-router-dom";
 import pic5 from "../assets/pic5.png";
 import pic6 from "../assets/pic6.png";
-import image from "../assets/image.png";
+import pic10 from "../assets/pic10.png";
 import { BiSolidCheckCircle } from "react-icons/bi";
 
 // Import course images
@@ -165,7 +165,7 @@ export default function Home() {
                   }}>
                     <div className="relative overflow-hidden rounded-lg md:rounded-xl">
                       <img 
-                        src={image} 
+                        src={pic10} 
                         alt="Student Learning" 
                         className="w-full h-auto group-hover:scale-105 transition-all duration-700 responsive-img" 
                       />
