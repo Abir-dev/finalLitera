@@ -162,7 +162,7 @@ export default function Home() {
       <StatCard />
 
       {/* Explore Courses section */}
-      <section className="py-16 md:py-20">
+      <section className="pt-16 md:pt-20 pb-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
@@ -252,7 +252,7 @@ export default function Home() {
       </section>
 
       {/* Expert Coaching Section */}
-      <section className="py-16 md:py-20">
+      <section className="pt-8 md:pt-12 pb-16 md:pb-20">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <div className="relative reveal">
             <div className="absolute -left-8 -bottom-8 w-48 h-48 rounded-full opacity-15 blur-3xl" style={{ background: 'linear-gradient(135deg, var(--brand), var(--accent-rose))' }} />
