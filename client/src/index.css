@@ -563,9 +563,12 @@ code, pre, .font-mono {
   color: var(--text-secondary); 
   text-decoration: none;
   transition: all var(--timing-normal) ease;
-  display: inline-block;
+  display: inline-flex; 
+  align-items: center;  
+  gap: 0.5rem;          
   padding: var(--space-xs) 0;
 }
+
 
 .footer-link:hover { 
   color: var(--text-primary);

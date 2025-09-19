@@ -129,7 +129,7 @@ export default function Home() {
                   />
                   
                   {/* Floating Stats Cards */}
-                  <div className="absolute -top-4 -left-4 card-glass p-4 animate-float">
+                  {/* <div className="absolute -top-4 -left-4 card-glass p-4 animate-float">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center">
                         <span className="text-white font-bold text-sm">✓</span>
@@ -151,7 +151,7 @@ export default function Home() {
                         <div className="text-xs text-gray-400">Support</div>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </RevealOnScroll>
