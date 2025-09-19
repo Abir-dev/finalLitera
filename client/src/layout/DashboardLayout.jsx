@@ -17,7 +17,7 @@ const menu = [
   { to: "/dashboard/algobridge", label: "AlgoBridge" },
   { to: "/dashboard/notifications", label: "Notification Preferences" },
   { to: "/dashboard/profile", label: "Profile" },
-  { to: "/dashboard/billing", label: "Billing" },
+  // { to: "/dashboard/billing", label: "Billing" },
   { to: "/dashboard/logout", label: "LogOut Account" },
 ];
 
