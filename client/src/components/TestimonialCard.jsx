@@ -29,7 +29,7 @@ export default function TestimonialCard({
       )}
       
       {/* Stars */}
-      <div className="flex gap-1 mb-6">
+      <div className="flex gap-1 mb-6 mt-10">
         {[...Array(5)].map((_, i) => (
           <Star 
             key={i} 

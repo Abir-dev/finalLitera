@@ -134,7 +134,7 @@ export default function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "navbar-scrolled mt-2 max-w-6xl mx-auto px-4"
+            ? "navbar-scrolled mt-2 max-w-6xl mx-auto px-4 "
             : "navbar-scrolled mt-4 max-w-7xl mx-auto px-4"
         }`}
       >
@@ -186,7 +186,7 @@ export default function Navbar() {
                       )}
                     </button>
                     {notifOpen && (
-                      <div className="absolute right-0 mt-2 w-80 card-premium z-50">
+                      <div className="absolute right-0 mt-70 w-80 card-premium z-50">
                         <div className="p-3 border-b border-[color:var(--border)] flex items-center justify-between">
                           <span className="text-sm font-semibold">
                             Notifications
