@@ -2,7 +2,7 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Bell, Menu, X } from "lucide-react";
-// import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 import LoginModal from "./LoginModal.jsx";
 import SignupModal from "./SignupModal.jsx";
 import Logo from "../assets/kinglogo.png";
