@@ -17,14 +17,8 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    console.log("Request interceptor - Token:", token ? "Present" : "Missing");
-    console.log("Request interceptor - URL:", config.url);
-    console.log("Request interceptor - Method:", config.method);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("Request interceptor - Authorization header set");
-    } else {
-      console.log("Request interceptor - No token found in localStorage");
     }
     return config;
   },
@@ -37,12 +31,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Handle different types of errors
+    if (error.code === 'ECONNABORTED') {
+      console.warn('Request timeout - server may be slow');
+    } else if (error.code === 'ERR_NETWORK') {
+      console.warn('Network error - check your connection');
+    } else if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
+    } else if (error.response?.status >= 500) {
+      console.warn('Server error - please try again later');
     }
+    
     return Promise.reject(error);
   }
 );

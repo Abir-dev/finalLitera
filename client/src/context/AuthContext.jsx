@@ -22,21 +22,51 @@ export const AuthProvider = ({ children }) => {
   // Socket connection for real-time notifications
   useEffect(() => {
     let socket;
+    
+    // Only attempt socket connection if user is logged in
+    if (!user?.id && !user?._id) return;
+    
     try {
       socket = io(backendURL, {
         withCredentials: true,
         path: '/socket.io',
-        transports: ['websocket'],
-        reconnectionAttempts: 5,
+        transports: ['websocket', 'polling'], // Add polling as fallback
+        reconnectionAttempts: 3, // Reduce attempts
+        reconnectionDelay: 2000,
+        timeout: 10000,
+        forceNew: true,
       });
-      if (user?.id || user?._id) {
-        socket.emit('register_user', user.id || user._id);
-      }
-    } catch (_) {
-      // ignore
+
+      // Add error handling for socket events
+      socket.on('connect', () => {
+        console.log('Socket connected successfully');
+        if (user?.id || user?._id) {
+          socket.emit('register_user', user.id || user._id);
+        }
+      });
+
+      socket.on('connect_error', (error) => {
+        console.warn('Socket connection error:', error.message);
+        // Don't spam console with connection errors
+      });
+
+      socket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
+      });
+
+    } catch (error) {
+      console.warn('Failed to initialize socket:', error.message);
     }
+    
     return () => {
-      try { socket && socket.disconnect(); } catch (_) {}
+      try { 
+        if (socket) {
+          socket.removeAllListeners();
+          socket.disconnect(); 
+        }
+      } catch (error) {
+        console.warn('Error disconnecting socket:', error.message);
+      }
     };
   }, [backendURL, user?.id, user?._id]);
 

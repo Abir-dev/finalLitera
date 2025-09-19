@@ -326,17 +326,18 @@ export default function AdminStudents() {
   return (
     <div className="space-y-6">
       {/* Premium Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="heading-1 text-3xl" style={{ color: 'var(--text-primary)' }}>Student Management</h1>
-          <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>Manage all registered students and their progress</p>
+          <h1 className="heading-1 text-2xl sm:text-3xl" style={{ color: 'var(--text-primary)' }}>Student Management</h1>
+          <p className="mt-1 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>Manage all registered students and their progress</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-premium px-6 py-3 font-semibold flex items-center gap-2"
+          className="btn-premium px-4 py-2 sm:px-6 sm:py-3 font-semibold flex items-center gap-2 text-sm sm:text-base w-full sm:w-auto justify-center"
         >
-          <Plus size={20} />
-          Add New Student
+          <Plus size={16} className="sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline">Add New Student</span>
+          <span className="sm:hidden">Add Student</span>
         </button>
       </div>
 
@@ -358,24 +359,24 @@ export default function AdminStudents() {
       ) : null}
 
       {/* Premium Filters and Search */}
-      <div className="card-premium p-6">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="card-premium p-4 sm:p-6">
+        <div className="flex flex-col gap-4">
           <div className="flex-1 relative">
-            <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search students by name, email, or course..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-premium pl-10"
+              className="input-premium pl-10 text-sm sm:text-base"
             />
           </div>
           <div className="relative">
-            <Filter size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <Filter size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-premium pl-10"
+              className="input-premium pl-10 text-sm sm:text-base"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -387,46 +388,46 @@ export default function AdminStudents() {
 
       {/* Premium Students Enrolled In Courses */}
       <div className="card-premium overflow-hidden">
-        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <div className="px-4 sm:px-6 py-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
               <BookOpen size={16} style={{ color: 'var(--brand)' }} />
             </div>
-            <h2 className="heading-3 text-lg" style={{ color: 'var(--text-primary)' }}>Students Enrolled In Courses</h2>
+            <h2 className="heading-3 text-base sm:text-lg" style={{ color: 'var(--text-primary)' }}>Students Enrolled In Courses</h2>
           </div>
-          <span className="text-sm px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{enrolledStudentsOnly.length} students</span>
+          <span className="text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{enrolledStudentsOnly.length} students</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead style={{ background: 'var(--surface)', borderColor: 'var(--border)' }} className="border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Course</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell" style={{ color: 'var(--text-secondary)' }}>Course</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {enrolledStudentsOnly.map((student) => (
                 <tr key={`enrolled-${student.id}`} className="hover:scale-[1.01] transition-all duration-300" style={{ background: 'var(--bg-primary)' }}>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
                         {student.name.charAt(0)}
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
-                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
+                      <div className="ml-3 sm:ml-4">
+                        <div className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
+                        <div className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                    <div className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(student.status)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-primary)' }}>
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell" style={{ color: 'var(--text-primary)' }}>
                     {new Date(student.joinDate).toLocaleDateString()}
                   </td>
                 </tr>
@@ -438,95 +439,95 @@ export default function AdminStudents() {
 
       {/* Premium Students Table */}
       <div className="card-premium overflow-hidden">
-        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <div className="px-4 sm:px-6 py-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
               <Users size={16} style={{ color: 'var(--accent-rose)' }} />
             </div>
-            <h2 className="heading-3 text-lg" style={{ color: 'var(--text-primary)' }}>All Students</h2>
+            <h2 className="heading-3 text-base sm:text-lg" style={{ color: 'var(--text-primary)' }}>All Students</h2>
           </div>
-          <span className="text-sm px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{filteredStudents.length} students</span>
+          <span className="text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{filteredStudents.length} students</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead style={{ background: 'var(--surface)', borderColor: 'var(--border)' }} className="border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Course</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Progress</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Last Active</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Actions</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell" style={{ color: 'var(--text-secondary)' }}>Course</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell" style={{ color: 'var(--text-secondary)' }}>Progress</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell" style={{ color: 'var(--text-secondary)' }}>Last Active</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {filteredStudents.map((student) => (
                 <tr key={student.id} className="hover:scale-[1.01] transition-all duration-300" style={{ background: 'var(--bg-primary)' }}>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
                         {student.name.charAt(0)}
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
-                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
-                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{student.phone}</div>
+                      <div className="ml-3 sm:ml-4">
+                        <div className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
+                        <div className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
+                        <div className="text-xs hidden sm:block" style={{ color: 'var(--text-muted)' }}>{student.phone}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                    <div className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(student.status)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                     <div className="flex items-center">
-                      <div className="w-16 rounded-full h-2 mr-2" style={{ background: 'var(--surface)' }}>
+                      <div className="w-12 sm:w-16 rounded-full h-2 mr-2" style={{ background: 'var(--surface)' }}>
                         <div
                           className="h-2 rounded-full transition-all duration-1000"
                           style={{ width: `${student.progress}%`, background: getProgressColor(student.progress) }}
                         ></div>
                       </div>
-                      <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{student.progress}%</span>
+                      <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{student.progress}%</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-primary)' }}>
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden lg:table-cell" style={{ color: 'var(--text-primary)' }}>
                     {new Date(student.joinDate).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden lg:table-cell" style={{ color: 'var(--text-secondary)' }}>
                     {student.lastActive}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2 flex-wrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                       <button
                         onClick={() => handleViewProgressReport(student)}
-                        className="btn-outline-premium px-3 py-1 text-xs flex items-center gap-1"
+                        className="btn-outline-premium px-2 sm:px-3 py-1 text-xs flex items-center gap-1"
                         title="View Progress Report"
                       >
                         <BarChart3 size={12} />
-                        Progress
+                        <span className="hidden sm:inline">Progress</span>
                       </button>
                       <button
                         onClick={() => handleAssignCourse(student)}
-                        className="btn-outline-premium px-3 py-1 text-xs flex items-center gap-1"
+                        className="btn-outline-premium px-2 sm:px-3 py-1 text-xs flex items-center gap-1"
                         title="Assign Course to Student"
                       >
                         <BookOpen size={12} />
-                        Assign
+                        <span className="hidden sm:inline">Assign</span>
                       </button>
                       <button
                         onClick={() => handleEditStudent(student)}
-                        className="btn-outline-premium px-3 py-1 text-xs flex items-center gap-1"
+                        className="btn-outline-premium px-2 sm:px-3 py-1 text-xs flex items-center gap-1"
                         title="Edit Student Details"
                       >
                         <Edit size={12} />
-                        Edit
+                        <span className="hidden sm:inline">Edit</span>
                       </button>
                       <button
                         onClick={() => handleStatusToggle(student.id)}
-                        className={`px-3 py-1 text-xs rounded-full flex items-center gap-1 transition-all duration-300 ${student.status === "active"
+                        className={`px-2 sm:px-3 py-1 text-xs rounded-full flex items-center gap-1 transition-all duration-300 ${student.status === "active"
                             ? "hover:bg-orange-100 text-orange-600"
                             : "hover:bg-green-100 text-green-600"
                           }`}
@@ -534,21 +535,21 @@ export default function AdminStudents() {
                         {student.status === "active" ? (
                           <>
                             <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                            Pause
+                            <span className="hidden sm:inline">Pause</span>
                           </>
                         ) : (
                           <>
                             <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                            Activate
+                            <span className="hidden sm:inline">Activate</span>
                           </>
                         )}
                       </button>
                       <button
                         onClick={() => handleDeleteStudent(student.id)}
-                        className="px-3 py-1 text-xs rounded-full flex items-center gap-1 hover:bg-red-100 text-red-600 transition-all duration-300"
+                        className="px-2 sm:px-3 py-1 text-xs rounded-full flex items-center gap-1 hover:bg-red-100 text-red-600 transition-all duration-300"
                       >
                         <Trash2 size={12} />
-                        Delete
+                        <span className="hidden sm:inline">Delete</span>
                       </button>
                     </div>
                   </td>

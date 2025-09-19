@@ -324,14 +324,14 @@ export default function CourseDetails() {
 
   return (
     <div style={{ background: "var(--bg-primary)" }}>
-      <div className="container-premium pt-40 pb-12 md:pt-44 md:pb-16">
+      <div className="container-premium pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-8 sm:pb-12 md:pb-16">
         {/* Breadcrumb */}
-        <nav className="mb-8">
+        <nav className="mb-6 sm:mb-8">
           <ol
-            className="flex items-center space-x-2 text-sm"
+            className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm overflow-x-auto"
             style={{ color: "var(--text-muted)" }}
           >
-            <li>
+            <li className="whitespace-nowrap">
               <Link
                 to="/"
                 className="hover:opacity-80 transition-opacity"
@@ -343,7 +343,7 @@ export default function CourseDetails() {
             <li>
               <span>/</span>
             </li>
-            <li>
+            <li className="whitespace-nowrap">
               <Link
                 to="/courses"
                 className="hover:opacity-80 transition-opacity"
@@ -356,8 +356,9 @@ export default function CourseDetails() {
               <span>/</span>
             </li>
             <li
-              className="font-medium"
+              className="font-medium truncate max-w-[200px] sm:max-w-none"
               style={{ color: "var(--text-primary)" }}
+              title={display.title}
             >
               {display.title}
             </li>
@@ -365,55 +366,57 @@ export default function CourseDetails() {
         </nav>
 
         {/* Title and rating */}
-        <div className="mt-22">
+        <div className="mt-4 sm:mt-6">
           <h1
-            className="text-3xl md:text-4xl font-extrabold tracking-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight"
             style={{ color: "var(--text-primary)" }}
           >
             {display.title}
           </h1>
-          <div className="mt-2 flex items-center gap-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} filled={i < Math.floor(display.rating)} />
-              ))}
+          <div className="mt-2 sm:mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} filled={i < Math.floor(display.rating)} />
+                ))}
+              </div>
+              <span
+                className="text-sm font-semibold"
+                style={{ color: "var(--accent-emerald)" }}
+              >
+                {display.rating}
+              </span>
             </div>
-            <span
-              className="text-sm font-semibold"
-              style={{ color: "var(--accent-emerald)" }}
-            >
-              {display.rating}
-            </span>
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <span className="text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>
               {display.students} students enrolled
             </span>
           </div>
         </div>
 
         {/* Overview + Right preview */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
           {/* Left column */}
-          <div>
+          <div className="order-2 lg:order-1">
             <h2
-              className="text-3xl font-semibold"
+              className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6"
               style={{ color: "var(--text-primary)" }}
             >
               Course Overview
             </h2>
-            <div style={{ color: "var(--text-secondary)" }}>
+            <div className="text-sm sm:text-base" style={{ color: "var(--text-secondary)" }}>
               {renderDescription(display.description)}
             </div>
 
             {display.learningOutcomes.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-6 sm:mt-8">
                 <h3
-                  className="text-xl font-semibold mb-2"
+                  className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4"
                   style={{ color: "var(--text-primary)" }}
                 >
                   What you'll learn
                 </h3>
                 <ul
-                  className="list-disc ml-6 space-y-1"
+                  className="list-disc ml-4 sm:ml-6 space-y-2 text-sm sm:text-base"
                   style={{ color: "var(--text-secondary)" }}
                 >
                   {display.learningOutcomes.map((o, idx) => (
@@ -424,15 +427,15 @@ export default function CourseDetails() {
             )}
 
             {display.requirements.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-6 sm:mt-8">
                 <h3
-                  className="text-xl font-semibold mb-2"
+                  className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4"
                   style={{ color: "var(--text-primary)" }}
                 >
                   Requirements
                 </h3>
                 <ul
-                  className="list-disc ml-6 space-y-1"
+                  className="list-disc ml-4 sm:ml-6 space-y-2 text-sm sm:text-base"
                   style={{ color: "var(--text-secondary)" }}
                 >
                   {display.requirements.map((r, idx) => (
@@ -444,14 +447,14 @@ export default function CourseDetails() {
 
             {/* Course Videos Section */}
             {course.videos && course.videos.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-6 sm:mt-8">
                 <h3
-                  className="text-xl font-semibold mb-4"
+                  className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6"
                   style={{ color: "var(--text-primary)" }}
                 >
                   Course Videos
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {course.videos.map((videoUrl, index) => {
                     // Check if it's a URL (starts with http) or a file path
                     const isUrl = videoUrl.startsWith("http");
@@ -459,13 +462,13 @@ export default function CourseDetails() {
                     return (
                       <div
                         key={index}
-                        className="rounded-lg p-4"
+                        className="rounded-lg p-3 sm:p-4"
                         style={{ background: "var(--surface)" }}
                       >
                         {isUrl ? (
                           // For URLs, show a clickable link
                           <div
-                            className="aspect-video rounded-lg overflow-hidden mb-2"
+                            className="aspect-video rounded-lg overflow-hidden mb-2 sm:mb-3"
                             style={{
                               background:
                                 "linear-gradient(135deg, var(--brand-soft), var(--brand)10)",
@@ -480,7 +483,7 @@ export default function CourseDetails() {
                               style={{ color: "var(--brand)" }}
                             >
                               <svg
-                                className="w-16 h-16 mb-3"
+                                className="w-12 h-12 sm:w-16 sm:h-16 mb-2 sm:mb-3"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -492,7 +495,7 @@ export default function CourseDetails() {
                                   d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                                 />
                               </svg>
-                              <p className="text-sm font-semibold mb-1">
+                              <p className="text-xs sm:text-sm font-semibold mb-1">
                                 Click to Watch Video
                               </p>
                               <p className="text-xs opacity-70">
@@ -503,7 +506,7 @@ export default function CourseDetails() {
                         ) : (
                           // For uploaded files, show video player
                           <div
-                            className="aspect-video rounded-lg overflow-hidden mb-2"
+                            className="aspect-video rounded-lg overflow-hidden mb-2 sm:mb-3"
                             style={{ background: "var(--bg-secondary)" }}
                           >
                             <video
@@ -521,7 +524,7 @@ export default function CourseDetails() {
                             >
                               <div className="text-center">
                                 <svg
-                                  className="w-12 h-12 mx-auto mb-2"
+                                  className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -533,14 +536,14 @@ export default function CourseDetails() {
                                     d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                                   />
                                 </svg>
-                                <p className="text-sm">Video not available</p>
+                                <p className="text-xs sm:text-sm">Video not available</p>
                               </div>
                             </div>
                           </div>
                         )}
                         <div className="flex items-center justify-between">
                           <p
-                            className="text-sm"
+                            className="text-xs sm:text-sm"
                             style={{ color: "var(--text-secondary)" }}
                           >
                             Video {index + 1}
@@ -583,10 +586,10 @@ export default function CourseDetails() {
               </div>
             </div> */}
 
-            <div className="mt-8 mb-8">
+            <div className="mt-6 sm:mt-8 mb-6 sm:mb-8">
               <button
                 onClick={handleEnrollClick}
-                className="inline-flex items-center justify-center btn-premium px-6 py-2.5"
+                className="inline-flex items-center justify-center btn-premium px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base w-full sm:w-auto"
               >
                 Register Now
               </button>
@@ -594,9 +597,9 @@ export default function CourseDetails() {
           </div>
 
           {/* Right preview card */}
-          <aside>
+          <aside className="order-1 lg:order-2">
             <div
-              className="rounded-xl p-6 shadow-lg sticky top-6"
+              className="rounded-xl p-4 sm:p-6 shadow-lg sticky top-4 sm:top-6"
               style={{
                 background: "var(--surface)",
                 border: "1px solid var(--border)",
@@ -619,7 +622,7 @@ export default function CourseDetails() {
                 >
                   <div className="text-center">
                     <svg
-                      className="w-16 h-16 mx-auto mb-2"
+                      className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -633,7 +636,7 @@ export default function CourseDetails() {
                       />
                     </svg>
                     <p
-                      className="text-sm"
+                      className="text-xs sm:text-sm"
                       style={{ color: "var(--text-muted)" }}
                     >
                       No thumbnail
@@ -642,15 +645,15 @@ export default function CourseDetails() {
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div
-                  className="text-3xl font-bold"
+                  className="text-2xl sm:text-3xl font-bold"
                   style={{ color: "var(--brand)" }}
                 >
                   {display.price}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
                   <div>
                     <div
                       className="mb-1"
@@ -711,7 +714,7 @@ export default function CourseDetails() {
 
                 <button
                   onClick={handleEnrollClick}
-                  className="w-full font-semibold py-3 px-4 btn-premium"
+                  className="w-full font-semibold py-2.5 sm:py-3 px-4 btn-premium text-sm sm:text-base"
                 >
                   Enroll Now
                 </button>
@@ -722,14 +725,14 @@ export default function CourseDetails() {
 
         {/* Similar Courses */}
         {similarCourses.length > 0 && (
-          <section className="mt-16">
+          <section className="mt-12 sm:mt-16">
             <h2
-              className="text-2xl font-bold mb-6"
+              className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6"
               style={{ color: "var(--text-primary)" }}
             >
               Similar Courses
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {similarCourses.map((c) => (
                 <Link key={c._id} to={`/courses/${c._id}`} className="group">
                   <article
@@ -743,11 +746,11 @@ export default function CourseDetails() {
                       <img
                         src={c.thumbnail}
                         alt={c.title}
-                        className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-32 sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div
-                        className="w-full h-40 flex items-center justify-center"
+                        className="w-full h-32 sm:h-40 flex items-center justify-center"
                         style={{
                           background:
                             "linear-gradient(135deg, var(--surface), var(--surface-hover))",
@@ -756,7 +759,7 @@ export default function CourseDetails() {
                       >
                         <div className="text-center">
                           <svg
-                            className="w-12 h-12 mx-auto mb-1"
+                            className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-1"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -778,15 +781,15 @@ export default function CourseDetails() {
                         </div>
                       </div>
                     )}
-                    <div className="p-5">
+                    <div className="p-3 sm:p-5">
                       <h3
-                        className="text-sm font-semibold group-hover:opacity-80 transition-opacity duration-300"
+                        className="text-xs sm:text-sm font-semibold group-hover:opacity-80 transition-opacity duration-300 line-clamp-2"
                         style={{ color: "var(--text-primary)" }}
                       >
                         {c.title}
                       </h3>
                       <p
-                        className="mt-1 text-sm"
+                        className="mt-1 text-xs sm:text-sm line-clamp-2"
                         style={{ color: "var(--text-secondary)" }}
                       >
                         {c.shortDescription || c.description}
@@ -816,9 +819,9 @@ export default function CourseDetails() {
 
       {/* Checkout Modal */}
       {showCheckout && orderInfo && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-3 sm:p-4">
           <div
-            className="rounded-xl shadow-xl w-full max-w-md p-6"
+            className="rounded-xl shadow-xl w-full max-w-sm sm:max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto"
             style={{
               background: "var(--surface)",
               border: "1px solid var(--border)",
@@ -826,7 +829,7 @@ export default function CourseDetails() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3
-                className="text-lg font-semibold"
+                className="text-base sm:text-lg font-semibold"
                 style={{ color: "var(--text-primary)" }}
               >
                 Confirm Purchase
@@ -839,7 +842,7 @@ export default function CourseDetails() {
                   setRefundAccepted(false);
                   setPrivacyAccepted(false);
                 }}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 text-lg sm:text-xl"
                 style={{ color: "var(--text-muted)" }}
               >
                 ✖
@@ -848,13 +851,13 @@ export default function CourseDetails() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span
-                  className="text-sm"
+                  className="text-xs sm:text-sm"
                   style={{ color: "var(--text-secondary)" }}
                 >
                   Original Price
                 </span>
                 <span
-                  className="text-sm line-through"
+                  className="text-xs sm:text-sm line-through"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {orderInfo.course.originalPrice
@@ -872,7 +875,7 @@ export default function CourseDetails() {
                   You Pay
                 </span>
                 <span
-                  className="text-xl font-bold"
+                  className="text-lg sm:text-xl font-bold"
                   style={{ color: "var(--brand)" }}
                 >
                   ₹{Number(orderInfo.course.price).toLocaleString("en-IN")}
@@ -881,10 +884,10 @@ export default function CourseDetails() {
             </div>
 
             {/* Terms and Conditions Checkboxes */}
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-2 sm:space-y-3">
               {/* Terms & Conditions Checkbox */}
               <div
-                className="p-3 rounded-lg border"
+                className="p-2 sm:p-3 rounded-lg border"
                 style={{
                   background: "var(--bg-secondary)",
                   border: "1px solid var(--border)",
@@ -895,14 +898,14 @@ export default function CourseDetails() {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded focus:ring-2"
+                    className="mt-0.5 sm:mt-1 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded focus:ring-2"
                     style={{
                       accentColor: "var(--brand)",
                       borderColor: "var(--border)",
                     }}
                   />
                   <span
-                    className="text-xs"
+                    className="text-xs leading-relaxed"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     I agree to the{" "}
@@ -919,7 +922,7 @@ export default function CourseDetails() {
 
               {/* Refund Policy Checkbox */}
               <div
-                className="p-3 rounded-lg border"
+                className="p-2 sm:p-3 rounded-lg border"
                 style={{
                   background: "var(--bg-secondary)",
                   border: "1px solid var(--border)",
@@ -930,14 +933,14 @@ export default function CourseDetails() {
                     type="checkbox"
                     checked={refundAccepted}
                     onChange={(e) => setRefundAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded focus:ring-2"
+                    className="mt-0.5 sm:mt-1 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded focus:ring-2"
                     style={{
                       accentColor: "var(--brand)",
                       borderColor: "var(--border)",
                     }}
                   />
                   <span
-                    className="text-xs"
+                    className="text-xs leading-relaxed"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     I agree to the{" "}
@@ -954,7 +957,7 @@ export default function CourseDetails() {
 
               {/* Privacy Policy Checkbox */}
               <div
-                className="p-3 rounded-lg border"
+                className="p-2 sm:p-3 rounded-lg border"
                 style={{
                   background: "var(--bg-secondary)",
                   border: "1px solid var(--border)",
@@ -965,14 +968,14 @@ export default function CourseDetails() {
                     type="checkbox"
                     checked={privacyAccepted}
                     onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded focus:ring-2"
+                    className="mt-0.5 sm:mt-1 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded focus:ring-2"
                     style={{
                       accentColor: "var(--brand)",
                       borderColor: "var(--border)",
                     }}
                   />
                   <span
-                    className="text-xs"
+                    className="text-xs leading-relaxed"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     I agree to the{" "}
@@ -991,7 +994,7 @@ export default function CourseDetails() {
             <button
               onClick={launchRazorpay}
               disabled={!termsAccepted || !refundAccepted || !privacyAccepted}
-              className={`mt-6 w-full font-semibold py-3 px-4 rounded-lg transition-colors ${
+              className={`mt-4 sm:mt-6 w-full font-semibold py-2.5 sm:py-3 px-4 rounded-lg transition-colors text-sm sm:text-base ${
                 termsAccepted && refundAccepted && privacyAccepted
                   ? "hover:opacity-90"
                   : "cursor-not-allowed opacity-50"
@@ -1010,7 +1013,7 @@ export default function CourseDetails() {
               Pay Now
             </button>
             <p
-              className="text-xs text-center mt-3"
+              className="text-xs text-center mt-2 sm:mt-3"
               style={{ color: "var(--text-muted)" }}
             >
               Secure payments by Razorpay

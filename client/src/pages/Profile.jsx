@@ -260,82 +260,82 @@ export default function Profile() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Header with Real-time Stats */}
-      <div className="card-premium p-8 mb-8" style={{ background: 'linear-gradient(135deg, var(--brand-strong), var(--brand))', color: 'white' }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)' }}>
+      <div className="card-premium p-4 sm:p-8 mb-6 sm:mb-8" style={{ background: 'linear-gradient(135deg, var(--brand-strong), var(--brand))', color: 'white' }}>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 sm:gap-0">
+          <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)' }}>
               <img 
                 src={user?.avatar || "/icons/profile.svg"} 
                 alt="Profile" 
-                className="w-16 h-16 rounded-full border-2"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2"
                 style={{ borderColor: 'rgba(255,255,255,0.3)' }}
               />
             </div>
-            <div>
-              <h1 className="text-3xl font-bold mb-2 text-white">
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">
                 {form.firstName} {form.lastName}
               </h1>
-              <p className="text-white/80 text-lg">{form.email}</p>
-              <p className="text-white/60 text-sm">
+              <p className="text-white/80 text-base sm:text-lg">{form.email}</p>
+              <p className="text-white/60 text-xs sm:text-sm">
                 Member since {new Date(user?.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-white">{stats?.enrolledCourses || 0}</div>
-            <div className="text-white/60 text-sm">Enrolled Courses</div>
+          <div className="text-center sm:text-right">
+            <div className="text-xl sm:text-2xl font-bold text-white">{stats?.enrolledCourses || 0}</div>
+            <div className="text-white/60 text-xs sm:text-sm">Enrolled Courses</div>
           </div>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="card-premium p-4 sm:p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Active Courses</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.enrolledCourses || 0}</p>
+              <p className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Active Courses</p>
+              <p className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.enrolledCourses || 0}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
-              <BookOpen size={20} style={{ color: 'var(--brand)' }} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
+              <BookOpen size={16} className="sm:w-5 sm:h-5" style={{ color: 'var(--brand)' }} />
             </div>
           </div>
         </div>
 
-        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
+        <div className="card-premium p-4 sm:p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Completed</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.completedCourses || 0}</p>
+              <p className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Completed</p>
+              <p className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.completedCourses || 0}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)', border: '1px solid var(--accent-gold)30' }}>
-              <CheckCircle size={20} style={{ color: 'var(--accent-gold)' }} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)', border: '1px solid var(--accent-gold)30' }}>
+              <CheckCircle size={16} className="sm:w-5 sm:h-5" style={{ color: 'var(--accent-gold)' }} />
             </div>
           </div>
         </div>
 
-        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
+        <div className="card-premium p-4 sm:p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Certificates</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.certificates || 0}</p>
+              <p className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Certificates</p>
+              <p className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.certificates || 0}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
-              <Award size={20} style={{ color: 'var(--accent-rose)' }} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
+              <Award size={16} className="sm:w-5 sm:h-5" style={{ color: 'var(--accent-rose)' }} />
             </div>
           </div>
         </div>
 
-        <div className="card-premium p-6 hover:scale-105 transition-all duration-300">
+        <div className="card-premium p-4 sm:p-6 hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Avg Progress</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.averageProgress || 0}%</p>
+              <p className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Avg Progress</p>
+              <p className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats?.averageProgress || 0}%</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)', border: '1px solid var(--brand-strong)30' }}>
-              <TrendingUp size={20} style={{ color: 'var(--brand-strong)' }} />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)', border: '1px solid var(--brand-strong)30' }}>
+              <TrendingUp size={16} className="sm:w-5 sm:h-5" style={{ color: 'var(--brand-strong)' }} />
             </div>
           </div>
         </div>

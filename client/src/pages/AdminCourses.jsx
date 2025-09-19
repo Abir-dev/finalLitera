@@ -353,39 +353,41 @@ export default function AdminCourses() {
 return (
   <div className="space-y-6">
     {/* Enhanced Page Header */}
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
-        <h1 className="text-3xl font-bold text-white">Course Management</h1>
-        <p className="text-gray-300 mt-1">Manage your courses and content</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Course Management</h1>
+        <p className="text-gray-300 mt-1 text-sm sm:text-base">Manage your courses and content</p>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
         <button
-          className="btn-outline-premium px-6 py-3 text-sm font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
+          className="btn-outline-premium px-4 py-2 sm:px-6 sm:py-3 text-sm font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300 justify-center"
         >
           <Link size={16} />
-          Manage Live Links
+          <span className="hidden sm:inline">Manage Live Links</span>
+          <span className="sm:hidden">Live Links</span>
         </button>
         <button
           onClick={openAddModal}
-          className="btn-premium px-6 py-3 text-sm font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
+          className="btn-premium px-4 py-2 sm:px-6 sm:py-3 text-sm font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300 justify-center"
         >
           <Plus size={16} />
-          Add New Course
+          <span className="hidden sm:inline">Add New Course</span>
+          <span className="sm:hidden">Add Course</span>
         </button>
       </div>
     </div>
 
     {/* Premium Filters and Search */}
-    <div className="card-premium p-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-2 relative">
-          <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+    <div className="card-premium p-4 sm:p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="sm:col-span-2 lg:col-span-2 relative">
+          <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search courses by title, description, or instructor..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-premium w-full pl-10"
+            className="input-premium w-full pl-10 text-sm sm:text-base"
           />
         </div>
         <div className="relative">
@@ -393,7 +395,7 @@ return (
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="input-premium w-full pl-10"
+            className="input-premium w-full pl-10 text-sm sm:text-base"
           >
             {availableCategories.map(category => (
               <option key={category} value={category}>
@@ -407,7 +409,7 @@ return (
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="input-premium w-full pl-10"
+            className="input-premium w-full pl-10 text-sm sm:text-base"
           >
             {statuses.map(status => (
               <option key={status} value={status}>
@@ -420,19 +422,19 @@ return (
     </div>
 
     {/* Course Count Header */}
-    <div className="flex items-center justify-between">
-      <h2 className="text-xl font-semibold text-white">All Courses ({filteredCourses.length})</h2>
-      <div className="flex items-center gap-2 text-sm text-gray-400">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <h2 className="text-lg sm:text-xl font-semibold text-white">All Courses ({filteredCourses.length})</h2>
+      <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
         <span>Showing {filteredCourses.length} of {courses.length} courses</span>
       </div>
     </div>
 
     {/* Enhanced Courses Grid with Consistent Heights */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {filteredCourses.map((course) => (
         <div key={course.id} className="card-premium overflow-hidden group hover-lift relative flex flex-col h-full">
           {/* Enhanced Course Image / Cover */}
-          <div className="relative h-56 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
+          <div className="relative h-48 sm:h-56 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
             {(() => {
               const explicitThumb = course.thumbnail || null;
               const firstThumb = course.modules?.find(m => m.thumbnailPreview)?.thumbnailPreview;
@@ -514,49 +516,49 @@ return (
           </div>
 
           {/* Enhanced Course Content with Consistent Height */}
-          <div className="p-6 flex flex-col flex-1">
+          <div className="p-4 sm:p-6 flex flex-col flex-1">
             {/* Course Header */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <span className="text-xs font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
                   {course.category}
                 </span>
-                <div className="flex items-center gap-1 text-sm text-gray-400">
-                  <Clock size={14} />
+                <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-400">
+                  <Clock size={12} className="sm:w-3.5 sm:h-3.5" />
                   <span>{course.duration}</span>
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold mb-3 line-clamp-2 text-white group-hover:text-blue-400 transition-colors duration-300">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 line-clamp-2 text-white group-hover:text-blue-400 transition-colors duration-300">
                 {course.title}
               </h3>
 
-              <p className="text-sm text-gray-300 line-clamp-2 mb-4">
+              <p className="text-xs sm:text-sm text-gray-300 line-clamp-2 mb-4">
                 {course.description}
               </p>
             </div>
 
             {/* Enhanced Course Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="text-center p-3 rounded-lg bg-white/5 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
-                <div className="flex items-center justify-center mb-2">
-                  <BookOpen size={16} className="text-blue-400" />
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="text-center p-2 sm:p-3 rounded-lg bg-white/5 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
+                <div className="flex items-center justify-center mb-1 sm:mb-2">
+                  <BookOpen size={14} className="sm:w-4 sm:h-4 text-blue-400" />
                 </div>
-                <div className="text-lg font-bold text-white">{course.modules?.length || 0}</div>
+                <div className="text-sm sm:text-lg font-bold text-white">{course.modules?.length || 0}</div>
                 <div className="text-xs text-gray-400">Modules</div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-white/5 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
-                <div className="flex items-center justify-center mb-2">
-                  <Users size={16} className="text-green-400" />
+              <div className="text-center p-2 sm:p-3 rounded-lg bg-white/5 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
+                <div className="flex items-center justify-center mb-1 sm:mb-2">
+                  <Users size={14} className="sm:w-4 sm:h-4 text-green-400" />
                 </div>
-                <div className="text-lg font-bold text-white">{course.students || 0}</div>
+                <div className="text-sm sm:text-lg font-bold text-white">{course.students || 0}</div>
                 <div className="text-xs text-gray-400">Students</div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-white/5 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
-                <div className="flex items-center justify-center mb-2">
-                  <Star size={16} className="text-yellow-400" />
+              <div className="text-center p-2 sm:p-3 rounded-lg bg-white/5 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
+                <div className="flex items-center justify-center mb-1 sm:mb-2">
+                  <Star size={14} className="sm:w-4 sm:h-4 text-yellow-400" />
                 </div>
-                <div className="text-lg font-bold text-white">{course.rating || 0}</div>
+                <div className="text-sm sm:text-lg font-bold text-white">{course.rating || 0}</div>
                 <div className="text-xs text-gray-400">Rating</div>
               </div>
             </div>
@@ -566,16 +568,17 @@ return (
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <button
                   onClick={() => setPreviewCourse(course)}
-                  className="btn-outline-premium px-3 py-2.5 text-sm font-medium flex items-center justify-center gap-2 hover:scale-105 transition-all duration-300"
+                  className="btn-outline-premium px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 hover:scale-105 transition-all duration-300"
                 >
-                  <Eye size={16} />
-                  Preview
+                  <Eye size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Preview</span>
+                  <span className="sm:hidden">View</span>
                 </button>
                 <button
                   onClick={() => openEditModal(course)}
-                  className="btn-premium px-3 py-2.5 text-sm font-medium flex items-center justify-center gap-2 hover:scale-105 transition-all duration-300"
+                  className="btn-premium px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 hover:scale-105 transition-all duration-300"
                 >
-                  <Edit size={16} />
+                  <Edit size={14} className="sm:w-4 sm:h-4" />
                   Edit
                 </button>
               </div>
@@ -583,7 +586,7 @@ return (
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handleStatusToggle(course.id, course.status === "published" ? "draft" : "published")}
-                  className={`px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 ${
+                  className={`px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 hover:scale-105 ${
                     course.status === "published"
                       ? "bg-gradient-to-r from-yellow-600 to-orange-600 text-white hover:from-yellow-700 hover:to-orange-700"
                       : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
@@ -591,22 +594,25 @@ return (
                 >
                   {course.status === "published" ? (
                     <>
-                      <EyeOff size={16} />
-                      Unpublish
+                      <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Unpublish</span>
+                      <span className="sm:hidden">Hide</span>
                     </>
                   ) : (
                     <>
-                      <EyeIcon size={16} />
-                      Publish
+                      <EyeIcon size={14} className="sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Publish</span>
+                      <span className="sm:hidden">Show</span>
                     </>
                   )}
                 </button>
                 <button
                   onClick={() => handleDeleteCourse(course.id)}
-                  className="px-3 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105"
+                  className="px-2 sm:px-3 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs sm:text-sm font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 hover:scale-105"
                 >
-                  <Trash2 size={16} />
-                  Delete
+                  <Trash2 size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Delete</span>
+                  <span className="sm:hidden">Del</span>
                 </button>
               </div>
             </div>
