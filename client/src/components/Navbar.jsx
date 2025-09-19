@@ -143,7 +143,7 @@ export default function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <img src={Logo} alt="Logo" className="h-15 w-15" />
-              <span className="hidden md:inline text-lg font-bold text-white">
+              <span className="hidden md:inline text-lg font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent ">
                 Litera
               </span>
             </Link>
@@ -244,7 +244,7 @@ export default function Navbar() {
                       className="w-10 h-10 rounded-full border cursor-pointer"
                       onClick={handleProfileClick}
                     />
-                    <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg p-2 min-w-[120px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="absolute right-0 mt-5 bg-white shadow-lg rounded-lg p-2 min-w-[120px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                       <p className="px-4 py-2 text-gray-700 font-medium">
                         {user.firstName || user.email?.split("@")[0]}
                       </p>

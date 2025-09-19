@@ -60,7 +60,7 @@ export default function Home() {
 
               <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
                 Transform Your Future with{" "}
-                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-9xl">
                   LITERA
                 </span>
               </h1>
@@ -121,7 +121,7 @@ export default function Home() {
               
               {/* Main Image Container */}
               <div className="relative">
-                <div className="card-premium p-4 group hover-lift">
+                <div className=" p-4 group hover-lift">
                   <img 
                     src={pic5} 
                     alt="Student Learning" 
@@ -256,7 +256,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <div className="relative reveal">
             <div className="absolute -left-8 -bottom-8 w-48 h-48 rounded-full opacity-15 blur-3xl" style={{ background: 'linear-gradient(135deg, var(--brand), var(--accent-rose))' }} />
-            <div className="card-premium p-4">
+            <div className=" p-4">
               <img
                 src={pic6}
                 alt="Expert Mentor"
