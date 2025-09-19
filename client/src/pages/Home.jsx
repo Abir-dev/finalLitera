@@ -53,7 +53,7 @@ export default function Home() {
             {/* Left Content */}
             <RevealOnScroll direction="left" delay={200}>
               {/* Premium Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full mb-5 mt-4">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-sm font-semibold text-white">Premium Learning Platform</span>
               </div>
@@ -241,9 +241,9 @@ export default function Home() {
           <div className="mt-12 text-center">
             <Link
               to="/courses"
-              className="inline-flex items-center justify-center rounded-full border-2 border-[#1B4A8B] bg-[#1B4A8B] text-white font-semibold px-8 py-4 shadow-lg hover:bg-white hover:text-[#1B4A8B] hover:border-[#1B4A8B] transition-all duration-300 transform hover:scale-105"
+              className="inline-flex items-center justify-center btn-premium  font-semibold px-8 py-5 shadow-lg"
             >
-              <span className="mr-2">🚀</span>
+              <span className="mr-2"></span>
               View All Courses
               <span className="ml-2">→</span>
             </Link>

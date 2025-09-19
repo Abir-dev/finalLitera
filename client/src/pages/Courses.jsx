@@ -644,7 +644,7 @@ export default function Courses() {
                   to="/signup"
                   className="btn-premium px-8 py-4 text-lg font-semibold"
                 >
-                  <span className="mr-2">🚀</span>
+                  <span className="mr-2"></span>
                   Get Started Today
                   <span className="ml-2">→</span>
                 </Link>
