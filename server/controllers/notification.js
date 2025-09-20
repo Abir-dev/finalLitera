@@ -796,3 +796,118 @@ export const sendInactivityReminder = async (req, res) => {
     });
   }
 };
+
+// @desc    Get user notification preferences
+// @route   GET /api/notifications/preferences
+// @access  Private
+export const getNotificationPreferences = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Initialize preferences if they don't exist
+    if (!user.preferences) {
+      user.preferences = {
+        notifications: {
+          email: true,
+          push: true,
+          courseUpdates: true,
+          marketing: false,
+        },
+        language: "en",
+        timezone: "UTC",
+      };
+      await user.save();
+    } else if (!user.preferences.notifications) {
+      user.preferences.notifications = {
+        email: true,
+        push: true,
+        courseUpdates: true,
+        marketing: false,
+      };
+      await user.save();
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        preferences: user.preferences.notifications,
+      },
+    });
+  } catch (error) {
+    console.error("Get notification preferences error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to get notification preferences",
+    });
+  }
+};
+
+// @desc    Update user notification preferences
+// @route   PUT /api/notifications/preferences
+// @access  Private
+export const updateNotificationPreferences = async (req, res) => {
+  try {
+    const { email, push, courseUpdates, marketing } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Initialize preferences if they don't exist
+    if (!user.preferences) {
+      user.preferences = {
+        notifications: {
+          email: true,
+          push: true,
+          courseUpdates: true,
+          marketing: false,
+        },
+        language: "en",
+        timezone: "UTC",
+      };
+    } else if (!user.preferences.notifications) {
+      user.preferences.notifications = {
+        email: true,
+        push: true,
+        courseUpdates: true,
+        marketing: false,
+      };
+    }
+
+    // Update notification preferences
+    if (email !== undefined) user.preferences.notifications.email = email;
+    if (push !== undefined) user.preferences.notifications.push = push;
+    if (courseUpdates !== undefined)
+      user.preferences.notifications.courseUpdates = courseUpdates;
+    if (marketing !== undefined)
+      user.preferences.notifications.marketing = marketing;
+
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Notification preferences updated successfully",
+      data: {
+        preferences: user.preferences.notifications,
+      },
+    });
+  } catch (error) {
+    console.error("Update notification preferences error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update notification preferences",
+    });
+  }
+};

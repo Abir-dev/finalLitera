@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import LoginModal from "./LoginModal.jsx";
 import SignupModal from "./SignupModal.jsx";
 import Logo from "../assets/kinglogo.png";
-import axios from "axios";
+import { notificationService } from "../services/notificationService";
 import { io } from "socket.io-client";
 
 const navItems = [
@@ -51,15 +51,11 @@ export default function Navbar() {
   // ✅ Notifications + socket
   useEffect(() => {
     if (!user) return;
-    
-    const token = localStorage.getItem("token");
+
     const fetchRecent = async () => {
       try {
-        const res = await axios.get(`${backendURL}/api/notifications?limit=5`, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        });
-        const list = (res.data?.data?.notifications || []).map((n) => ({
+        const res = await notificationService.getNotifications({ limit: 5 });
+        const list = (res?.data?.notifications || []).map((n) => ({
           id: n._id,
           title: n.title,
           message: n.message,
@@ -68,9 +64,9 @@ export default function Navbar() {
           isRead: n.isRead,
         }));
         setNotifications(list);
-        setUnreadCount(res.data?.data?.pagination?.unreadCount || 0);
+        setUnreadCount(res?.data?.pagination?.unreadCount || 0);
       } catch (error) {
-        console.warn('Failed to fetch notifications:', error.message);
+        console.warn("Failed to fetch notifications:", error.message);
       }
     };
     fetchRecent();
@@ -88,14 +84,14 @@ export default function Navbar() {
       });
 
       socket.on("connect", () => {
-        console.log('Navbar socket connected');
+        console.log("Navbar socket connected");
         if (user?.id || user?._id) {
           socket.emit("register_user", user.id || user._id);
         }
       });
 
       socket.on("connect_error", (error) => {
-        console.warn('Navbar socket connection error:', error.message);
+        console.warn("Navbar socket connection error:", error.message);
       });
 
       socket.on("new_notification", (payload) => {
@@ -112,9 +108,8 @@ export default function Navbar() {
         ]);
         setUnreadCount((c) => c + 1);
       });
-
     } catch (error) {
-      console.warn('Failed to initialize navbar socket:', error.message);
+      console.warn("Failed to initialize navbar socket:", error.message);
     }
 
     return () => {
@@ -124,7 +119,7 @@ export default function Navbar() {
           socket.disconnect();
         }
       } catch (error) {
-        console.warn('Error disconnecting navbar socket:', error.message);
+        console.warn("Error disconnecting navbar socket:", error.message);
       }
     };
   }, [user, backendURL]);
@@ -153,6 +148,25 @@ export default function Navbar() {
     navigate("/");
   };
 
+  // Function to refresh notification count (can be called from other components)
+  const refreshNotificationCount = async () => {
+    if (!user) return;
+    try {
+      const res = await notificationService.getNotificationCount();
+      setUnreadCount(res?.data?.unreadCount || 0);
+    } catch (error) {
+      console.warn("Failed to refresh notification count:", error.message);
+    }
+  };
+
+  // Expose refresh function globally for other components to use
+  useEffect(() => {
+    window.refreshNotificationCount = refreshNotificationCount;
+    return () => {
+      delete window.refreshNotificationCount;
+    };
+  }, [user]);
+
   return (
     <>
       <motion.header
@@ -168,7 +182,11 @@ export default function Navbar() {
           <div className="h-14 md:h-16 flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
-              <img src={Logo} alt="Logo" className="h-10 w-10 md:h-12 md:w-12" />
+              <img
+                src={Logo}
+                alt="Logo"
+                className="h-10 w-10 md:h-12 md:w-12"
+              />
               <span className="hidden sm:inline text-base md:text-lg font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent ">
                 Litera
               </span>
@@ -298,7 +316,11 @@ export default function Navbar() {
                   className="p-1.5 md:p-2 text-slate-200 hover:text-white transition-colors cursor-pointer"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
-                  {isMobileMenuOpen ? <X size={18} className="md:w-5 md:h-5" /> : <Menu size={18} className="md:w-5 md:h-5" />}
+                  {isMobileMenuOpen ? (
+                    <X size={18} className="md:w-5 md:h-5" />
+                  ) : (
+                    <Menu size={18} className="md:w-5 md:h-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -323,7 +345,9 @@ export default function Navbar() {
                 end={item.href === "/"}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`block w-full nav-link text-sm md:text-base py-2 px-3 rounded-lg transition-colors ${
-                  location.pathname === item.href ? "text-white bg-white/10" : "hover:bg-white/5"
+                  location.pathname === item.href
+                    ? "text-white bg-white/10"
+                    : "hover:bg-white/5"
                 }`}
               >
                 {item.name}
