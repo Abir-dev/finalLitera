@@ -12,11 +12,11 @@ export default function RootLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      {!location.pathname.startsWith('/admin/login') && <Navbar />}
       <main className={`flex-1 ${isFullWidth ? '' : 'container-premium'}`}>
         <Outlet />
       </main>
-      <Footer />
+      {!location.pathname.startsWith('/admin/login') && <Footer />}
     </div>
   );
 }
