@@ -9,14 +9,15 @@ import {
   updateAdmin,
   deleteAdmin,
 } from "../controllers/adminController.js";
-import { 
-  sendMaintenanceNotice, 
-  sendNotification 
+import {
+  sendMaintenanceNotice,
+  sendNotification,
+  sendCoursePublishedNotification,
+  sendCourseUpdateNotification,
+  cleanupExpiredNotifications,
+  getNotificationStats,
+  sendInactivityReminder,
 } from "../controllers/notification.js";
-import { 
-  sendSystemAnnouncement,
-  getNotificationStats 
-} from "../services/notificationService.js";
 import {
   adminAuth,
   superAdminAuth,
@@ -77,37 +78,43 @@ router.post(
   "/notifications/announcement",
   adminAuth,
   requirePermission("notifications"),
-  async (req, res) => {
-    try {
-      const { title, message, priority } = req.body;
-      
-      if (!title || !message) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Title and message are required'
-        });
-      }
-      
-      // Get socket.io instance if available
-      const io = req.app.get('io');
-      
-      const count = await sendSystemAnnouncement(title, message, priority, io);
-      
-      res.status(200).json({
-        status: 'success',
-        message: 'System announcement sent successfully',
-        data: {
-          recipientsCount: count
-        }
-      });
-    } catch (error) {
-      console.error('Send system announcement error:', error);
-      res.status(500).json({
-        status: 'error',
-        message: 'Failed to send system announcement'
-      });
-    }
-  }
+  sendNotification
+);
+
+// @route   POST /api/admin/notifications/course-published
+// @access  Private/Admin
+router.post(
+  "/notifications/course-published",
+  adminAuth,
+  requirePermission("notifications"),
+  sendCoursePublishedNotification
+);
+
+// @route   POST /api/admin/notifications/course-update
+// @access  Private/Admin
+router.post(
+  "/notifications/course-update",
+  adminAuth,
+  requirePermission("notifications"),
+  sendCourseUpdateNotification
+);
+
+// @route   POST /api/admin/notifications/cleanup
+// @access  Private/Admin
+router.post(
+  "/notifications/cleanup",
+  adminAuth,
+  requirePermission("notifications"),
+  cleanupExpiredNotifications
+);
+
+// @route   POST /api/admin/notifications/inactivity-reminder
+// @access  Private/Admin
+router.post(
+  "/notifications/inactivity-reminder",
+  adminAuth,
+  requirePermission("notifications"),
+  sendInactivityReminder
 );
 
 // @route   GET /api/admin/notifications/stats
@@ -116,22 +123,7 @@ router.get(
   "/notifications/stats",
   adminAuth,
   requirePermission("notifications"),
-  async (req, res) => {
-    try {
-      const stats = await getNotificationStats();
-      
-      res.status(200).json({
-        status: 'success',
-        data: stats
-      });
-    } catch (error) {
-      console.error('Get notification stats error:', error);
-      res.status(500).json({
-        status: 'error',
-        message: 'Failed to get notification statistics'
-      });
-    }
-  }
+  getNotificationStats
 );
 
 // @desc    Update admin profile
@@ -205,7 +197,11 @@ router.post("/students/:id/assign-course", adminAuth, assignCourseToStudent);
 // @desc    Remove course from student (Admin)
 // @route   DELETE /api/admin/students/:id/courses/:courseId
 // @access  Private/Admin
-router.delete("/students/:id/courses/:courseId", adminAuth, removeCourseFromStudent);
+router.delete(
+  "/students/:id/courses/:courseId",
+  adminAuth,
+  removeCourseFromStudent
+);
 
 // @desc    Get student progress report (Admin)
 // @route   GET /api/admin/students/:id/progress
