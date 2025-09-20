@@ -6,6 +6,7 @@ import profileService from "../services/profileService.js";
 const styles = {
   brandBlue: "#18457A",
   liveRed: "#D14343",
+  navyblue: "#18457A",
 };
 
 function LiveBadge() {
@@ -322,7 +323,7 @@ export default function LiveClasses() {
       </section>
 
       {/* AI Features List */}
-      <div className="mt-12 bg-white border rounded-xl p-6">
+      <div className="mt-12 bg-navyblue text-white border rounded-xl p-6">
         <h3 className="text-lg font-semibold text-slate-900 mb-4">AI-Powered Features</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Feature 1 */}
