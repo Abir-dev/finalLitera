@@ -274,7 +274,7 @@ function SkillRequirement({ skill, icon, color }) {
         <div className={`w-12 h-12 bg-${color}-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
           <span className="text-2xl">{icon}</span>
         </div>
-        <span className="font-bold text-gray-900 text-lg">{skill}</span>
+        <span className="font-bold text-black text-lg">{skill}</span>
       </div>
     </div>
   );
@@ -410,29 +410,29 @@ export default function AlgoBridge() {
         <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
           🚀 AlgoBridge
         </h1>
-        <p className="text-2xl md:text-3xl font-bold text-gray-700 mb-3">
+        <p className="text-2xl md:text-3xl font-bold text-black mb-3">
           Master Algorithms Through Interactive Learning
         </p>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg text-black max-w-3xl mx-auto leading-relaxed">
           Experience the future of algorithmic education with our comprehensive exam platform,
           competitive contests, and real-time leaderboards designed to challenge and inspire.
         </p>
       </div>
 
       {/* NEW: Company Logos Showcase */}
-      <div className="mb-16 bg-gradient-to-r from-gray-50 to-blue-50 rounded-3xl p-8 border-2 border-blue-200 shadow-xl">
+      <div className="mb-16 bg-navyblue text-white rounded-3xl p-8 border-2 border-blue-200 shadow-xl">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
             🏢 Official Partners & Certifiers
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-white max-w-2xl mx-auto">
             Get certified by industry leaders and unlock opportunities at top tech companies
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center group">
-            <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-blue-300">
+            <div className="bg-navyblue rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-blue-300">
               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
                 <img
                   src={GoogleLogo}
@@ -440,8 +440,8 @@ export default function AlgoBridge() {
                   className="w-20 h-20 object-contain"
                 />
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-2">Google</h3>
-              <p className="text-sm text-gray-600">Search & AI Algorithms</p>
+              <h3 className="text-xl font-black text-white mb-2">Google</h3>
+              <p className="text-sm text-white">Search & AI Algorithms</p>
               <div className="mt-3 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
                 Official Partner
               </div>
@@ -449,7 +449,7 @@ export default function AlgoBridge() {
           </div>
 
           <div className="text-center group">
-            <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-purple-300">
+            <div className="bg-navyblue rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-purple-300">
               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
                 <img
                   src={MetaLogo}
@@ -457,8 +457,8 @@ export default function AlgoBridge() {
                   className="w-20 h-20 object-contain"
                 />
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-2">Meta</h3>
-              <p className="text-sm text-gray-600">Social Media & AI</p>
+              <h3 className="text-xl font-black text-white mb-2">Meta</h3>
+              <p className="text-sm text-white">Social Media & AI</p>
               <div className="mt-3 px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-xs font-bold">
                 Official Partner
               </div>
@@ -466,7 +466,7 @@ export default function AlgoBridge() {
           </div>
 
           <div className="text-center group">
-            <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-green-300">
+            <div className="bg-navyblue rounded-2xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-green-300">
               <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
                 <img
                   src={MicrosoftLogo}
@@ -474,8 +474,8 @@ export default function AlgoBridge() {
                   className="w-20 h-20 object-contain"
                 />
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-2">Microsoft</h3>
-              <p className="text-sm text-gray-600">Enterprise & Cloud</p>
+              <h3 className="text-xl font-black text-white mb-2">Microsoft</h3>
+              <p className="text-sm text-white">Enterprise & Cloud</p>
               <div className="mt-3 px-4 py-2 bg-green-100 text-green-800 rounded-full text-xs font-bold">
                 Official Partner
               </div>
@@ -498,21 +498,21 @@ export default function AlgoBridge() {
           <h2 className="text-4xl md:text-5xl font-black mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
             🏢 Why AlgoBridge?
           </h2>
-          <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl text-black max-w-4xl mx-auto leading-relaxed">
             Your career launchpad, connecting ambitious students with opportunities at Google, Meta, Microsoft and other top MNCs.
           </p>
         </div>
 
         {/* Triple Certification Banner */}
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 mb-12 text-white shadow-2xl">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 mb-12 text-black shadow-2xl">
           <div className="text-center mb-8">
             <h3 className="text-3xl font-black mb-4">🏆 Achieve Triple Certification</h3>
-            <p className="text-xl opacity-90">
+            <p className="text-xl opacity-90 text-black">
               From Google, Meta, and Microsoft simultaneously, by scoring a minimum of 60% in our qualifying exam.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-transparent font-black text-black">
             <CompanyLogo
               company="Google"
               logoImage={GoogleLogo}
@@ -532,10 +532,10 @@ export default function AlgoBridge() {
         </div>
 
         {/* Target Audience */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 text-black">
           {/* CSE/IT/ECE/BCA/MCA Students */}
           <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-3xl p-8 border-2 border-green-200 shadow-xl">
-            <h3 className="text-2xl font-black text-gray-900 mb-6 text-center">🎓 For CSE/IT/ECE/BCA/MCA Students</h3>
+            <h3 className="text-2xl font-bold text-black mb-6 text-center">🎓 For CSE/IT/ECE/BCA/MCA Students</h3>
             <div className="grid grid-cols-2 gap-4">
               <SkillRequirement skill="Quantitative Aptitude" icon="🧮" color="green" />
               <SkillRequirement skill="Logical Reasoning" icon="🧩" color="blue" />
@@ -548,7 +548,7 @@ export default function AlgoBridge() {
 
           {/* Other B-Tech Branches */}
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 border-2 border-purple-200 shadow-xl">
-            <h3 className="text-2xl font-black text-gray-900 mb-6 text-center">⚡ For Other B-Tech Branches</h3>
+            <h3 className="text-2xl font-black text-black mb-6 text-center">⚡ For Other B-Tech Branches</h3>
             <div className="grid grid-cols-1 gap-4">
               <SkillRequirement skill="Quantitative Aptitude" icon="🧮" color="purple" />
               <SkillRequirement skill="Logical Reasoning" icon="🧩" color="pink" />
@@ -559,8 +559,8 @@ export default function AlgoBridge() {
 
         {/* Your Direct Path to Top MNCs */}
         <div className="text-center mb-8">
-          <h3 className="text-3xl font-black text-gray-900 mb-4">🚀 Your Direct Path to Top MNCs</h3>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <h3 className="text-3xl font-black text-black mb-4">🚀 Your Direct Path to Top MNCs</h3>
+          <p className="text-lg text-black max-w-3xl mx-auto">
             We provide comprehensive support to help you land your dream job at top multinational companies.
           </p>
         </div>
@@ -588,28 +588,28 @@ export default function AlgoBridge() {
         </div>
 
         {/* Success Statistics */}
-        <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-3xl p-8 border-2 border-indigo-200 shadow-xl">
+        <div className="bg-navyblue rounded-3xl p-8 border-2 border-indigo-200 shadow-xl">
           <div className="text-center mb-8">
-            <h3 className="text-3xl font-black text-gray-900 mb-4">📊 Success Statistics</h3>
-            <p className="text-lg text-gray-600">Join thousands of successful candidates who have transformed their careers</p>
+            <h3 className="text-3xl font-black text-white mb-4">📊 Success Statistics</h3>
+            <p className="text-lg text-white">Join thousands of successful candidates who have transformed their careers</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center group">
-              <div className="text-4xl font-black text-indigo-600 group-hover:scale-110 transition-transform duration-300">95%</div>
-              <div className="text-lg font-bold text-gray-700">Placement Rate</div>
+              <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">95%</div>
+              <div className="text-lg font-bold text-white">Placement Rate</div>
             </div>
             <div className="text-center group">
-              <div className="text-4xl font-black text-purple-600 group-hover:scale-110 transition-transform duration-300">500+</div>
-              <div className="text-lg font-bold text-gray-700">Companies</div>
+              <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">500+</div>
+              <div className="text-lg font-bold text-white">Companies</div>
             </div>
             <div className="text-center group">
-              <div className="text-4xl font-black text-pink-600 group-hover:scale-110 transition-transform duration-300">10K+</div>
-              <div className="text-lg font-bold text-gray-700">Students Placed</div>
+              <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">10K+</div>
+              <div className="text-lg font-bold text-white">Students Placed</div>
             </div>
             <div className="text-center group">
-              <div className="text-4xl font-black text-blue-600 group-hover:scale-110 transition-transform duration-300">₹15L</div>
-              <div className="text-lg font-bold text-gray-700">Avg Package</div>
+              <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">₹15L</div>
+              <div className="text-lg font-bold text-white">Avg Package</div>
             </div>
           </div>
         </div>
@@ -618,23 +618,23 @@ export default function AlgoBridge() {
 
 
       {/* Enhanced Stats Banner */}
-      <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-blue-200 rounded-3xl p-8 mb-12">
+      <div className="bg-navyblue border-2 border-blue-200 rounded-3xl p-8 mb-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="text-center group">
-            <div className="text-4xl font-black text-blue-900 group-hover:scale-110 transition-transform duration-300">{exams.length}</div>
-            <div className="text-lg font-bold text-blue-700">Available Exams</div>
+            <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">{exams.length}</div>
+            <div className="text-lg font-bold text-white">Available Exams</div>
           </div>
           <div className="text-center group">
-            <div className="text-4xl font-black text-purple-900 group-hover:scale-110 transition-transform duration-300">{contests.length}</div>
-            <div className="text-lg font-bold text-purple-700">Active Contests</div>
+            <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">{contests.length}</div>
+            <div className="text-lg font-bold text-white">Active Contests</div>
           </div>
           <div className="text-center group">
-            <div className="text-4xl font-black text-green-900 group-hover:scale-110 transition-transform duration-300">2.5K+</div>
-            <div className="text-lg font-bold text-green-700">Students Enrolled</div>
+            <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">2.5K+</div>
+            <div className="text-lg font-bold text-white">Students Enrolled</div>
           </div>
           <div className="text-center group">
-            <div className="text-4xl font-black text-orange-900 group-hover:scale-110 transition-transform duration-300">₹8L+</div>
-            <div className="text-lg font-bold text-orange-700">Total Prizes</div>
+            <div className="text-4xl font-black text-white group-hover:scale-110 transition-transform duration-300">₹8L+</div>
+            <div className="text-lg font-bold text-white">Total Prizes</div>
           </div>
         </div>
       </div>
@@ -674,7 +674,7 @@ export default function AlgoBridge() {
       {activeTab === 'exams' && (
         <div>
           <div className="mb-8">
-            <h2 className="text-3xl font-black text-gray-900 mb-6 text-center">
+            <h2 className="text-3xl font-black text-black mb-6 text-center">
               🎯 Available Exams & Practice Tests
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -693,7 +693,7 @@ export default function AlgoBridge() {
       {activeTab === 'contests' && (
         <div>
           <div className="mb-8">
-            <h2 className="text-3xl font-black text-gray-900 mb-6 text-center">
+            <h2 className="text-3xl font-black text-black mb-6 text-center">
               🏆 Active & Upcoming Contests
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -712,7 +712,7 @@ export default function AlgoBridge() {
       {activeTab === 'leaderboard' && (
         <div>
           <div className="mb-8">
-            <h2 className="text-3xl font-black text-gray-900 mb-6 text-center">
+            <h2 className="text-3xl font-black text-black mb-6 text-center">
               🏅 Top Performers
             </h2>
             <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-xl">
@@ -729,14 +729,14 @@ export default function AlgoBridge() {
                       <div className="flex items-center space-x-6">
                         <span className="text-4xl">{player.badge}</span>
                         <div>
-                          <div className="text-2xl font-black text-gray-900">{player.name}</div>
-                          <div className="text-lg text-gray-600 font-semibold">Rank #{player.rank}</div>
+                          <div className="text-2xl font-black text-black">{player.name}</div>
+                          <div className="text-lg text-black font-semibold">Rank #{player.rank}</div>
                           <div className="text-sm text-blue-600 font-bold">🔥 {player.streak} day streak</div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-3xl font-black text-blue-600">{player.score} pts</div>
-                        <div className="text-lg text-gray-600 font-semibold">{player.contests} contests</div>
+                        <div className="text-lg text-black font-semibold">{player.contests} contests</div>
                       </div>
                     </div>
                   ))}
@@ -748,8 +748,8 @@ export default function AlgoBridge() {
       )}
 
       {/* Enhanced Quick Actions */}
-      <div className="mt-12 bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 border-2 border-green-200 rounded-3xl p-8">
-        <h3 className="text-3xl font-black text-gray-900 mb-8 text-center">⚡ Quick Actions</h3>
+      <div className="mt-12 bg-navyblue border-none border-green-200 rounded-3xl p-8">
+        <h3 className="text-3xl font-black text-white mb-8 text-center">⚡ Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <button
             onClick={() => handleQuickAction('Create Practice Test')}
@@ -762,8 +762,8 @@ export default function AlgoBridge() {
                 </svg>
               </div>
               <div>
-                <div className="text-xl font-black text-gray-900">Create Practice Test</div>
-                <div className="text-base text-gray-600">Customize your learning experience</div>
+                <div className="text-xl font-black text-black">Create Practice Test</div>
+                <div className="text-base text-black">Customize your learning experience</div>
               </div>
             </div>
           </button>
@@ -779,8 +779,8 @@ export default function AlgoBridge() {
                 </svg>
               </div>
               <div>
-                <div className="text-xl font-black text-gray-900">Join Live Contest</div>
-                <div className="text-base text-gray-600">Real-time competitive programming</div>
+                <div className="text-xl font-black text-black">Join Live Contest</div>
+                <div className="text-base text-black">Real-time competitive programming</div>
               </div>
             </div>
           </button>
@@ -796,8 +796,8 @@ export default function AlgoBridge() {
                 </svg>
               </div>
               <div>
-                <div className="text-xl font-black text-gray-900">View Analytics</div>
-                <div className="text-base text-gray-600">Track your progress & performance</div>
+                <div className="text-xl font-black text-black">View Analytics</div>
+                <div className="text-base text-black">Track your progress & performance</div>
               </div>
             </div>
           </button>
