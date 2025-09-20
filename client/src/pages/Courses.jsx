@@ -13,6 +13,51 @@ import AiPic from "../assets/Ai-pic.jpg";
 import ReactPic from "../assets/react-pic.jpg";
 import courses1 from "../assets/courses1.jpg";
 
+/**
+ * FULLY RESPONSIVE COURSES PAGE
+ * 
+ * This component is optimized for all device sizes with the following responsive features:
+ * 
+ * Mobile (< 640px):
+ * - Compact header with abbreviated category labels
+ * - Single-column course grid
+ * - Simplified search and filters
+ * - Mobile-optimized pagination (3 pages max)
+ * - Touch-friendly buttons and spacing
+ * 
+ * Tablet (640px - 1024px):
+ * - 2-column course grid
+ * - Enhanced filter layouts
+ * - Medium-sized UI elements
+ * 
+ * Desktop (> 1024px):
+ * - 3-5 column course grid depending on screen size
+ * - Full-featured UI with all details
+ * - Larger interactive elements
+ * 
+ * Responsive breakpoints: xs, sm, md, lg, xl, 2xl
+ * All spacing, typography, and layouts scale appropriately
+ */
+
+// Custom hook for responsive behavior
+const useResponsive = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  
+  useEffect(() => {
+    const checkResponsive = () => {
+      setIsMobile(window.innerWidth < 640);
+      setIsTablet(window.innerWidth >= 640 && window.innerWidth < 1024);
+    };
+    
+    checkResponsive();
+    window.addEventListener('resize', checkResponsive);
+    return () => window.removeEventListener('resize', checkResponsive);
+  }, []);
+  
+  return { isMobile, isTablet };
+};
+
 export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +74,20 @@ export default function Courses() {
     hasNext: false,
     hasPrev: false,
   });
+
+  // Responsive hook
+  const { isMobile, isTablet } = useResponsive();
+
+  // Ensure body doesn't have horizontal overflow on mobile
+  useEffect(() => {
+    document.body.style.overflowX = 'hidden';
+    document.documentElement.style.overflowX = 'hidden';
+    
+    return () => {
+      document.body.style.overflowX = 'auto';
+      document.documentElement.style.overflowX = 'auto';
+    };
+  }, []);
 
   // Debounce search term to avoid excessive API calls
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -338,19 +397,19 @@ export default function Courses() {
   const promoSlides = generatePromoSlides();
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20">
-        {/* Page Header - UPDATED DESIGN */}
-        <div className="text-center mb-8 mt-7 sm:mb-10">
+    <div className="min-h-screen w-full overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-8 sm:py-12 lg:py-16 xl:py-20 w-full">
+        {/* Page Header - FULLY RESPONSIVE */}
+        <div className="text-center mb-6 sm:mb-8 lg:mb-10 mt-4 sm:mt-6 lg:mt-8">
           <div className="reveal">
-            <div className="inline-block px-4 py-2 mb-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full text-sm font-medium text-blue-300">
-              ✨ Updated Compact UI Design
+            <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 mb-3 sm:mb-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full text-xs sm:text-sm font-medium text-blue-300">
+              ✨ Fully Responsive Design
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 lg:mb-6 text-white leading-tight">
               Explore Our Courses
             </h1>
             <p
-              className="text-lg sm:text-xl md:text-2xl leading-relaxed max-w-4xl mx-auto mb-6 sm:mb-8 px-4"
+              className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl leading-relaxed max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto mb-4 sm:mb-6 lg:mb-8 px-2 sm:px-4"
               style={{ color: "var(--text-secondary)" }}
             >
               From beginner to expert level, discover premium courses designed
@@ -358,14 +417,14 @@ export default function Courses() {
             </p>
             {courses.length > 0 && (
               <div
-                className="flex items-center justify-center gap-2 text-xs sm:text-sm"
+                className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
                 style={{ color: "var(--text-muted)" }}
               >
                 <div
-                  className="w-2 h-2 rounded-full"
+                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
                   style={{ backgroundColor: "var(--brand)" }}
                 ></div>
-                <span>
+                <span className="text-center">
                   Showing {courses.length} of {pagination.totalCourses} course
                   {pagination.totalCourses !== 1 ? "s" : ""}
                 </span>
@@ -373,21 +432,30 @@ export default function Courses() {
             )}
           </div>
         </div>
-        {/* Promo Banner with Swiper */}
-        <section className="rounded-2xl sm:rounded-3xl overflow-hidden relative bg-gray-100 mb-8 sm:mb-12">
+        {/* Promo Banner with Swiper - FULLY RESPONSIVE */}
+        <section className="rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden relative bg-gray-100 mb-6 sm:mb-8 lg:mb-12 w-full">
           <Swiper
             modules={[Navigation, Pagination, Autoplay]}
             spaceBetween={0}
             slidesPerView={1}
-            navigation={true}
-            pagination={{ clickable: true }}
+            navigation={{
+              enabled: !isMobile,
+              prevEl: '.swiper-button-prev',
+              nextEl: '.swiper-button-next',
+            }}
+            pagination={{ 
+              clickable: true,
+              dynamicBullets: true,
+              dynamicMainBullets: isMobile ? 2 : 3
+            }}
             autoplay={{
-              delay: 2000,
+              delay: 3000,
               disableOnInteraction: false,
+              pauseOnMouseEnter: !isMobile,
             }}
             loop={true}
-            style={{ height: "240px" }}
-            className="sm:h-80"
+            className="h-48 sm:h-64 md:h-72 lg:h-80 xl:h-96 w-full"
+            style={{ width: '100%', maxWidth: '100%' }}
           >
             {promoSlides.map((slide) => (
               <SwiperSlide key={slide.id}>
@@ -395,30 +463,38 @@ export default function Courses() {
                   className="relative w-full h-full flex items-center"
                   style={{ background: slide.gradient }}
                 >
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-2 left-2 sm:top-4 sm:left-4 w-12 h-12 sm:w-20 sm:h-20 border-2 border-white rounded-full"></div>
-                    <div className="absolute top-6 right-4 sm:top-12 sm:right-8 w-8 h-8 sm:w-12 sm:h-12 border-2 border-white rounded-full"></div>
-                    <div className="absolute bottom-4 left-6 sm:bottom-8 sm:left-12 w-10 h-10 sm:w-16 sm:h-16 border-2 border-white rounded-full"></div>
-                    <div className="absolute bottom-8 right-2 sm:bottom-16 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 border-2 border-white rounded-full"></div>
+                  {/* Background Pattern - Responsive */}
+                  <div className="absolute inset-0 opacity-5 sm:opacity-10">
+                    <div className="absolute top-1 left-1 sm:top-2 sm:left-2 md:top-4 md:left-4 w-6 h-6 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 border border-white sm:border-2 rounded-full"></div>
+                    <div className="absolute top-3 right-2 sm:top-6 sm:right-4 md:top-12 md:right-8 w-4 h-4 sm:w-8 sm:h-8 md:w-12 md:h-12 border border-white sm:border-2 rounded-full"></div>
+                    <div className="absolute bottom-2 left-3 sm:bottom-4 sm:left-6 md:bottom-8 md:left-12 w-5 h-5 sm:w-10 sm:h-10 md:w-16 md:h-16 border border-white sm:border-2 rounded-full"></div>
+                    <div className="absolute bottom-4 right-1 sm:bottom-8 sm:right-2 md:bottom-16 md:right-4 w-3 h-3 sm:w-6 sm:h-6 md:w-8 md:h-8 border border-white sm:border-2 rounded-full"></div>
                   </div>
 
-                  {/* Content */}
-                  <div className="relative z-10 w-full px-4 sm:px-8 md:px-12">
-                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-6">
-                      {/* Icon */}
-                      <div className="text-4xl sm:text-6xl md:text-8xl">
+                  {/* Content - Enhanced Responsive Layout */}
+                  <div className="relative z-10 w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 max-w-full">
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3 sm:gap-4 md:gap-6 lg:gap-8 max-w-full">
+                      {/* Icon - Responsive Sizing */}
+                      <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl flex-shrink-0">
                         {slide.icon}
                       </div>
 
                       {/* Text Content */}
-                      <div className="flex-1 text-white text-center sm:text-left">
-                        <h2 className="text-xl sm:text-3xl md:text-4xl font-black mb-2 sm:mb-3">
+                      <div className="flex-1 text-white text-center sm:text-left max-w-full sm:max-w-none overflow-hidden">
+                        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black mb-1 sm:mb-2 md:mb-3 leading-tight break-words">
                           {slide.title}
                         </h2>
-                        <p className="text-sm sm:text-lg md:text-xl opacity-90 max-w-2xl">
+                        <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl opacity-90 max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl leading-relaxed break-words">
                           {slide.subtitle}
                         </p>
+                        {/* Course Stats - Hidden on very small screens */}
+                        <div className="hidden sm:flex items-center gap-3 md:gap-4 lg:gap-6 mt-2 md:mt-3 text-xs md:text-sm opacity-80 flex-wrap">
+                          <span>{slide.courseCount} Courses</span>
+                          <span>•</span>
+                          <span>{slide.studentCount.toLocaleString()} Students</span>
+                          <span>•</span>
+                          <span>⭐ {slide.avgRating}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -427,9 +503,9 @@ export default function Courses() {
             ))}
           </Swiper>
         </section>
-        {/* Search and Filters - UPDATED UI */}
+        {/* Search and Filters - FULLY RESPONSIVE */}
         <div
-          className="py-4 rounded-4xl p-4 mb-6"
+          className="py-3 sm:py-4 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8"
           style={{
             background:
               "linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.02) 100%)",
@@ -437,20 +513,20 @@ export default function Courses() {
             backdropFilter: "blur(20px)",
           }}
         >
-          {/* Compact Search Row */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
-            {/* Search Input */}
-            <div className="flex-1 min-w-0">
+          {/* Mobile-First Responsive Search and Filters */}
+          <div className="space-y-3 sm:space-y-4">
+            {/* Search Input - Full Width */}
+            <div className="w-full">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search courses, instructors..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 pl-10 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pl-9 sm:pl-10 text-sm sm:text-base rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                 />
                 <svg
-                  className="w-4 h-4 absolute left-3 top-2.5 text-gray-400"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-2.5 sm:left-3 top-2.5 sm:top-3 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -466,8 +542,8 @@ export default function Courses() {
                 {searchLoading &&
                   searchTerm &&
                   searchTerm !== debouncedSearchTerm && (
-                    <div className="absolute right-3 top-2.5">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                    <div className="absolute right-2.5 sm:right-3 top-2.5 sm:top-3">
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 border-b-2 border-blue-400"></div>
                     </div>
                   )}
 
@@ -475,7 +551,7 @@ export default function Courses() {
                 {searchTerm && !searchLoading && (
                   <button
                     onClick={() => setSearchTerm("")}
-                    className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 hover:text-white transition-colors"
+                    className="absolute right-2.5 sm:right-3 top-2.5 sm:top-3 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 hover:text-white transition-colors"
                   >
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
@@ -490,14 +566,14 @@ export default function Courses() {
               </div>
             </div>
 
-            {/* Filters Row */}
-            <div className="flex gap-3 sm:gap-4 w-full sm:w-auto">
+            {/* Filters Row - Responsive Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
               {/* Level Filter */}
-              <div className="flex-1 sm:w-32">
+              <div className="col-span-1">
                 <select
                   value={selectedLevel}
                   onChange={(e) => setSelectedLevel(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer"
+                  className="w-full px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer"
                 >
                   {levels.map((level) => (
                     <option
@@ -505,18 +581,18 @@ export default function Courses() {
                       value={level}
                       style={{ background: "#1a1a1a", color: "white" }}
                     >
-                      {level}
+                      {level === "All Levels" ? "Level" : level}
                     </option>
                   ))}
                 </select>
               </div>
 
               {/* Sort Filter */}
-              <div className="flex-1 sm:w-40">
+              <div className="col-span-1">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer"
+                  className="w-full px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer"
                 >
                   {sortOptions.map((option) => (
                     <option
@@ -530,48 +606,91 @@ export default function Courses() {
                 </select>
               </div>
 
-              {/* Clear Filters */}
+              {/* Clear Filters - Show on larger screens or when filters are active */}
               {(searchTerm ||
                 selectedCategory !== "All Courses" ||
                 selectedLevel !== "All Levels" ||
                 sortBy !== "default") && (
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setSelectedCategory("All Courses");
-                    setSelectedLevel("All Levels");
-                    setSortBy("default");
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all whitespace-nowrap"
-                >
-                  Clear
-                </button>
+                <div className="col-span-2 lg:col-span-2 flex justify-center lg:justify-end">
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSelectedCategory("All Courses");
+                      setSelectedLevel("All Levels");
+                      setSortBy("default");
+                    }}
+                    className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all whitespace-nowrap border border-blue-400/30 hover:border-blue-300/50"
+                  >
+                    Clear All
+                  </button>
+                </div>
               )}
             </div>
+
+            {/* Active Filters Display - Mobile Friendly */}
+            {(searchTerm || selectedCategory !== "All Courses" || selectedLevel !== "All Levels" || sortBy !== "default") && (
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t border-white/10">
+                {searchTerm && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30">
+                    Search: "{searchTerm.slice(0, 20)}{searchTerm.length > 20 ? '...' : ''}"
+                    <button onClick={() => setSearchTerm("")} className="hover:text-white">×</button>
+                  </span>
+                )}
+                {selectedCategory !== "All Courses" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
+                    {selectedCategory}
+                    <button onClick={() => setSelectedCategory("All Courses")} className="hover:text-white">×</button>
+                  </span>
+                )}
+                {selectedLevel !== "All Levels" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 text-green-300 rounded-full border border-green-500/30">
+                    {selectedLevel}
+                    <button onClick={() => setSelectedLevel("All Levels")} className="hover:text-white">×</button>
+                  </span>
+                )}
+                {sortBy !== "default" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-orange-500/20 text-orange-300 rounded-full border border-orange-500/30">
+                    {sortOptions.find(opt => opt.value === sortBy)?.label}
+                    <button onClick={() => setSortBy("default")} className="hover:text-white">×</button>
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
-        {/* Course Categories Filter */}
-        <section className="mb-8 sm:mb-12">
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+        {/* Course Categories Filter - RESPONSIVE */}
+        <section className="mb-6 sm:mb-8 lg:mb-12">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 md:gap-3 px-2 sm:px-0">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`rounded-full px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                className={`rounded-full px-2.5 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 text-xs sm:text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg whitespace-nowrap ${
                   category === selectedCategory
                     ? "btn-premium shadow-lg"
                     : "btn-outline-premium hover:bg-white/5"
                 }`}
               >
-                {category}
+                <span className="hidden sm:inline">{category}</span>
+                <span className="sm:hidden">
+                  {category === "All Courses" ? "All" :
+                   category === "Web Development" ? "Web" :
+                   category === "Data Science" ? "Data" :
+                   category === "Machine Learning" ? "ML" :
+                   category === "Mobile Development" ? "Mobile" :
+                   category === "Cloud Computing" ? "Cloud" :
+                   category === "DevOps" ? "DevOps" :
+                   category === "Cybersecurity" ? "Security" :
+                   category}
+                </span>
               </button>
             ))}
           </div>
         </section>
 
-        {/* Course Statistics - UPDATED UI */}
-        <section className="mb-6 sm:mb-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        {/* Course Statistics - FULLY RESPONSIVE */}
+        <section className="mb-6 sm:mb-8 lg:mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
             <KPICard
               icon={
                 <path
@@ -582,7 +701,7 @@ export default function Courses() {
                 />
               }
               value={courses.length}
-              label="Total Courses"
+              label="Courses"
               iconColor="var(--brand)"
               iconBackground="linear-gradient(135deg, var(--brand)20, var(--brand)10)"
               iconBorder="1px solid var(--brand)30"
@@ -646,7 +765,7 @@ export default function Courses() {
                     ).toFixed(1)
                   : "0.0"
               }
-              label="Average Rating"
+              label="Rating"
               iconColor="var(--brand-strong)"
               iconBackground="linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)"
               iconBorder="1px solid var(--brand-strong)30"
@@ -654,36 +773,36 @@ export default function Courses() {
           </div>
         </section>
 
-        {/* Loading State */}
+        {/* Loading State - RESPONSIVE */}
         {loading && (
-          <div className="flex items-center justify-center py-16 sm:py-20">
-            <div className="text-center">
+          <div className="flex items-center justify-center py-12 sm:py-16 lg:py-20">
+            <div className="text-center px-4">
               <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-700 border-t-transparent mx-auto mb-6"></div>
+                <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-gray-700 border-t-transparent mx-auto mb-4 sm:mb-6"></div>
                 <div
-                  className="absolute inset-0 rounded-full h-16 w-16 border-4 border-transparent border-t-blue-500 animate-spin mx-auto"
+                  className="absolute inset-0 rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-transparent border-t-blue-500 animate-spin mx-auto"
                   style={{
                     animationDirection: "reverse",
                     animationDuration: "1.5s",
                   }}
                 ></div>
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-white">
+              <h3 className="text-base sm:text-lg font-semibold mb-2 text-white">
                 Loading Courses
               </h3>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-xs sm:text-sm" style={{ color: "var(--text-secondary)" }}>
                 Fetching the latest courses for you...
               </p>
             </div>
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error State - RESPONSIVE */}
         {error && (
-          <div className="card-premium p-8 text-center max-w-md mx-auto">
-            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="card-premium p-6 sm:p-8 text-center max-w-sm sm:max-w-md mx-auto">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <svg
-                className="w-8 h-8 text-red-400"
+                className="w-6 h-6 sm:w-8 sm:h-8 text-red-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -696,31 +815,31 @@ export default function Courses() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-3 text-white">
+            <h3 className="text-base sm:text-lg font-semibold mb-3 text-white">
               Failed to Load Courses
             </h3>
             <p
-              className="text-sm mb-6"
+              className="text-xs sm:text-sm mb-4 sm:mb-6"
               style={{ color: "var(--text-secondary)" }}
             >
               {error}
             </p>
             <button
               onClick={loadCourses}
-              className="btn-premium px-6 py-3 text-sm font-semibold"
+              className="btn-premium px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold"
             >
               Try Again
             </button>
           </div>
         )}
 
-        {/* Courses Grid */}
+        {/* Courses Grid - FULLY RESPONSIVE */}
         <section>
           {courses.length === 0 && !loading ? (
-            <div className="card-premium p-12 sm:p-16 text-center max-w-2xl mx-auto">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+            <div className="card-premium p-6 sm:p-8 md:p-12 lg:p-16 text-center max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8">
                 <svg
-                  className="w-12 h-12 text-blue-400"
+                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-blue-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -733,11 +852,11 @@ export default function Courses() {
                   />
                 </svg>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-white">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-white">
                 No Courses Found
               </h3>
               <p
-                className="text-base sm:text-lg mb-8"
+                className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed"
                 style={{ color: "var(--text-secondary)" }}
               >
                 {courses.length === 0
@@ -747,7 +866,7 @@ export default function Courses() {
               {(searchTerm ||
                 selectedCategory !== "All Courses" ||
                 selectedLevel !== "All Levels") && (
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
                   <button
                     onClick={() => {
                       setSearchTerm("");
@@ -755,13 +874,13 @@ export default function Courses() {
                       setSelectedLevel("All Levels");
                       setSortBy("default");
                     }}
-                    className="btn-premium px-6 py-3 text-sm font-semibold"
+                    className="btn-premium px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold"
                   >
                     Clear All Filters
                   </button>
                   <Link
                     to="/courses"
-                    className="btn-outline-premium px-6 py-3 text-sm font-semibold"
+                    className="btn-outline-premium px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold"
                   >
                     View All Courses
                   </Link>
@@ -769,7 +888,7 @@ export default function Courses() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-8">
               {courses.map((course) => (
                 <CourseCard
                   key={course._id || course.id}
@@ -813,10 +932,10 @@ export default function Courses() {
           )}
         </section>
 
-        {/* Pagination */}
+        {/* Pagination - FULLY RESPONSIVE */}
         {pagination.totalPages > 1 && (
-          <div className="mt-12 flex justify-center">
-            <div className="flex items-center gap-2">
+          <div className="mt-8 sm:mt-10 lg:mt-12 flex justify-center px-4">
+            <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto max-w-full">
               {/* Previous Page Button */}
               <button
                 onClick={() =>
@@ -826,47 +945,89 @@ export default function Courses() {
                   }))
                 }
                 disabled={!pagination.hasPrev || loading}
-                className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-all"
+                className="flex-shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-all text-xs sm:text-sm"
               >
-                Previous
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">‹</span>
               </button>
 
-              {/* Page Numbers */}
-              <div className="flex items-center gap-1">
-                {Array.from(
-                  { length: Math.min(5, pagination.totalPages) },
-                  (_, i) => {
-                    const pageNum = Math.max(
-                      1,
-                      Math.min(
-                        pagination.currentPage - 2 + i,
-                        pagination.totalPages - 4 + i
-                      )
-                    );
+              {/* Page Numbers - Responsive Display */}
+              <div className="flex items-center gap-1 overflow-x-auto">
+                {/* Show fewer pages on mobile */}
+                <div className="flex sm:hidden">
+                  {Array.from(
+                    { length: Math.min(3, pagination.totalPages) },
+                    (_, i) => {
+                      const pageNum = Math.max(
+                        1,
+                        Math.min(
+                          pagination.currentPage - 1 + i,
+                          pagination.totalPages - 2 + i
+                        )
+                      );
 
-                    if (pageNum > pagination.totalPages) return null;
+                      if (pageNum > pagination.totalPages) return null;
 
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() =>
-                          setPagination((prev) => ({
-                            ...prev,
-                            currentPage: pageNum,
-                          }))
-                        }
-                        disabled={loading}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                          pageNum === pagination.currentPage
-                            ? "bg-blue-500 text-white"
-                            : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  }
-                )}
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() =>
+                            setPagination((prev) => ({
+                              ...prev,
+                              currentPage: pageNum,
+                            }))
+                          }
+                          disabled={loading}
+                          className={`flex-shrink-0 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                            pageNum === pagination.currentPage
+                              ? "bg-blue-500 text-white"
+                              : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+                
+                {/* Show more pages on tablet and desktop */}
+                <div className="hidden sm:flex">
+                  {Array.from(
+                    { length: Math.min(5, pagination.totalPages) },
+                    (_, i) => {
+                      const pageNum = Math.max(
+                        1,
+                        Math.min(
+                          pagination.currentPage - 2 + i,
+                          pagination.totalPages - 4 + i
+                        )
+                      );
+
+                      if (pageNum > pagination.totalPages) return null;
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() =>
+                            setPagination((prev) => ({
+                              ...prev,
+                              currentPage: pageNum,
+                            }))
+                          }
+                          disabled={loading}
+                          className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                            pageNum === pagination.currentPage
+                              ? "bg-blue-500 text-white"
+                              : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
               </div>
 
               {/* Next Page Button */}
@@ -878,18 +1039,19 @@ export default function Courses() {
                   }))
                 }
                 disabled={!pagination.hasNext || loading}
-                className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-all"
+                className="flex-shrink-0 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10 transition-all text-xs sm:text-sm"
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
+                <span className="sm:hidden">›</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* Call to Action */}
-        <section className="mt-16 sm:mt-20 text-center">
+        {/* Call to Action - FULLY RESPONSIVE */}
+        <section className="mt-12 sm:mt-16 lg:mt-20 text-center px-3 sm:px-4">
           <div
-            className="card-premium p-6 sm:p-8 md:p-12 lg:p-16 relative overflow-hidden"
+            className="card-premium p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16 relative overflow-hidden"
             style={{
               background:
                 "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
@@ -905,25 +1067,25 @@ export default function Courses() {
               }}
             ></div>
             <div className="relative z-10">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-white">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 lg:mb-6 text-white leading-tight">
                 Ready to Start Learning?
               </h2>
               <p
-                className="text-base sm:text-lg md:text-xl leading-relaxed mb-6 sm:mb-8 max-w-2xl mx-auto px-4"
+                className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed mb-4 sm:mb-6 lg:mb-8 max-w-xs sm:max-w-lg md:max-w-2xl mx-auto px-2"
                 style={{ color: "var(--text-secondary)" }}
               >
                 Join thousands of students who are already advancing their
                 careers with our premium courses and expert mentorship.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
                 <Link
                   to="/signup"
-                  className="btn-premium px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold w-full sm:w-auto hover:shadow-xl transition-all duration-300"
+                  className="btn-premium px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold w-full sm:w-auto hover:shadow-xl transition-all duration-300"
                 >
                   <span className="flex items-center justify-center gap-2">
                     Get Started Today
                     <svg
-                      className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+                      className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform duration-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -939,7 +1101,7 @@ export default function Courses() {
                 </Link>
                 <Link
                   to="/courses"
-                  className="btn-outline-premium px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold w-full sm:w-auto hover:bg-white/5 transition-all duration-300"
+                  className="btn-outline-premium px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg font-semibold w-full sm:w-auto hover:bg-white/5 transition-all duration-300"
                 >
                   Browse All Courses
                 </Link>
