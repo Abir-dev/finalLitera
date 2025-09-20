@@ -20,6 +20,7 @@ export default function AdminStudents() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showCourseAssignment, setShowCourseAssignment] = useState(false);
   const [assignmentStudent, setAssignmentStudent] = useState(null);
+  const [expandedStudent, setExpandedStudent] = useState(null);
 
   // Add Student Form State
   const [newStudent, setNewStudent] = useState({
@@ -304,6 +305,10 @@ export default function AdminStudents() {
     );
   };
 
+  const handleStudentClick = (student) => {
+    setExpandedStudent(expandedStudent?.id === student.id ? null : student);
+  };
+
   const getStatusBadge = (status) => {
     return status === "active"
       ? <span className="px-3 py-1 text-xs rounded-full flex items-center gap-1" style={{ background: 'var(--accent-gold)10', color: 'var(--accent-gold)' }}>
@@ -324,7 +329,7 @@ export default function AdminStudents() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Premium Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -358,9 +363,9 @@ export default function AdminStudents() {
         </div>
       ) : null}
 
-      {/* Premium Filters and Search */}
-      <div className="card-premium p-4 sm:p-6">
-        <div className="flex flex-col gap-4">
+      {/* Premium Search and Filter */}
+      <div className="card-premium p-4 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-3">
           <div className="flex-1 relative">
             <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
@@ -368,15 +373,15 @@ export default function AdminStudents() {
               placeholder="Search students by name, email, or course..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-premium pl-10 text-sm sm:text-base"
+              className="input-premium pl-10 pr-4 py-2.5 text-sm w-full"
             />
           </div>
-          <div className="relative">
+          <div className="relative lg:w-44">
             <Filter size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-premium pl-10 text-sm sm:text-base"
+              className="input-premium pl-10 pr-4 py-2.5 text-sm w-full"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -386,232 +391,273 @@ export default function AdminStudents() {
         </div>
       </div>
 
-      {/* Premium Students Enrolled In Courses */}
+      {/* Unified Students List */}
       <div className="card-premium overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderColor: 'var(--border)' }}>
+        <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', border: '1px solid var(--brand)30' }}>
-              <BookOpen size={16} style={{ color: 'var(--brand)' }} />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+              <Users size={16} className="text-white" />
             </div>
-            <h2 className="heading-3 text-base sm:text-lg" style={{ color: 'var(--text-primary)' }}>Students Enrolled In Courses</h2>
-          </div>
-          <span className="text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{enrolledStudentsOnly.length} students</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead style={{ background: 'var(--surface)', borderColor: 'var(--border)' }} className="border-b">
-              <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell" style={{ color: 'var(--text-secondary)' }}>Course</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
-              {enrolledStudentsOnly.map((student) => (
-                <tr key={`enrolled-${student.id}`} className="hover:scale-[1.01] transition-all duration-300" style={{ background: 'var(--bg-primary)' }}>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
-                        {student.name.charAt(0)}
-                      </div>
-                      <div className="ml-3 sm:ml-4">
-                        <div className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
-                        <div className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                    <div className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(student.status)}
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell" style={{ color: 'var(--text-primary)' }}>
-                    {new Date(student.joinDate).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Premium Students Table */}
-      <div className="card-premium overflow-hidden">
-        <div className="px-4 sm:px-6 py-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', border: '1px solid var(--accent-rose)30' }}>
-              <Users size={16} style={{ color: 'var(--accent-rose)' }} />
+            <div>
+              <h2 className="heading-3 text-lg" style={{ color: 'var(--text-primary)' }}>All Students</h2>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Click on any student to view details and manage</p>
             </div>
-            <h2 className="heading-3 text-base sm:text-lg" style={{ color: 'var(--text-primary)' }}>All Students</h2>
           </div>
-          <span className="text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full" style={{ background: 'var(--surface)', color: 'var(--text-secondary)' }}>{filteredStudents.length} students</span>
+          <span className="px-3 py-1 rounded-lg text-sm font-semibold" style={{ background: 'var(--surface)', color: 'var(--text-primary)' }}>
+            {filteredStudents.length} students
+          </span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead style={{ background: 'var(--surface)', borderColor: 'var(--border)' }} className="border-b">
-              <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Student</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell" style={{ color: 'var(--text-secondary)' }}>Course</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Status</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell" style={{ color: 'var(--text-secondary)' }}>Progress</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell" style={{ color: 'var(--text-secondary)' }}>Join Date</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell" style={{ color: 'var(--text-secondary)' }}>Last Active</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
+        
+        <div className="max-h-80 overflow-y-auto">
+          {filteredStudents.length === 0 ? (
+            <div className="p-6 text-center">
+              <Users size={40} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+              <p className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No students found</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Try adjusting your search criteria</p>
+            </div>
+          ) : (
+            <div className="space-y-1 p-3">
               {filteredStudents.map((student) => (
-                <tr key={student.id} className="hover:scale-[1.01] transition-all duration-300" style={{ background: 'var(--bg-primary)' }}>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
-                        {student.name.charAt(0)}
+                <div key={student.id}>
+                  {/* Student Card */}
+                  <div 
+                    onClick={() => handleStudentClick(student)}
+                    className="card-premium p-3 cursor-pointer hover:scale-[1.01] transition-all duration-300 group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="relative">
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg" 
+                               style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+                            {student.name.charAt(0)}
+                          </div>
+                          {student.status === "active" && (
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border border-white">
+                              <div className="w-1.5 h-1.5 bg-white rounded-full mx-auto mt-0.5"></div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                              {student.name}
+                            </h3>
+                            {getStatusBadge(student.status)}
+                          </div>
+                          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                            {student.email}
+                          </p>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--surface)', color: 'var(--text-muted)' }}>
+                              {student.course}
+                            </span>
+                            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                              {new Date(student.joinDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="ml-3 sm:ml-4">
-                        <div className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{student.name}</div>
-                        <div className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>{student.email}</div>
-                        <div className="text-xs hidden sm:block" style={{ color: 'var(--text-muted)' }}>{student.phone}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                    <div className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{student.course}</div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(student.status)}
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
-                    <div className="flex items-center">
-                      <div className="w-12 sm:w-16 rounded-full h-2 mr-2" style={{ background: 'var(--surface)' }}>
-                        <div
-                          className="h-2 rounded-full transition-all duration-1000"
-                          style={{ width: `${student.progress}%`, background: getProgressColor(student.progress) }}
-                        ></div>
-                      </div>
-                      <span className="text-xs sm:text-sm" style={{ color: 'var(--text-primary)' }}>{student.progress}%</span>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden lg:table-cell" style={{ color: 'var(--text-primary)' }}>
-                    {new Date(student.joinDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden lg:table-cell" style={{ color: 'var(--text-secondary)' }}>
-                    {student.lastActive}
-                  </td>
-                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                      <button
-                        onClick={() => handleViewProgressReport(student)}
-                        className="btn-outline-premium px-2 sm:px-3 py-1 text-xs flex items-center gap-1"
-                        title="View Progress Report"
-                      >
-                        <BarChart3 size={12} />
-                        <span className="hidden sm:inline">Progress</span>
-                      </button>
-                      <button
-                        onClick={() => handleAssignCourse(student)}
-                        className="btn-outline-premium px-2 sm:px-3 py-1 text-xs flex items-center gap-1"
-                        title="Assign Course to Student"
-                      >
-                        <BookOpen size={12} />
-                        <span className="hidden sm:inline">Assign</span>
-                      </button>
-                      <button
-                        onClick={() => handleEditStudent(student)}
-                        className="btn-outline-premium px-2 sm:px-3 py-1 text-xs flex items-center gap-1"
-                        title="Edit Student Details"
-                      >
-                        <Edit size={12} />
-                        <span className="hidden sm:inline">Edit</span>
-                      </button>
-                      <button
-                        onClick={() => handleStatusToggle(student.id)}
-                        className={`px-2 sm:px-3 py-1 text-xs rounded-full flex items-center gap-1 transition-all duration-300 ${student.status === "active"
-                            ? "hover:bg-orange-100 text-orange-600"
-                            : "hover:bg-green-100 text-green-600"
-                          }`}
-                      >
-                        {student.status === "active" ? (
-                          <>
-                            <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                            <span className="hidden sm:inline">Pause</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                            <span className="hidden sm:inline">Activate</span>
-                          </>
+                      
+                      <div className="flex items-center gap-2">
+                        {student.progress > 0 && (
+                          <div className="flex items-center gap-1">
+                            <div className="w-12 rounded-full h-1.5" style={{ background: 'var(--surface)' }}>
+                              <div
+                                className="h-1.5 rounded-full transition-all duration-1000"
+                                style={{ width: `${student.progress}%`, background: getProgressColor(student.progress) }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                              {student.progress}%
+                            </span>
+                          </div>
                         )}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStudent(student.id)}
-                        className="px-2 sm:px-3 py-1 text-xs rounded-full flex items-center gap-1 hover:bg-red-100 text-red-600 transition-all duration-300"
-                      >
-                        <Trash2 size={12} />
-                        <span className="hidden sm:inline">Delete</span>
-                      </button>
+                        <div className={`transition-transform duration-300 ${expandedStudent?.id === student.id ? 'rotate-180' : ''}`}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="6,9 12,15 18,9"></polyline>
+                          </svg>
+                        </div>
+                      </div>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                  
+                  {/* Expanded Details */}
+                  {expandedStudent?.id === student.id && (
+                    <div className="ml-3 mr-3 mb-1">
+                      <div className="card-premium p-4 border-l-4" style={{ borderLeftColor: 'var(--brand)' }}>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {/* Student Information */}
+                          <div>
+                            <h4 className="font-bold text-base mb-3" style={{ color: 'var(--text-primary)' }}>
+                              Student Information
+                            </h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between">
+                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Full Name:</span>
+                                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{student.name}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Email:</span>
+                                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{student.email}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Phone:</span>
+                                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{student.phone || 'Not provided'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Current Course:</span>
+                                <span className="font-medium text-sm" style={{ color: 'var(--accent-gold)' }}>{student.course}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Progress:</span>
+                                <span className="font-medium text-sm" style={{ color: getProgressColor(student.progress) }}>{student.progress}%</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Status:</span>
+                                {getStatusBadge(student.status)}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Action Buttons */}
+                          <div>
+                            <h4 className="font-bold text-base mb-3" style={{ color: 'var(--text-primary)' }}>
+                              Quick Actions
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewProgressReport(student);
+                                }}
+                                className="btn-premium px-3 py-2 flex items-center gap-2 justify-center text-xs"
+                              >
+                                <BarChart3 size={14} />
+                                Progress
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAssignCourse(student);
+                                }}
+                                className="btn-outline-premium px-3 py-2 flex items-center gap-2 justify-center text-xs"
+                              >
+                                <BookOpen size={14} />
+                                Assign
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditStudent(student);
+                                }}
+                                className="btn-outline-premium px-3 py-2 flex items-center gap-2 justify-center text-xs"
+                              >
+                                <Edit size={14} />
+                                Edit
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteStudent(student.id);
+                                }}
+                                className="px-3 py-2 flex items-center gap-2 justify-center text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-all duration-300"
+                              >
+                                <Trash2 size={14} />
+                                Delete
+                              </button>
+                            </div>
+                            
+                            {/* Status Toggle */}
+                            <div className="mt-3">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStatusToggle(student.id);
+                                }}
+                                className={`w-full px-3 py-2 flex items-center gap-2 justify-center text-xs rounded-lg transition-all duration-300 ${
+                                  student.status === "active"
+                                    ? "bg-orange-100 text-orange-700 border border-orange-300 hover:bg-orange-200"
+                                    : "bg-green-100 text-green-700 border border-green-300 hover:bg-green-200"
+                                }`}
+                              >
+                                {student.status === "active" ? (
+                                  <>
+                                    <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                                    Deactivate
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                    Activate
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-2xl text-white">👥</span>
+      {/* Premium Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Total Students</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{students.length}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Students</p>
-              <p className="text-2xl font-bold text-gray-900">{students.length}</p>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+              <Users size={20} className="text-white" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-2xl text-white">✅</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Active Students</p>
-              <p className="text-2xl font-bold text-gray-900">
+        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Active Students</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 {students.filter(s => s.status === "active").length}
               </p>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-              <span className="text-2xl text-white">📚</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Enrolled Courses</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {new Set(students.map(s => s.course)).size}
-              </p>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-emerald), var(--brand))' }}>
+              <UserCheck size={20} className="text-white" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center">
-              <span className="text-2xl text-white">📈</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg Progress</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length)}%
+        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Enrolled Courses</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                {new Set(students.filter(s => s.course !== "-").map(s => s.course)).size}
               </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose), var(--accent-rose-strong))' }}>
+              <GraduationCap size={20} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Avg Progress</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                {students.length > 0 ? Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length) : 0}%
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold), var(--accent-gold-strong))' }}>
+              <TrendingUp size={20} className="text-white" />
             </div>
           </div>
         </div>
