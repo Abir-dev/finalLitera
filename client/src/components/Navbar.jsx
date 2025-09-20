@@ -212,7 +212,7 @@ export default function Navbar() {
                       )}
                     </button>
                     {notifOpen && (
-                      <div className="absolute right-0 mt-2 w-72 md:w-80 card-premium z-50 glass-notification">
+                      <div className="absolute right-0 mt-110 w-72 md:w-80 card-premium z-5 glass-notification">
                         <div className="p-3 border-b border-[color:var(--border)] flex items-center justify-between">
                           <span className="text-sm font-semibold">
                             Notifications
