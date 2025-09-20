@@ -189,12 +189,22 @@ export const createNotification = async (notificationData) => {
   }
 };
 
-// @desc    Create course announcement notification for all users
+// @desc    Create course announcement notification for all users with notification preferences
 // @access  Private
 export const createCourseAnnouncement = async (courseId, courseTitle, adminName) => {
   try {
-    // Get all users
-    const users = await User.find({}, '_id');
+    // Get all active users who have courseUpdates notifications enabled
+    const users = await User.find({
+      isActive: true,
+      'preferences.notifications.courseUpdates': true
+    }, '_id preferences.notifications');
+    
+    console.log(`Found ${users.length} users eligible for course notifications`);
+    
+    if (users.length === 0) {
+      console.log('No users found with course update notifications enabled');
+      return 0;
+    }
     
     const notifications = users.map(user => ({
       user: user._id,
@@ -211,11 +221,182 @@ export const createCourseAnnouncement = async (courseId, courseTitle, adminName)
     }));
 
     // Insert all notifications
-    await Notification.insertMany(notifications);
+    const createdNotifications = await Notification.insertMany(notifications);
     
-    return notifications.length;
+    console.log(`Created ${createdNotifications.length} course announcement notifications`);
+    
+    return createdNotifications.length;
   } catch (error) {
     console.error('Create course announcement error:', error);
+    throw error;
+  }
+};
+
+// @desc    Send new course published notification to users with course update preferences
+// @access  Private
+export const sendNewCourseNotification = async (courseId, courseTitle, instructorName, io = null) => {
+  try {
+    // Get all active users who have courseUpdates notifications enabled
+    const users = await User.find({
+      isActive: true,
+      'preferences.notifications.courseUpdates': true
+    }, '_id preferences.notifications');
+    
+    console.log(`Sending new course notifications to ${users.length} users`);
+    
+    if (users.length === 0) {
+      return 0;
+    }
+    
+    const notifications = users.map(user => ({
+      user: user._id,
+      type: 'new_course_available',
+      title: 'New Course Published!',
+      message: `"${courseTitle}" by ${instructorName} is now available. Start learning today!`,
+      data: {
+        courseId: courseId,
+        instructorName: instructorName
+      },
+      priority: 'high',
+      actionUrl: `/courses/${courseId}`,
+      actionText: 'View Course'
+    }));
+
+    // Insert all notifications
+    const createdNotifications = await Notification.insertMany(notifications);
+    
+    // Emit real-time notifications if socket.io is available
+    if (io) {
+      createdNotifications.forEach(notification => {
+        io.to(`user_${notification.user}`).emit('new_notification', {
+          id: notification._id,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          data: notification.data,
+          priority: notification.priority,
+          actionUrl: notification.actionUrl,
+          actionText: notification.actionText,
+          timestamp: notification.createdAt
+        });
+      });
+    }
+    
+    console.log(`Successfully sent ${createdNotifications.length} new course notifications`);
+    return createdNotifications.length;
+  } catch (error) {
+    console.error('Send new course notification error:', error);
+    throw error;
+  }
+};
+
+// @desc    Send course update notification to enrolled users
+// @access  Private
+export const sendCourseUpdateNotification = async (courseId, courseTitle, updateMessage, io = null) => {
+  try {
+    // Find users enrolled in this specific course who have courseUpdates notifications enabled
+    const enrolledUsers = await User.find({
+      'enrolledCourses.course': courseId,
+      isActive: true,
+      'preferences.notifications.courseUpdates': true
+    }, '_id preferences.notifications');
+    
+    console.log(`Sending course update notifications to ${enrolledUsers.length} enrolled users`);
+    
+    if (enrolledUsers.length === 0) {
+      return 0;
+    }
+    
+    const notifications = enrolledUsers.map(user => ({
+      user: user._id,
+      type: 'new_lesson',
+      title: `Course Update: ${courseTitle}`,
+      message: updateMessage,
+      data: {
+        courseId: courseId
+      },
+      priority: 'medium',
+      actionUrl: `/courses/${courseId}`,
+      actionText: 'View Course'
+    }));
+
+    const createdNotifications = await Notification.insertMany(notifications);
+    
+    // Emit real-time notifications if socket.io is available
+    if (io) {
+      createdNotifications.forEach(notification => {
+        io.to(`user_${notification.user}`).emit('new_notification', {
+          id: notification._id,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          data: notification.data,
+          priority: notification.priority,
+          actionUrl: notification.actionUrl,
+          actionText: notification.actionText,
+          timestamp: notification.createdAt
+        });
+      });
+    }
+    
+    console.log(`Successfully sent ${createdNotifications.length} course update notifications`);
+    return createdNotifications.length;
+  } catch (error) {
+    console.error('Send course update notification error:', error);
+    throw error;
+  }
+};
+
+// @desc    Send system announcement to users based on their notification preferences
+// @access  Private
+export const sendSystemAnnouncement = async (title, message, priority = 'medium', io = null) => {
+  try {
+    // Get all active users who have push notifications enabled
+    const users = await User.find({
+      isActive: true,
+      'preferences.notifications.push': true
+    }, '_id preferences.notifications');
+    
+    console.log(`Sending system announcement to ${users.length} users`);
+    
+    if (users.length === 0) {
+      return 0;
+    }
+    
+    const notifications = users.map(user => ({
+      user: user._id,
+      type: 'system_announcement',
+      title: title,
+      message: message,
+      data: {},
+      priority: priority,
+      actionUrl: '/dashboard',
+      actionText: 'View Dashboard'
+    }));
+
+    const createdNotifications = await Notification.insertMany(notifications);
+    
+    // Emit real-time notifications if socket.io is available
+    if (io) {
+      createdNotifications.forEach(notification => {
+        io.to(`user_${notification.user}`).emit('new_notification', {
+          id: notification._id,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          data: notification.data,
+          priority: notification.priority,
+          actionUrl: notification.actionUrl,
+          actionText: notification.actionText,
+          timestamp: notification.createdAt
+        });
+      });
+    }
+    
+    console.log(`Successfully sent ${createdNotifications.length} system announcements`);
+    return createdNotifications.length;
+  } catch (error) {
+    console.error('Send system announcement error:', error);
     throw error;
   }
 };
@@ -247,14 +428,25 @@ export const sendNotification = async (req, res) => {
 
     let targetUsers = [];
 
-    // Determine target users based on audience
+    // Determine target users based on audience and notification preferences
     switch (targetAudience) {
       case 'all':
-        targetUsers = await User.find({}, '_id');
+        // Get all active users who have push notifications enabled
+        targetUsers = await User.find({
+          isActive: true,
+          'preferences.notifications.push': true
+        }, '_id');
         break;
       case 'enrolled':
-        // Get users who are enrolled in any course
-        const enrollments = await Enrollment.find({}, 'user').populate('user', '_id');
+        // Get users who are enrolled in any course and have course update notifications enabled
+        const enrollments = await Enrollment.find({}, 'user').populate({
+          path: 'user',
+          match: {
+            isActive: true,
+            'preferences.notifications.courseUpdates': true
+          },
+          select: '_id'
+        });
         targetUsers = enrollments.map(enrollment => enrollment.user).filter(Boolean);
         break;
       case 'specific':
@@ -264,8 +456,15 @@ export const sendNotification = async (req, res) => {
             message: 'Course ID is required for specific course notifications'
           });
         }
-        // Get users enrolled in specific course
-        const courseEnrollments = await Enrollment.find({ course: courseId }, 'user').populate('user', '_id');
+        // Get users enrolled in specific course who have course update notifications enabled
+        const courseEnrollments = await Enrollment.find({ course: courseId }, 'user').populate({
+          path: 'user',
+          match: {
+            isActive: true,
+            'preferences.notifications.courseUpdates': true
+          },
+          select: '_id'
+        });
         targetUsers = courseEnrollments.map(enrollment => enrollment.user).filter(Boolean);
         break;
       default:

@@ -7,6 +7,7 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
+import { sendNewCourseNotification } from "./notification.js";
 import fs from "fs";
 import path from "path";
 
@@ -257,6 +258,30 @@ export const createCourse = async (req, res) => {
     // Populate instructor info
     await course.populate("instructor", "firstName lastName email avatar");
 
+    // Send automatic notification to users if course is published
+    if (course.isPublished) {
+      try {
+        const instructorName = course.instructor ? 
+          `${course.instructor.firstName} ${course.instructor.lastName}` : 
+          'Admin';
+        
+        // Get socket.io instance if available
+        const io = req.app.get('io');
+        
+        await sendNewCourseNotification(
+          course._id, 
+          course.title, 
+          instructorName,
+          io
+        );
+        
+        console.log(`Sent automatic notifications for new course: ${course.title}`);
+      } catch (notificationError) {
+        console.error('Error sending course notifications:', notificationError);
+        // Don't fail the course creation if notifications fail
+      }
+    }
+
     res.status(201).json({
       status: "success",
       message: "Course created successfully",
@@ -471,8 +496,36 @@ export const toggleCoursePublish = async (req, res) => {
       });
     }
 
+    const wasPublished = course.isPublished;
     course.isPublished = !course.isPublished;
     await course.save();
+    
+    // Populate instructor info for notifications
+    await course.populate("instructor", "firstName lastName email avatar");
+
+    // Send automatic notification to users when course is newly published
+    if (!wasPublished && course.isPublished) {
+      try {
+        const instructorName = course.instructor ? 
+          `${course.instructor.firstName} ${course.instructor.lastName}` : 
+          'Admin';
+        
+        // Get socket.io instance if available
+        const io = req.app.get('io');
+        
+        await sendNewCourseNotification(
+          course._id, 
+          course.title, 
+          instructorName,
+          io
+        );
+        
+        console.log(`Sent automatic notifications for newly published course: ${course.title}`);
+      } catch (notificationError) {
+        console.error('Error sending course publish notifications:', notificationError);
+        // Don't fail the operation if notifications fail
+      }
+    }
 
     res.status(200).json({
       status: "success",

@@ -9,7 +9,14 @@ import {
   updateAdmin,
   deleteAdmin,
 } from "../controllers/adminController.js";
-import { sendMaintenanceNotice } from "../controllers/notification.js";
+import { 
+  sendMaintenanceNotice, 
+  sendNotification 
+} from "../controllers/notification.js";
+import { 
+  sendSystemAnnouncement,
+  getNotificationStats 
+} from "../services/notificationService.js";
 import {
   adminAuth,
   superAdminAuth,
@@ -45,12 +52,86 @@ router.post("/login", adminLogin);
 // @access  Private/Admin
 router.get("/profile", adminAuth, getAdminProfile);
 
-// Server maintenance notice to all students
+// @desc    Notification management routes
+// @route   POST /api/admin/notifications/send
+// @access  Private/Admin
+router.post(
+  "/notifications/send",
+  adminAuth,
+  requirePermission("notifications"),
+  sendNotification
+);
+
+// @route   POST /api/admin/notifications/maintenance
+// @access  Private/Admin
 router.post(
   "/notifications/maintenance",
   adminAuth,
   requirePermission("notifications"),
   sendMaintenanceNotice
+);
+
+// @route   POST /api/admin/notifications/announcement
+// @access  Private/Admin
+router.post(
+  "/notifications/announcement",
+  adminAuth,
+  requirePermission("notifications"),
+  async (req, res) => {
+    try {
+      const { title, message, priority } = req.body;
+      
+      if (!title || !message) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Title and message are required'
+        });
+      }
+      
+      // Get socket.io instance if available
+      const io = req.app.get('io');
+      
+      const count = await sendSystemAnnouncement(title, message, priority, io);
+      
+      res.status(200).json({
+        status: 'success',
+        message: 'System announcement sent successfully',
+        data: {
+          recipientsCount: count
+        }
+      });
+    } catch (error) {
+      console.error('Send system announcement error:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to send system announcement'
+      });
+    }
+  }
+);
+
+// @route   GET /api/admin/notifications/stats
+// @access  Private/Admin
+router.get(
+  "/notifications/stats",
+  adminAuth,
+  requirePermission("notifications"),
+  async (req, res) => {
+    try {
+      const stats = await getNotificationStats();
+      
+      res.status(200).json({
+        status: 'success',
+        data: stats
+      });
+    } catch (error) {
+      console.error('Get notification stats error:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to get notification statistics'
+      });
+    }
+  }
 );
 
 // @desc    Update admin profile
