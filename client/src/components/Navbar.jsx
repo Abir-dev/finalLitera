@@ -181,7 +181,7 @@ export default function Navbar() {
                   key={item.name}
                   to={item.href}
                   end={item.href === "/"}
-                  className={`nav-link relative group text-sm xl:text-base ${
+                  className={`nav-link relative group text-1xs md:text-sm font-medium xl:text-base ${
                     location.pathname === item.href ? "text-white" : ""
                   }`}
                 >
@@ -295,7 +295,7 @@ export default function Navbar() {
               {/* Mobile Menu Button */}
               <div className="lg:hidden">
                 <button
-                  className="p-1.5 md:p-2 text-slate-200 hover:text-white transition-colors"
+                  className="p-1.5 md:p-2 text-slate-200 hover:text-white transition-colors cursor-pointer"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
                   {isMobileMenuOpen ? <X size={18} className="md:w-5 md:h-5" /> : <Menu size={18} className="md:w-5 md:h-5" />}
@@ -335,7 +335,7 @@ export default function Navbar() {
                   setIsMobileMenuOpen(false);
                   setIsLoginModalOpen(true);
                 }}
-                className="w-full py-2.5 md:py-3 text-sm md:text-base rounded-lg text-white bg-blue-500/20 border border-blue-400/40 backdrop-blur-md shadow-lg hover:bg-blue-500/30 transition-all"
+                className="cursor-pointer  w-full py-2.5 md:py-3 text-sm md:text-base rounded-lg text-white bg-blue-500/20 border border-blue-400/40 backdrop-blur-md shadow-lg hover:bg-blue-500/30 transition-all"
               >
                 Login
               </button>
