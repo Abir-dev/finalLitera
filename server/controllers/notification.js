@@ -911,3 +911,67 @@ export const updateNotificationPreferences = async (req, res) => {
     });
   }
 };
+
+// @desc    Send new course notification to users (Used by adminCourseController)
+// @access  Internal function
+export const sendNewCourseNotification = async (courseId, courseTitle, instructorName, io = null) => {
+  try {
+    console.log(`Sending new course notification for: ${courseTitle} by ${instructorName}`);
+    
+    // Get all active users who have courseUpdates notifications enabled
+    const users = await User.find(
+      {
+        isActive: true,
+        "preferences.notifications.courseUpdates": true,
+      },
+      "_id preferences.notifications"
+    );
+
+    console.log(`Found ${users.length} users eligible for course notifications`);
+
+    if (users.length === 0) {
+      console.log("No users found with course update notifications enabled");
+      return 0;
+    }
+
+    const notifications = users.map((user) => ({
+      user: user._id,
+      type: "new_course_available",
+      title: "New Course Available!",
+      message: `A new course "${courseTitle}" has been added by ${instructorName}. Check it out now!`,
+      data: {
+        courseId: courseId,
+        instructorName: instructorName,
+      },
+      priority: "high",
+      actionUrl: `/courses/${courseId}`,
+      actionText: "View Course",
+    }));
+
+    // Insert all notifications
+    const createdNotifications = await Notification.insertMany(notifications);
+
+    // Emit real-time notifications if socket.io is available
+    if (io) {
+      createdNotifications.forEach((notification) => {
+        io.to(`user_${notification.user}`).emit("new_notification", {
+          id: notification._id,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          data: notification.data,
+          priority: notification.priority,
+          actionUrl: notification.actionUrl,
+          actionText: notification.actionText,
+          timestamp: notification.createdAt,
+        });
+      });
+    }
+
+    console.log(`Created ${createdNotifications.length} course announcement notifications`);
+    return createdNotifications.length;
+  } catch (error) {
+    console.error("Send new course notification error:", error);
+    throw error;
+  }
+};
