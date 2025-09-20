@@ -1,18 +1,29 @@
 import { Navigate } from "react-router-dom";
 
-// Example: you might get this info from context, Redux, or Supabase
-const isAuthenticated = () => {
-  const token = localStorage.getItem("authToken"); // or Supabase session
-  const role = localStorage.getItem("role");       // e.g., "admin" or "user"
-  return { token, role };
+// Check authentication based on required role
+const isAuthenticated = (requiredRole) => {
+  if (requiredRole === "admin") {
+    // For admin routes, check adminToken
+    const adminToken = localStorage.getItem("adminToken");
+    return { token: adminToken, role: adminToken ? "admin" : null };
+  } else {
+    // For user routes, check user token and role
+    const userToken = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    return { token: userToken, role };
+  }
 };
 
 export default function ProtectedRoute({ children, requiredRole = "admin" }) {
-  const { token, role } = isAuthenticated();
+  const { token, role } = isAuthenticated(requiredRole);
 
   if (!token) {
-    // Not logged in
-    return <Navigate to="/admin/login" replace />;
+    // Not logged in - redirect based on required role
+    if (requiredRole === "admin") {
+      return <Navigate to="/admin/login" replace />;
+    } else {
+      return <Navigate to="/login" replace />;
+    }
   }
 
   if (requiredRole && role !== requiredRole) {
