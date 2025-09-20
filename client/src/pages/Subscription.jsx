@@ -297,21 +297,74 @@ export default function Subscription() {
   const filteredCourses = useMemo(() => {
     let filtered = [...enrolledCourses];
 
-    // Search filter - search in title, instructor name, and description (using debounced search)
+    // Search filter - enhanced keyword-based title search (using debounced search)
     if (debouncedSearch) {
       const searchTerm = debouncedSearch.toLowerCase();
-      filtered = filtered.filter(
-        (course) =>
-          course.course?.title?.toLowerCase().includes(searchTerm) ||
-          course.course?.instructor?.firstName
-            ?.toLowerCase()
-            .includes(searchTerm) ||
-          course.course?.instructor?.lastName
-            ?.toLowerCase()
-            .includes(searchTerm) ||
-          course.course?.shortDescription?.toLowerCase().includes(searchTerm) ||
-          course.course?.description?.toLowerCase().includes(searchTerm)
-      );
+      const keywords = searchTerm.split(/\s+/).filter(Boolean); // Split into individual keywords
+
+      filtered = filtered
+        .filter((course) => {
+          const title = course.course?.title?.toLowerCase() || "";
+          const shortDesc =
+            course.course?.shortDescription?.toLowerCase() || "";
+          const fullDesc = course.course?.description?.toLowerCase() || "";
+          const instructorFirst =
+            course.course?.instructor?.firstName?.toLowerCase() || "";
+          const instructorLast =
+            course.course?.instructor?.lastName?.toLowerCase() || "";
+
+          // Enhanced keyword-based search
+          return (
+            // 1. Exact phrase in title (highest priority)
+            title.includes(searchTerm) ||
+            // 2. All keywords present in title (second priority)
+            (keywords.length > 1 &&
+              keywords.every((keyword) => title.includes(keyword))) ||
+            // 3. Any keyword present in title (third priority)
+            keywords.some((keyword) => title.includes(keyword)) ||
+            // 4. Fallback to other fields
+            shortDesc.includes(searchTerm) ||
+            fullDesc.includes(searchTerm) ||
+            instructorFirst.includes(searchTerm) ||
+            instructorLast.includes(searchTerm)
+          );
+        })
+        .sort((a, b) => {
+          // Enhanced relevance sorting
+          const aTitle = a.course?.title?.toLowerCase() || "";
+          const bTitle = b.course?.title?.toLowerCase() || "";
+
+          // Calculate relevance scores
+          let aScore = 0;
+          let bScore = 0;
+
+          // Exact phrase match in title gets highest score
+          if (aTitle.includes(searchTerm)) aScore += 100;
+          if (bTitle.includes(searchTerm)) bScore += 100;
+
+          // All keywords in title gets high score
+          if (keywords.length > 1) {
+            if (keywords.every((keyword) => aTitle.includes(keyword)))
+              aScore += 80;
+            if (keywords.every((keyword) => bTitle.includes(keyword)))
+              bScore += 80;
+          }
+
+          // Individual keyword matches get medium score
+          const aKeywordMatches = keywords.filter((keyword) =>
+            aTitle.includes(keyword)
+          ).length;
+          const bKeywordMatches = keywords.filter((keyword) =>
+            bTitle.includes(keyword)
+          ).length;
+          aScore += aKeywordMatches * 10;
+          bScore += bKeywordMatches * 10;
+
+          // Sort by score (higher score first)
+          if (aScore !== bScore) return bScore - aScore;
+
+          return 0; // Maintain original order for equal relevance
+        });
     }
 
     // Category filter
@@ -467,7 +520,7 @@ export default function Subscription() {
         <div className="relative w-full lg:w-80">
           <input
             className="w-full input-premium pl-12 pr-4 py-3 rounded-full"
-            placeholder="Search courses or instructors..."
+            placeholder="Search by course title keywords..."
             value={filters.search}
             onChange={(e) => handleFilterChange("search", e.target.value)}
           />

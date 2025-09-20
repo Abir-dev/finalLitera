@@ -15,26 +15,26 @@ import courses1 from "../assets/courses1.jpg";
 
 /**
  * FULLY RESPONSIVE COURSES PAGE
- * 
+ *
  * This component is optimized for all device sizes with the following responsive features:
- * 
+ *
  * Mobile (< 640px):
  * - Compact header with abbreviated category labels
  * - Single-column course grid
  * - Simplified search and filters
  * - Mobile-optimized pagination (3 pages max)
  * - Touch-friendly buttons and spacing
- * 
+ *
  * Tablet (640px - 1024px):
  * - 2-column course grid
  * - Enhanced filter layouts
  * - Medium-sized UI elements
- * 
+ *
  * Desktop (> 1024px):
  * - 3-5 column course grid depending on screen size
  * - Full-featured UI with all details
  * - Larger interactive elements
- * 
+ *
  * Responsive breakpoints: xs, sm, md, lg, xl, 2xl
  * All spacing, typography, and layouts scale appropriately
  */
@@ -43,18 +43,18 @@ import courses1 from "../assets/courses1.jpg";
 const useResponsive = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  
+
   useEffect(() => {
     const checkResponsive = () => {
       setIsMobile(window.innerWidth < 640);
       setIsTablet(window.innerWidth >= 640 && window.innerWidth < 1024);
     };
-    
+
     checkResponsive();
-    window.addEventListener('resize', checkResponsive);
-    return () => window.removeEventListener('resize', checkResponsive);
+    window.addEventListener("resize", checkResponsive);
+    return () => window.removeEventListener("resize", checkResponsive);
   }, []);
-  
+
   return { isMobile, isTablet };
 };
 
@@ -80,12 +80,12 @@ export default function Courses() {
 
   // Ensure body doesn't have horizontal overflow on mobile
   useEffect(() => {
-    document.body.style.overflowX = 'hidden';
-    document.documentElement.style.overflowX = 'hidden';
-    
+    document.body.style.overflowX = "hidden";
+    document.documentElement.style.overflowX = "hidden";
+
     return () => {
-      document.body.style.overflowX = 'auto';
-      document.documentElement.style.overflowX = 'auto';
+      document.body.style.overflowX = "auto";
+      document.documentElement.style.overflowX = "auto";
     };
   }, []);
 
@@ -440,13 +440,13 @@ export default function Courses() {
             slidesPerView={1}
             navigation={{
               enabled: !isMobile,
-              prevEl: '.swiper-button-prev',
-              nextEl: '.swiper-button-next',
+              prevEl: ".swiper-button-prev",
+              nextEl: ".swiper-button-next",
             }}
-            pagination={{ 
+            pagination={{
               clickable: true,
               dynamicBullets: true,
-              dynamicMainBullets: isMobile ? 2 : 3
+              dynamicMainBullets: isMobile ? 2 : 3,
             }}
             autoplay={{
               delay: 3000,
@@ -455,7 +455,7 @@ export default function Courses() {
             }}
             loop={true}
             className="h-48 sm:h-64 md:h-72 lg:h-80 xl:h-96 w-full"
-            style={{ width: '100%', maxWidth: '100%' }}
+            style={{ width: "100%", maxWidth: "100%" }}
           >
             {promoSlides.map((slide) => (
               <SwiperSlide key={slide.id}>
@@ -491,7 +491,9 @@ export default function Courses() {
                         <div className="hidden sm:flex items-center gap-3 md:gap-4 lg:gap-6 mt-2 md:mt-3 text-xs md:text-sm opacity-80 flex-wrap">
                           <span>{slide.courseCount} Courses</span>
                           <span>•</span>
-                          <span>{slide.studentCount.toLocaleString()} Students</span>
+                          <span>
+                            {slide.studentCount.toLocaleString()} Students
+                          </span>
                           <span>•</span>
                           <span>⭐ {slide.avgRating}</span>
                         </div>
@@ -520,7 +522,7 @@ export default function Courses() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search courses, instructors..."
+                  placeholder="Search by course title keywords..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pl-9 sm:pl-10 text-sm sm:text-base rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
@@ -628,30 +630,54 @@ export default function Courses() {
             </div>
 
             {/* Active Filters Display - Mobile Friendly */}
-            {(searchTerm || selectedCategory !== "All Courses" || selectedLevel !== "All Levels" || sortBy !== "default") && (
+            {(searchTerm ||
+              selectedCategory !== "All Courses" ||
+              selectedLevel !== "All Levels" ||
+              sortBy !== "default") && (
               <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t border-white/10">
                 {searchTerm && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30">
-                    Search: "{searchTerm.slice(0, 20)}{searchTerm.length > 20 ? '...' : ''}"
-                    <button onClick={() => setSearchTerm("")} className="hover:text-white">×</button>
+                    Search: "{searchTerm.slice(0, 20)}
+                    {searchTerm.length > 20 ? "..." : ""}"
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="hover:text-white"
+                    >
+                      ×
+                    </button>
                   </span>
                 )}
                 {selectedCategory !== "All Courses" && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
                     {selectedCategory}
-                    <button onClick={() => setSelectedCategory("All Courses")} className="hover:text-white">×</button>
+                    <button
+                      onClick={() => setSelectedCategory("All Courses")}
+                      className="hover:text-white"
+                    >
+                      ×
+                    </button>
                   </span>
                 )}
                 {selectedLevel !== "All Levels" && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 text-green-300 rounded-full border border-green-500/30">
                     {selectedLevel}
-                    <button onClick={() => setSelectedLevel("All Levels")} className="hover:text-white">×</button>
+                    <button
+                      onClick={() => setSelectedLevel("All Levels")}
+                      className="hover:text-white"
+                    >
+                      ×
+                    </button>
                   </span>
                 )}
                 {sortBy !== "default" && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-orange-500/20 text-orange-300 rounded-full border border-orange-500/30">
-                    {sortOptions.find(opt => opt.value === sortBy)?.label}
-                    <button onClick={() => setSortBy("default")} className="hover:text-white">×</button>
+                    {sortOptions.find((opt) => opt.value === sortBy)?.label}
+                    <button
+                      onClick={() => setSortBy("default")}
+                      className="hover:text-white"
+                    >
+                      ×
+                    </button>
                   </span>
                 )}
               </div>
@@ -673,15 +699,23 @@ export default function Courses() {
               >
                 <span className="hidden sm:inline">{category}</span>
                 <span className="sm:hidden">
-                  {category === "All Courses" ? "All" :
-                   category === "Web Development" ? "Web" :
-                   category === "Data Science" ? "Data" :
-                   category === "Machine Learning" ? "ML" :
-                   category === "Mobile Development" ? "Mobile" :
-                   category === "Cloud Computing" ? "Cloud" :
-                   category === "DevOps" ? "DevOps" :
-                   category === "Cybersecurity" ? "Security" :
-                   category}
+                  {category === "All Courses"
+                    ? "All"
+                    : category === "Web Development"
+                    ? "Web"
+                    : category === "Data Science"
+                    ? "Data"
+                    : category === "Machine Learning"
+                    ? "ML"
+                    : category === "Mobile Development"
+                    ? "Mobile"
+                    : category === "Cloud Computing"
+                    ? "Cloud"
+                    : category === "DevOps"
+                    ? "DevOps"
+                    : category === "Cybersecurity"
+                    ? "Security"
+                    : category}
                 </span>
               </button>
             ))}
@@ -790,7 +824,10 @@ export default function Courses() {
               <h3 className="text-base sm:text-lg font-semibold mb-2 text-white">
                 Loading Courses
               </h3>
-              <p className="text-xs sm:text-sm" style={{ color: "var(--text-secondary)" }}>
+              <p
+                className="text-xs sm:text-sm"
+                style={{ color: "var(--text-secondary)" }}
+              >
                 Fetching the latest courses for you...
               </p>
             </div>
@@ -990,7 +1027,7 @@ export default function Courses() {
                     }
                   )}
                 </div>
-                
+
                 {/* Show more pages on tablet and desktop */}
                 <div className="hidden sm:flex">
                   {Array.from(

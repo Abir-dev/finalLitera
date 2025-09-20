@@ -1,8 +1,8 @@
-import Course from '../models/Course.js';
-import User from '../models/User.js';
-import Review from '../models/Review.js';
-import Enrollment from '../models/Enrollment.js';
-import Notification from '../models/Notification.js';
+import Course from "../models/Course.js";
+import User from "../models/User.js";
+import Review from "../models/Review.js";
+import Enrollment from "../models/Enrollment.js";
+import Notification from "../models/Notification.js";
 
 // @desc    Get all courses
 // @route   GET /api/courses
@@ -15,38 +15,80 @@ export const getCourses = async (req, res) => {
 
     // Build filter object
     const filter = { isPublished: true };
-    
+
     if (req.query.category) filter.category = req.query.category;
     if (req.query.level) filter.level = req.query.level;
     if (req.query.instructor) filter.instructor = req.query.instructor;
-    if (req.query.liveClasses === 'true') {
-      filter['schedule.liveSessions.0'] = { $exists: true };
+    if (req.query.liveClasses === "true") {
+      filter["schedule.liveSessions.0"] = { $exists: true };
     }
-    
+
     // Price range filter
     if (req.query.minPrice || req.query.maxPrice) {
       filter.price = {};
-      if (req.query.minPrice) filter.price.$gte = parseFloat(req.query.minPrice);
-      if (req.query.maxPrice) filter.price.$lte = parseFloat(req.query.maxPrice);
+      if (req.query.minPrice)
+        filter.price.$gte = parseFloat(req.query.minPrice);
+      if (req.query.maxPrice)
+        filter.price.$lte = parseFloat(req.query.maxPrice);
     }
 
-    // Search filter
+    // Search filter - Enhanced keyword-based title search
     if (req.query.q) {
-      filter.$text = { $search: req.query.q };
+      const searchTerm = req.query.q.trim();
+      const keywords = searchTerm.split(/\s+/).filter(Boolean); // Split into individual keywords
+
+      // Create multiple search strategies for better keyword matching
+      const searchQueries = [];
+
+      // 1. Exact phrase match in title (highest priority)
+      searchQueries.push({ title: { $regex: searchTerm, $options: "i" } });
+
+      // 2. All keywords must be present in title (second priority)
+      if (keywords.length > 1) {
+        const keywordRegexes = keywords.map((keyword) => ({
+          title: { $regex: keyword, $options: "i" },
+        }));
+        searchQueries.push({ $and: keywordRegexes });
+      }
+
+      // 3. Any keyword present in title (third priority)
+      if (keywords.length > 0) {
+        const anyKeywordQuery = keywords.map((keyword) => ({
+          title: { $regex: keyword, $options: "i" },
+        }));
+        searchQueries.push({ $or: anyKeywordQuery });
+      }
+
+      // 4. MongoDB text search across all fields (lowest priority)
+      searchQueries.push({ $text: { $search: searchTerm } });
+
+      // 5. Fuzzy title match for partial words
+      searchQueries.push({
+        title: { $regex: searchTerm.split(" ").join(".*"), $options: "i" },
+      });
+
+      filter.$or = searchQueries;
     }
 
     // Build sort object
     const sort = {};
-    if (req.query.sort) {
-      const sortField = req.query.sort.startsWith('-') ? req.query.sort.slice(1) : req.query.sort;
-      const sortOrder = req.query.sort.startsWith('-') ? -1 : 1;
+    if (req.query.q) {
+      // When searching, prioritize relevance score from text search
+      sort.score = { $meta: "textScore" };
+      // Then sort by created date as secondary
+      sort.createdAt = -1;
+    } else if (req.query.sort) {
+      const sortField = req.query.sort.startsWith("-")
+        ? req.query.sort.slice(1)
+        : req.query.sort;
+      const sortOrder = req.query.sort.startsWith("-") ? -1 : 1;
       sort[sortField] = sortOrder;
     } else {
       sort.createdAt = -1;
     }
 
     const courses = await Course.find(filter)
-      .populate('instructor', 'firstName lastName avatar')
+      .populate("instructor", "firstName lastName avatar")
       .sort(sort)
       .skip(skip)
       .limit(limit);
@@ -54,7 +96,7 @@ export const getCourses = async (req, res) => {
     const total = await Course.countDocuments(filter);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         courses,
         pagination: {
@@ -62,15 +104,15 @@ export const getCourses = async (req, res) => {
           totalPages: Math.ceil(total / limit),
           totalCourses: total,
           hasNext: page < Math.ceil(total / limit),
-          hasPrev: page > 1
-        }
-      }
+          hasPrev: page > 1,
+        },
+      },
     });
   } catch (error) {
-    console.error('Get courses error:', error);
+    console.error("Get courses error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error'
+      status: "error",
+      message: "Server error",
     });
   }
 };
@@ -80,25 +122,25 @@ export const getCourses = async (req, res) => {
 // @access  Public
 export const getFeaturedCourses = async (req, res) => {
   try {
-    const courses = await Course.find({ 
-      isPublished: true, 
-      isFeatured: true 
+    const courses = await Course.find({
+      isPublished: true,
+      isFeatured: true,
     })
-      .populate('instructor', 'firstName lastName avatar')
-      .sort({ 'rating.average': -1, enrollmentCount: -1 })
+      .populate("instructor", "firstName lastName avatar")
+      .sort({ "rating.average": -1, enrollmentCount: -1 })
       .limit(8);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
-        courses
-      }
+        courses,
+      },
     });
   } catch (error) {
-    console.error('Get featured courses error:', error);
+    console.error("Get featured courses error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error'
+      status: "error",
+      message: "Server error",
     });
   }
 };
@@ -108,25 +150,25 @@ export const getFeaturedCourses = async (req, res) => {
 // @access  Public
 export const getLaunchPadCourses = async (req, res) => {
   try {
-    const courses = await Course.find({ 
-      isPublished: true, 
-      isLaunchPad: true 
+    const courses = await Course.find({
+      isPublished: true,
+      isLaunchPad: true,
     })
-      .populate('instructor', 'firstName lastName avatar')
-      .sort({ 'rating.average': -1, enrollmentCount: -1 })
+      .populate("instructor", "firstName lastName avatar")
+      .sort({ "rating.average": -1, enrollmentCount: -1 })
       .limit(12);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
-        courses
-      }
+        courses,
+      },
     });
   } catch (error) {
-    console.error('Get LaunchPad courses error:', error);
+    console.error("Get LaunchPad courses error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error'
+      status: "error",
+      message: "Server error",
     });
   }
 };
@@ -137,20 +179,20 @@ export const getLaunchPadCourses = async (req, res) => {
 export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
-      .populate('instructor', 'firstName lastName avatar profile.bio')
-      .populate('reviews.user', 'firstName lastName avatar');
+      .populate("instructor", "firstName lastName avatar profile.bio")
+      .populate("reviews.user", "firstName lastName avatar");
 
     if (!course) {
       return res.status(404).json({
-        status: 'error',
-        message: 'Course not found'
+        status: "error",
+        message: "Course not found",
       });
     }
 
     // Check if user is enrolled (if authenticated)
     let isEnrolled = false;
     let userProgress = 0;
-    
+
     if (req.user) {
       const user = await User.findById(req.user.id);
       if (user && user.isEnrolledInCourse(req.params.id)) {
@@ -160,20 +202,20 @@ export const getCourseById = async (req, res) => {
     }
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         course,
         enrollment: {
           isEnrolled,
-          progress: userProgress
-        }
-      }
+          progress: userProgress,
+        },
+      },
     });
   } catch (error) {
-    console.error('Get course error:', error);
+    console.error("Get course error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error'
+      status: "error",
+      message: "Server error",
     });
   }
 };
@@ -188,23 +230,38 @@ export const createCourse = async (req, res) => {
 
     // Ensure required text fields
     if (!normalized.shortDescription && normalized.description) {
-      normalized.shortDescription = String(normalized.description).slice(0, 300);
+      normalized.shortDescription = String(normalized.description).slice(
+        0,
+        300
+      );
     }
 
     // Provide a safe default thumbnail to satisfy schema requirement
     if (!normalized.thumbnail) {
-      normalized.thumbnail = course.thumbnail || '';
+      normalized.thumbnail = course.thumbnail || "";
     }
 
     // Normalize arrays if client sends comma-separated strings
     if (normalized.tags && !Array.isArray(normalized.tags)) {
-      normalized.tags = String(normalized.tags).split(',').map(t => t.trim()).filter(Boolean);
+      normalized.tags = String(normalized.tags)
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
     }
     if (normalized.requirements && !Array.isArray(normalized.requirements)) {
-      normalized.requirements = String(normalized.requirements).split(',').map(t => t.trim()).filter(Boolean);
+      normalized.requirements = String(normalized.requirements)
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
     }
-    if (normalized.learningOutcomes && !Array.isArray(normalized.learningOutcomes)) {
-      normalized.learningOutcomes = String(normalized.learningOutcomes).split(',').map(t => t.trim()).filter(Boolean);
+    if (
+      normalized.learningOutcomes &&
+      !Array.isArray(normalized.learningOutcomes)
+    ) {
+      normalized.learningOutcomes = String(normalized.learningOutcomes)
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
     }
 
     const courseData = {
@@ -215,17 +272,17 @@ export const createCourse = async (req, res) => {
     const course = await Course.create(courseData);
 
     res.status(201).json({
-      status: 'success',
-      message: 'Course created successfully',
+      status: "success",
+      message: "Course created successfully",
       data: {
-        course
-      }
+        course,
+      },
     });
   } catch (error) {
-    console.error('Create course error:', error);
+    console.error("Create course error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during course creation'
+      status: "error",
+      message: "Server error during course creation",
     });
   }
 };
@@ -239,16 +296,19 @@ export const updateCourse = async (req, res) => {
 
     if (!course) {
       return res.status(404).json({
-        status: 'error',
-        message: 'Course not found'
+        status: "error",
+        message: "Course not found",
       });
     }
 
     // Check if user can update this course
-    if (req.user.role !== 'admin' && course.instructor.toString() !== req.user.id) {
+    if (
+      req.user.role !== "admin" &&
+      course.instructor.toString() !== req.user.id
+    ) {
       return res.status(403).json({
-        status: 'error',
-        message: 'Not authorized to update this course'
+        status: "error",
+        message: "Not authorized to update this course",
       });
     }
 
@@ -256,20 +316,20 @@ export const updateCourse = async (req, res) => {
       req.params.id,
       req.body,
       { new: true, runValidators: true }
-    ).populate('instructor', 'firstName lastName avatar');
+    ).populate("instructor", "firstName lastName avatar");
 
     res.status(200).json({
-      status: 'success',
-      message: 'Course updated successfully',
+      status: "success",
+      message: "Course updated successfully",
       data: {
-        course: updatedCourse
-      }
+        course: updatedCourse,
+      },
     });
   } catch (error) {
-    console.error('Update course error:', error);
+    console.error("Update course error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during course update'
+      status: "error",
+      message: "Server error during course update",
     });
   }
 };
@@ -283,30 +343,33 @@ export const deleteCourse = async (req, res) => {
 
     if (!course) {
       return res.status(404).json({
-        status: 'error',
-        message: 'Course not found'
+        status: "error",
+        message: "Course not found",
       });
     }
 
     // Check if user can delete this course
-    if (req.user.role !== 'admin' && course.instructor.toString() !== req.user.id) {
+    if (
+      req.user.role !== "admin" &&
+      course.instructor.toString() !== req.user.id
+    ) {
       return res.status(403).json({
-        status: 'error',
-        message: 'Not authorized to delete this course'
+        status: "error",
+        message: "Not authorized to delete this course",
       });
     }
 
     await Course.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
-      status: 'success',
-      message: 'Course deleted successfully'
+      status: "success",
+      message: "Course deleted successfully",
     });
   } catch (error) {
-    console.error('Delete course error:', error);
+    console.error("Delete course error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during course deletion'
+      status: "error",
+      message: "Server error during course deletion",
     });
   }
 };
@@ -320,15 +383,15 @@ export const enrollInCourse = async (req, res) => {
 
     if (!course) {
       return res.status(404).json({
-        status: 'error',
-        message: 'Course not found'
+        status: "error",
+        message: "Course not found",
       });
     }
 
     if (!course.isPublished) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Course is not available for enrollment'
+        status: "error",
+        message: "Course is not available for enrollment",
       });
     }
 
@@ -337,35 +400,35 @@ export const enrollInCourse = async (req, res) => {
     // Check if already enrolled
     if (user.isEnrolledInCourse(req.params.id)) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Already enrolled in this course'
+        status: "error",
+        message: "Already enrolled in this course",
       });
     }
 
     // Enroll user
     await user.enrollInCourse(req.params.id);
-    
+
     // Increment course enrollment count
     await course.incrementEnrollment();
 
     // Create notification
     await Notification.create({
       user: req.user.id,
-      type: 'course_enrollment',
-      title: 'Course Enrollment Confirmed',
+      type: "course_enrollment",
+      title: "Course Enrollment Confirmed",
       message: `You have successfully enrolled in "${course.title}"`,
-      data: { courseId: course._id }
+      data: { courseId: course._id },
     });
 
     res.status(200).json({
-      status: 'success',
-      message: 'Successfully enrolled in course'
+      status: "success",
+      message: "Successfully enrolled in course",
     });
   } catch (error) {
-    console.error('Enroll in course error:', error);
+    console.error("Enroll in course error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during enrollment'
+      status: "error",
+      message: "Server error during enrollment",
     });
   }
 };
@@ -379,8 +442,8 @@ export const addCourseReview = async (req, res) => {
 
     if (!course) {
       return res.status(404).json({
-        status: 'error',
-        message: 'Course not found'
+        status: "error",
+        message: "Course not found",
       });
     }
 
@@ -389,8 +452,8 @@ export const addCourseReview = async (req, res) => {
     // Check if user is enrolled
     if (!user.isEnrolledInCourse(req.params.id)) {
       return res.status(400).json({
-        status: 'error',
-        message: 'You must be enrolled in this course to leave a review'
+        status: "error",
+        message: "You must be enrolled in this course to leave a review",
       });
     }
 
@@ -403,24 +466,24 @@ export const addCourseReview = async (req, res) => {
       rating,
       title,
       comment,
-      isVerified: true
+      isVerified: true,
     });
 
     // Add review to course and update rating
     await course.addReview(req.user.id, rating, comment);
 
     res.status(201).json({
-      status: 'success',
-      message: 'Review added successfully',
+      status: "success",
+      message: "Review added successfully",
       data: {
-        review
-      }
+        review,
+      },
     });
   } catch (error) {
-    console.error('Add review error:', error);
+    console.error("Add review error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error during review submission'
+      status: "error",
+      message: "Server error during review submission",
     });
   }
 };
@@ -432,21 +495,21 @@ export const getCourseCategories = async (req, res) => {
   try {
     const categories = await Course.aggregate([
       { $match: { isPublished: true } },
-      { $group: { _id: '$category', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
     ]);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
-        categories
-      }
+        categories,
+      },
     });
   } catch (error) {
-    console.error('Get categories error:', error);
+    console.error("Get categories error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error'
+      status: "error",
+      message: "Server error",
     });
   }
 };
@@ -462,7 +525,7 @@ export const getCoursesByInstructor = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const courses = await Course.find({ instructor: instructorId })
-      .populate('instructor', 'firstName lastName avatar')
+      .populate("instructor", "firstName lastName avatar")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -470,7 +533,7 @@ export const getCoursesByInstructor = async (req, res) => {
     const total = await Course.countDocuments({ instructor: instructorId });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         courses,
         pagination: {
@@ -478,15 +541,15 @@ export const getCoursesByInstructor = async (req, res) => {
           totalPages: Math.ceil(total / limit),
           totalCourses: total,
           hasNext: page < Math.ceil(total / limit),
-          hasPrev: page > 1
-        }
-      }
+          hasPrev: page > 1,
+        },
+      },
     });
   } catch (error) {
-    console.error('Get courses by instructor error:', error);
+    console.error("Get courses by instructor error:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Server error'
+      status: "error",
+      message: "Server error",
     });
   }
 };

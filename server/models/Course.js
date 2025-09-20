@@ -338,7 +338,24 @@ courseSchema.virtual("discountPercentage").get(function () {
 });
 
 // Indexes for better query performance
-courseSchema.index({ title: "text", description: "text", tags: "text" });
+// Create text index with title having highest weight for search
+courseSchema.index(
+  {
+    title: "text",
+    description: "text",
+    tags: "text",
+    shortDescription: "text",
+  },
+  {
+    weights: {
+      title: 10, // Highest weight for title
+      shortDescription: 5, // Medium weight for short description
+      tags: 3, // Lower weight for tags
+      description: 1, // Lowest weight for full description
+    },
+    name: "course_text_search",
+  }
+);
 courseSchema.index({ category: 1, level: 1 });
 courseSchema.index({ instructor: 1 });
 courseSchema.index({ isPublished: 1, isFeatured: 1 });
