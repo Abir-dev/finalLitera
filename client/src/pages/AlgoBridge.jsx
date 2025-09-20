@@ -237,9 +237,9 @@ function ContestCard({ title, description, participants, prize, startTime, endTi
 
 function CompanyLogo({ company, logoImage, description }) {
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 group">
-      <div className="text-center">
-        <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+    <div className=" rounded-2xl p-6 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 group">
+      <div className="text-center ">
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
           <img
             src={logoImage}
             alt={`${company} logo`}
@@ -247,7 +247,7 @@ function CompanyLogo({ company, logoImage, description }) {
           />
         </div>
         <h3 className="text-xl font-black text-gray-900 mb-2">{company}</h3>
-        <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+        <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -534,7 +534,7 @@ export default function AlgoBridge() {
         {/* Target Audience */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 text-black">
           {/* CSE/IT/ECE/BCA/MCA Students */}
-          <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-3xl p-8 border-2 border-green-200 shadow-xl">
+          <div className=" rounded-3xl p-8 border-2 border-green-200 shadow-xl">
             <h3 className="text-2xl font-bold text-black mb-6 text-center">🎓 For CSE/IT/ECE/BCA/MCA Students</h3>
             <div className="grid grid-cols-2 gap-4">
               <SkillRequirement skill="Quantitative Aptitude" icon="🧮" color="green" />
@@ -547,7 +547,7 @@ export default function AlgoBridge() {
           </div>
 
           {/* Other B-Tech Branches */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 border-2 border-purple-200 shadow-xl">
+          <div className=" rounded-3xl p-8 border-2 border-purple-200 shadow-xl">
             <h3 className="text-2xl font-black text-black mb-6 text-center">⚡ For Other B-Tech Branches</h3>
             <div className="grid grid-cols-1 gap-4">
               <SkillRequirement skill="Quantitative Aptitude" icon="🧮" color="purple" />
