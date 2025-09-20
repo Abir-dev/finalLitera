@@ -37,6 +37,8 @@ import AdminCourseManagement from "./pages/AdminCourseManagement.jsx";
 import AdminExams from "./pages/AdminExams.jsx";
 import AdminAnalytics from "./pages/AdminAnalytics.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Unauthorized from "./pages/Unauthorized.jsx";
 
 export default function App() {
   useEffect(() => {
@@ -76,15 +78,25 @@ export default function App() {
       </Route>
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="students" element={<AdminStudents />} />
-        <Route path="courses" element={<AdminCourseManagement />} />
-        <Route path="exams" element={<AdminExams />} />
-        <Route path="analytics" element={<AdminAnalytics />} />
-        <Route path="settings" element={<AdminSettings />} />
-      </Route>
+      <Route
+  path="/admin"
+  element={
+    <ProtectedRoute requiredRole="admin">
+      <AdminLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route index element={<Navigate to="dashboard" replace />} />
+  <Route path="dashboard" element={<AdminDashboard />} />
+  <Route path="students" element={<AdminStudents />} />
+  <Route path="courses" element={<AdminCourseManagement />} />
+  <Route path="exams" element={<AdminExams />} />
+  <Route path="analytics" element={<AdminAnalytics />} />
+  <Route path="settings" element={<AdminSettings />} />
+</Route>
+
+<Route path="/unauthorized" element={<Unauthorized />} />
+
 
       {/* Redirect old subscription route to dashboard */}
       <Route
