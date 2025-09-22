@@ -2415,3 +2415,32 @@ section > * {
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
+
+/* Custom Scrollbar Styles for Modal */
+.scrollbar-modal {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-muted) var(--surface);
+}
+
+.scrollbar-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-modal::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+.scrollbar-modal::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+}
+
+.scrollbar-modal::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Ensure proper scrolling behavior */
+.modal-content {
+  scroll-behavior: smooth;
+}

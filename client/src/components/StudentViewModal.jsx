@@ -13,6 +13,10 @@ import {
   Phone,
   Calendar,
   GraduationCap,
+  List,
+  AlertCircle,
+  RefreshCw,
+  Clock,
 } from "lucide-react";
 
 export default function StudentViewModal({
@@ -47,6 +51,12 @@ export default function StudentViewModal({
   const [progressData, setProgressData] = useState(null);
   const [progressLoading, setProgressLoading] = useState(false);
 
+  // Enrolled Courses State
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+  const [unassigningCourse, setUnassigningCourse] = useState(null);
+  const [lastFetchTime, setLastFetchTime] = useState(null);
+
   // Initialize form data when student changes
   useEffect(() => {
     if (student) {
@@ -61,7 +71,14 @@ export default function StudentViewModal({
     }
   }, [student]);
 
-  // Fetch data when modal opens
+  // Fetch enrolled courses data when modal opens (needed for filtering)
+  useEffect(() => {
+    if (isOpen && student) {
+      fetchEnrolledCourses();
+    }
+  }, [isOpen, student]);
+
+  // Fetch data when tab changes
   useEffect(() => {
     if (isOpen && student) {
       if (activeTab === "assign") {
@@ -71,6 +88,13 @@ export default function StudentViewModal({
       }
     }
   }, [isOpen, student, activeTab]);
+
+  // Refresh available courses when enrolled courses change
+  useEffect(() => {
+    if (activeTab === "assign" && enrolledCourses.length >= 0) {
+      fetchAvailableCourses();
+    }
+  }, [enrolledCourses]);
 
   const fetchAvailableCourses = async () => {
     setLoading(true);
@@ -95,11 +119,128 @@ export default function StudentViewModal({
       }
 
       const data = await response.json();
-      setCourses(data.data.courses || []);
+      const allCourses = data.data.courses || [];
+
+      // Filter out courses that the student is already enrolled in
+      const enrolledCourseIds = enrolledCourses.map((course) => course.id);
+      const availableCourses = allCourses.filter(
+        (course) => !enrolledCourseIds.includes(course._id)
+      );
+
+      console.log(
+        `Filtered ${
+          allCourses.length - availableCourses.length
+        } already enrolled courses`
+      );
+      console.log(
+        `${availableCourses.length} courses available for assignment`
+      );
+
+      setCourses(availableCourses);
     } catch (err) {
       setError(`Failed to load available courses: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEnrolledCourses = async () => {
+    setCoursesLoading(true);
+    setError("");
+
+    try {
+      const API_BASE =
+        import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+      const token = localStorage.getItem("adminToken");
+
+      // Fetch real-time student data from students list endpoint
+      console.log("Fetching real-time course data for student:", student.id);
+
+      const response = await fetch(`${API_BASE}/admin/students?limit=1000`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch students data: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const students = data.data.users || [];
+
+      // Find the specific student from the list
+      const currentStudent = students.find((s) => s._id === student.id);
+
+      if (!currentStudent) {
+        throw new Error("Student not found in the system");
+      }
+
+      // Transform enrolled courses data with real-time information
+      if (
+        currentStudent.enrolledCourses &&
+        currentStudent.enrolledCourses.length > 0
+      ) {
+        const realTimeCourses = currentStudent.enrolledCourses.map(
+          (enrollment, index) => {
+            // Calculate progress
+            const completedVideos = enrollment.progress?.completedVideos || 0;
+            const totalVideos = enrollment.progress?.totalVideos || 0;
+            const progress =
+              totalVideos > 0
+                ? Math.round((completedVideos / totalVideos) * 100)
+                : 0;
+
+            return {
+              id:
+                enrollment.course?._id ||
+                enrollment.course ||
+                `course-${index}`,
+              title: enrollment.course?.title || `Course ${index + 1}`,
+              instructor:
+                typeof enrollment.course?.instructor === "string"
+                  ? enrollment.course.instructor
+                  : enrollment.course?.instructor?.firstName
+                  ? `${enrollment.course.instructor.firstName} ${enrollment.course.instructor.lastName}`
+                  : "Unknown Instructor",
+              enrolledAt: enrollment.enrolledAt || new Date().toISOString(),
+              progress: progress,
+              completedVideos: completedVideos,
+              totalVideos: totalVideos,
+              watchedTime: enrollment.progress?.watchedTime || "0:00:00",
+              status: enrollment.status || "active",
+              lastAccessed:
+                enrollment.progress?.lastAccessed || enrollment.enrolledAt,
+              thumbnail: enrollment.course?.thumbnail || null,
+              description: enrollment.course?.description || "",
+              // Additional real-time data
+              isActive:
+                enrollment.status !== "paused" &&
+                enrollment.status !== "dropped",
+              enrollmentId: enrollment._id,
+            };
+          }
+        );
+
+        console.log(
+          `Successfully fetched ${realTimeCourses.length} real-time courses for student`
+        );
+        setEnrolledCourses(realTimeCourses);
+        setLastFetchTime(new Date());
+      } else {
+        console.log("No enrolled courses found for student");
+        setEnrolledCourses([]);
+        setLastFetchTime(new Date());
+      }
+    } catch (err) {
+      console.error("Error fetching real-time enrolled courses:", err);
+      setError(`Failed to load enrolled courses: ${err.message}`);
+      // No fallback - just show error and let user retry or assign courses
+    } finally {
+      setCoursesLoading(false);
     }
   };
 
@@ -288,15 +429,67 @@ export default function StudentViewModal({
         onCourseAssigned(data.data);
       }
 
+      // Refresh real-time enrolled courses data
+      setTimeout(() => {
+        fetchEnrolledCourses();
+        setActiveTab("courses");
+      }, 500);
+
       setTimeout(() => {
         setSuccess("");
         setSelectedCourseId("");
-        setActiveTab("overview");
       }, 1500);
     } catch (error) {
       setError(error.message || "Failed to assign course");
     } finally {
       setIsAssigning(false);
+    }
+  };
+
+  const handleUnassignCourse = async (courseId, courseTitle) => {
+    if (!courseId) return;
+
+    setUnassigningCourse(courseId);
+    setError("");
+    setSuccess("");
+
+    try {
+      const API_BASE =
+        import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+      const token = localStorage.getItem("adminToken");
+
+      const response = await fetch(
+        `${API_BASE}/admin/students/${student.id}/courses/${courseId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to unassign course");
+      }
+
+      setSuccess(`Successfully unassigned "${courseTitle}"`);
+
+      // Refresh real-time enrolled courses data
+      setTimeout(() => fetchEnrolledCourses(), 200);
+
+      if (onCourseAssigned) {
+        onCourseAssigned({ student: { id: student.id }, removed: true });
+      }
+
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (error) {
+      setError(error.message || "Failed to unassign course");
+    } finally {
+      setUnassigningCourse(null);
     }
   };
 
@@ -413,6 +606,7 @@ export default function StudentViewModal({
   const tabs = [
     { id: "overview", label: "Overview", icon: Users },
     { id: "edit", label: "Edit", icon: Edit },
+    { id: "courses", label: "Enrolled Courses", icon: List },
     { id: "assign", label: "Assign Course", icon: BookOpen },
     { id: "progress", label: "Progress", icon: BarChart3 },
   ];
@@ -421,9 +615,12 @@ export default function StudentViewModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="card-premium w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="card-premium w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b" style={{ borderColor: "var(--border)" }}>
+        <div
+          className="p-4 border-b flex-shrink-0"
+          style={{ borderColor: "var(--border)" }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
@@ -437,7 +634,7 @@ export default function StudentViewModal({
               </div>
               <div>
                 <h2
-                  className="text-xl font-bold"
+                  className="text-lg font-bold"
                   style={{ color: "var(--text-primary)" }}
                 >
                   {student.name}
@@ -462,18 +659,18 @@ export default function StudentViewModal({
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mt-4 overflow-x-auto">
+          <div className="flex gap-2 mt-3 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                     activeTab === tab.id ? "btn-premium" : "btn-outline-premium"
                   }`}
                 >
-                  <Icon size={16} />
+                  <Icon size={14} />
                   {tab.label}
                 </button>
               );
@@ -481,8 +678,13 @@ export default function StudentViewModal({
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
+        {/* Content - Scrollable Area */}
+        <div
+          className="flex-1 overflow-y-auto p-4 min-h-0 scrollbar-modal modal-content"
+          style={{
+            maxHeight: "calc(95vh - 200px)",
+          }}
+        >
           {/* Success/Error Messages */}
           {error && (
             <div
@@ -835,6 +1037,33 @@ export default function StudentViewModal({
                     Loading courses...
                   </span>
                 </div>
+              ) : courses.length === 0 ? (
+                <div className="text-center py-12">
+                  <BookOpen
+                    size={48}
+                    className="mx-auto mb-4"
+                    style={{ color: "var(--text-muted)" }}
+                  />
+                  <p
+                    className="text-lg mb-2"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    No Available Courses
+                  </p>
+                  <p
+                    className="text-sm mb-4"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {student.name} is already enrolled in all available courses,
+                    or there are no published courses to assign.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab("courses")}
+                    className="btn-outline-premium px-4 py-2"
+                  >
+                    View Enrolled Courses
+                  </button>
+                </div>
               ) : (
                 <div className="space-y-6">
                   <div>
@@ -842,7 +1071,7 @@ export default function StudentViewModal({
                       htmlFor="courseSelect"
                       className="block text-sm font-medium mb-2"
                     >
-                      Select Course to Assign *
+                      Select Course to Assign * ({courses.length} available)
                     </label>
                     <select
                       id="courseSelect"
@@ -943,6 +1172,234 @@ export default function StudentViewModal({
                     </button>
                   </div>
                 </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "courses" && (
+            <div className="space-y-6">
+              {coursesLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div
+                    className="animate-spin rounded-full h-8 w-8 border-b-2"
+                    style={{ borderColor: "var(--brand)" }}
+                  ></div>
+                  <span className="ml-3 text-[color:var(--text-secondary)]">
+                    Loading real-time course data...
+                  </span>
+                </div>
+              ) : error && error.includes("enrolled courses") ? (
+                <div className="text-center py-12">
+                  <AlertCircle
+                    size={48}
+                    className="mx-auto mb-4"
+                    style={{ color: "var(--text-muted)" }}
+                  />
+                  <p
+                    className="text-lg mb-2"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Failed to Load Course Data
+                  </p>
+                  <p
+                    className="text-sm mb-4"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Unable to fetch real-time course information for{" "}
+                    {student.name}
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => {
+                        setError("");
+                        fetchEnrolledCourses();
+                      }}
+                      className="btn-premium px-4 py-2"
+                    >
+                      Try Again
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("assign")}
+                      className="btn-outline-premium px-4 py-2"
+                    >
+                      Assign Course
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3
+                        className="text-lg font-bold"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        Enrolled Courses ({enrolledCourses.length})
+                      </h3>
+                      {lastFetchTime && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Clock
+                            size={12}
+                            style={{ color: "var(--text-muted)" }}
+                          />
+                          <span
+                            className="text-xs"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            Last updated: {lastFetchTime.toLocaleTimeString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setError("");
+                          fetchEnrolledCourses();
+                        }}
+                        disabled={coursesLoading}
+                        className="btn-outline-premium px-3 py-2 text-sm flex items-center gap-2"
+                        title="Refresh real-time data"
+                      >
+                        <RefreshCw
+                          size={16}
+                          className={coursesLoading ? "animate-spin" : ""}
+                        />
+                        Refresh
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("assign")}
+                        className="btn-premium px-3 py-2 text-sm flex items-center gap-2"
+                      >
+                        <BookOpen size={16} />
+                        Assign New Course
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Courses List */}
+                  {enrolledCourses.length === 0 ? (
+                    <div className="text-center py-12">
+                      <GraduationCap
+                        size={48}
+                        className="mx-auto mb-4"
+                        style={{ color: "var(--text-muted)" }}
+                      />
+                      <p
+                        className="text-lg mb-2"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        No Courses Enrolled
+                      </p>
+                      <p
+                        className="text-sm mb-4"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {student.name} is not currently enrolled in any courses
+                      </p>
+                      <button
+                        onClick={() => setActiveTab("assign")}
+                        className="btn-premium px-4 py-2"
+                      >
+                        Assign First Course
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {enrolledCourses.map((course, index) => (
+                        <div key={index} className="card-premium p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h4
+                                className="text-lg font-bold mb-1"
+                                style={{ color: "var(--text-primary)" }}
+                              >
+                                {course.title}
+                              </h4>
+                              <p
+                                className="text-sm mb-2"
+                                style={{ color: "var(--text-secondary)" }}
+                              >
+                                Instructor:{" "}
+                                {course.instructor || "Not specified"}
+                              </p>
+                              <div className="flex items-center gap-4 text-xs">
+                                <span style={{ color: "var(--text-muted)" }}>
+                                  Enrolled:{" "}
+                                  {new Date(
+                                    course.enrolledAt
+                                  ).toLocaleDateString()}
+                                </span>
+                                <span style={{ color: "var(--text-muted)" }}>
+                                  Progress: {course.progress || 0}%
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="text-2xl font-bold text-right"
+                                style={{
+                                  color: getProgressColor(course.progress || 0),
+                                }}
+                              >
+                                {course.progress || 0}%
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div
+                            className="w-full rounded-full h-2 mb-4"
+                            style={{ background: "var(--surface)" }}
+                          >
+                            <div
+                              className="h-2 rounded-full transition-all duration-1000"
+                              style={{
+                                width: `${course.progress || 0}%`,
+                                background: getProgressColor(
+                                  course.progress || 0
+                                ),
+                              }}
+                            />
+                          </div>
+
+                          {/* Course Details & Actions */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-sm">
+                              <span style={{ color: "var(--text-secondary)" }}>
+                                Videos: {course.completedVideos || 0}/
+                                {course.totalVideos || 0}
+                              </span>
+                              <span style={{ color: "var(--text-secondary)" }}>
+                                Time: {course.watchedTime || "0:00:00"}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleUnassignCourse(course.id, course.title)
+                              }
+                              disabled={unassigningCourse === course.id}
+                              className="px-3 py-1 text-sm flex items-center gap-2 rounded border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50"
+                            >
+                              {unassigningCourse === course.id ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-3 w-3 border border-red-500 border-t-transparent"></div>
+                                  Removing...
+                                </>
+                              ) : (
+                                <>
+                                  <Trash2 size={14} />
+                                  Unassign
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
