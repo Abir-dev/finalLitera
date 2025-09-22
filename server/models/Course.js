@@ -269,6 +269,17 @@ const courseSchema = new mongoose.Schema(
           recordingUrl: String,
         },
       ],
+      // Store recurring session configuration
+      recurringConfig: {
+        sessionDays: [String], // e.g., ['Mon', 'Wed', 'Fri']
+        sessionTime: String, // e.g., '15:30'
+        sessionDuration: Number, // e.g., 60
+        meetingLink: String,
+        isActive: {
+          type: Boolean,
+          default: false,
+        },
+      },
     },
     analytics: {
       views: {
