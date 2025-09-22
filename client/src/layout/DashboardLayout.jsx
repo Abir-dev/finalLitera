@@ -48,7 +48,7 @@ export default function DashboardLayout() {
       <div className="flex min-h-screen">
         {/* Fixed Sidebar */}
         <aside className="hidden md:flex w-64 text-white flex-col fixed left-0 top-0 h-screen z-30">
-          <div className="card-premium dashboard-sidebar flex flex-col m-4">
+          <div className="card-premium dashboard-sidebar flex flex-col m-4 h-[calc(100vh-2rem)] overflow-y-auto">
             {/* Standard Sidebar Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ export default function DashboardLayout() {
             </div>
 
             {/* Enhanced Bottom Actions */}
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-white/10 sticky bottom-0 bg-gray-900/80 backdrop-blur-sm">
               <NavLink
                 to="/"
                 className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-300 group hover:scale-105"
@@ -184,8 +184,8 @@ export default function DashboardLayout() {
 
           {/* Mobile Menu Overlay */}
           {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
-              <div className="fixed left-0 top-0 h-full w-64 bg-gray-900/95 backdrop-blur-xl border-r border-white/10" onClick={(e) => e.stopPropagation()}>
+              <div className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
+                <div id="mobile-dashboard-menu" className="fixed left-0 top-0 h-full w-64 bg-gray-900/95 backdrop-blur-xl border-r border-white/10 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">

@@ -305,11 +305,28 @@ export default function AdminCourseManagement() {
     // Pre-fill with first session if exists
     const first = course.schedule?.liveSessions?.[0];
     const prefillTime = first ? new Date(first.date) : null;
+    // Infer recurring days from existing sessions if present (Mon..Sun)
+    const weekdayAbbr = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const inferredDays = Array.isArray(course.schedule?.liveSessions)
+      ? Array.from(
+          new Set(
+            course.schedule.liveSessions
+              .slice(0, 7)
+              .map((s) => {
+                const d = new Date(s.date);
+                return weekdayAbbr[d.getUTCDay()];
+              })
+          )
+        )
+      : [];
     setMeetLinkData({
       meetLink: first?.meetingLink || "",
       isLiveClass: course.schedule?.liveSessions?.length > 0 || false,
-      sessionDays: [],
-      sessionTime: prefillTime ? `${String(prefillTime.getHours()).padStart(2,'0')}:${String(prefillTime.getMinutes()).padStart(2,'0')}` : "",
+      sessionDays: inferredDays,
+      // Use UTC components to avoid timezone shifts when reopening
+      sessionTime: prefillTime
+        ? `${String(prefillTime.getUTCHours()).padStart(2,'0')}:${String(prefillTime.getUTCMinutes()).padStart(2,'0')}`
+        : "",
       sessionDuration: first?.duration || "",
     });
     setShowLinksModal(true);
@@ -340,10 +357,30 @@ export default function AdminCourseManagement() {
     setLinksSubmitting(true);
 
     try {
+      // Basic validation for recurring sessions timing
+      if (
+        meetLinkData.isLiveClass &&
+        Array.isArray(meetLinkData.sessionDays) &&
+        meetLinkData.sessionDays.length > 0 &&
+        (!meetLinkData.sessionTime || meetLinkData.sessionTime.trim() === "")
+      ) {
+        toast.error("Please pick a time for the selected days.");
+        setLinksSubmitting(false);
+        return;
+      }
+
+      // Normalize payload
+      const payload = {
+        ...meetLinkData,
+        meetLink: (meetLinkData.meetLink || "").trim(),
+        // Ensure booleans/strings are correctly shaped for backend
+        isLiveClass: !!meetLinkData.isLiveClass,
+      };
+
       const token = localStorage.getItem("adminToken");
     const response = await axios.put(
       `${backendURL}/admin/courses/${selectedCourse._id}/meet-links`,
-      meetLinkData,
+      payload,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -1205,7 +1242,7 @@ export default function AdminCourseManagement() {
       {/* Meet Links Modal */}
       {showLinksModal && selectedCourse && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card-premium max-w-4xl w-full h-[10vh] flex flex-col overflow-y-auto">
+      <div className="card-premium max-w-4xl w-full h-[75vh] flex flex-col overflow-y-auto">
             <div className="p-4 sm:p-6 flex-shrink-0">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">

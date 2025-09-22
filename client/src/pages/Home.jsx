@@ -536,7 +536,7 @@ export default function Home() {
             />
             <TestimonialCard
               quote="Premium courses at the best prices. The quality of education here is unmatched in the industry."
-              name="Abir Lal Banerjee"
+              name="Aarti Yadav"
               role="Full Stack Developer"
             />
           </div>
