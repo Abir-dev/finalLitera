@@ -232,7 +232,7 @@ const LaunchPadDetails = () => {
 
               {/* Course Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-navyblue p-4 rounded-lg text-center">
+                <div className="bg-blue-50 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-blue-600">
                     {courseData.duration}
                   </div>
