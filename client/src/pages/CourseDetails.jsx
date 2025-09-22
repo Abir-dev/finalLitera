@@ -83,6 +83,12 @@ export default function CourseDetails() {
     })();
   }, [course]);
 
+  if (!user && !isLoginModalOpen) {
+    // If user is not logged in and landed directly here, prompt login first
+    // After login, stay on the same course details
+    setIsLoginModalOpen(true);
+  }
+
   if (loading) {
     return (
       <div
@@ -1029,6 +1035,10 @@ export default function CourseDetails() {
         onSwitchToSignup={() => {
           setIsLoginModalOpen(false);
           setIsSignupModalOpen(true);
+        }}
+        onSuccess={() => {
+          // Stay on this page after login
+          setIsLoginModalOpen(false);
         }}
       />
       <SignupModal

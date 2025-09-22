@@ -70,8 +70,8 @@ export default function DashboardLayout() {
               </div>
             </div>
             {/* Enhanced Profile Section */}
-            <div className="px-4 pt-6 pb-4">
-              <div className="relative mx-auto w-24 h-24">
+            <div className="px-4 pt-3 pb-4">
+              <div className="relative mx-auto w-20 h-20">
                 <div className="w-full h-full rounded-3xl overflow-hidden border-2 border-white/20 shadow-lg relative">
                   <img
                     className="w-full h-full object-cover"
@@ -95,11 +95,11 @@ export default function DashboardLayout() {
                 </p>
                 {userStats && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 backdrop-blur-sm rounded-xl p-3 border border-blue-500/20">
+                    <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 backdrop-blur-sm rounded-xl p-2 border border-blue-500/20">
                       <div className="text-lg font-bold text-white">{userStats.enrolledCourses || 0}</div>
                       <div className="text-xs text-blue-400 font-medium">Courses</div>
                     </div>
-                    <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 backdrop-blur-sm rounded-xl p-3 border border-green-500/20">
+                    <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 backdrop-blur-sm rounded-xl p-2 border border-green-500/20">
                       <div className="text-lg font-bold text-white">{userStats.completedCourses || 0}</div>
                       <div className="text-xs text-green-400 font-medium">Completed</div>
                     </div>
