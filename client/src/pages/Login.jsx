@@ -22,25 +22,13 @@ export default function Login() {
     try {
       // Use proper authentication from AuthContext
       await login(email, password);
-      
-      // Show success message briefly
-      setTimeout(() => {
-        setIsLoading(false);
-        setShowSuccess(true);
-        
-        // Show redirecting message and then navigate
-        setTimeout(() => {
-          setIsRedirecting(true);
-          setTimeout(() => {
-            // Always redirect to dashboard after login
-            navigate("/dashboard", { replace: true });
-          }, 1000);
-        }, 1000);
-      }, 1500);
+      // Navigate immediately to subscription after successful login
+      navigate("/dashboard/subscription", { replace: true });
       
     } catch (error) {
       console.error('Login error:', error);
       toast.error(error.response?.data?.message || "Login failed");
+    } finally {
       setIsLoading(false);
     }
   };
