@@ -483,28 +483,25 @@ export default function AdminCourses() {
       {/* Premium Filters and Search */}
       <div className="card-premium p-4 sm:p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="sm:col-span-2 lg:col-span-2 relative">
+          <div className="sm:col-span-2 lg:col-span-2 input-with-icon">
             <Search
               size={18}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="icon-left"
+              style={{ color: "var(--text-muted)" }}
             />
             <input
               type="text"
               placeholder="Search courses by title keywords..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-premium w-full pl-10 text-sm sm:text-base"
+              className="input-premium w-full pr-4 py-3 text-sm sm:text-base"
             />
           </div>
-          <div className="relative">
-            <Filter
-              size={16}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
+          <div>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="input-premium w-full pl-10 text-sm sm:text-base"
+              className="input-premium w-full px-4 py-3 text-sm sm:text-base"
             >
               {availableCategories.map((category) => (
                 <option key={category} value={category}>
@@ -513,15 +510,11 @@ export default function AdminCourses() {
               ))}
             </select>
           </div>
-          <div className="relative">
-            <CheckCircle
-              size={16}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
+          <div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-premium w-full pl-10 text-sm sm:text-base"
+              className="input-premium w-full px-4 py-3 text-sm sm:text-base"
             >
               {statuses.map((status) => (
                 <option key={status} value={status}>

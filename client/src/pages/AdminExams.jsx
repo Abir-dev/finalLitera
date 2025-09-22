@@ -1,25 +1,31 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { createExam as apiCreateExam, updateExam as apiUpdateExam, deleteExam as apiDeleteExam, updateExamStatus as apiUpdateExamStatus, fetchExams as apiFetchExams } from "../services/examService.js";
-import { 
-  FileText, 
-  CheckCircle, 
-  Clock, 
-  TrendingUp, 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Users, 
+import {
+  createExam as apiCreateExam,
+  updateExam as apiUpdateExam,
+  deleteExam as apiDeleteExam,
+  updateExamStatus as apiUpdateExamStatus,
+  fetchExams as apiFetchExams,
+} from "../services/examService.js";
+import {
+  FileText,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Eye,
+  Users,
   BarChart3,
   X,
   Save,
   Calendar,
   BookOpen,
   Target,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 
 export default function AdminExams() {
@@ -73,35 +79,38 @@ export default function AdminExams() {
         exam.title?.toLowerCase().includes(q) ||
         exam.course?.toLowerCase().includes(q);
       const matchesType = typeFilter === "all" || exam.type === typeFilter;
-      const matchesStatus = statusFilter === "all" || exam.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || exam.status === statusFilter;
       return matchesSearch && matchesType && matchesStatus;
     });
   }, [exams, searchTerm, typeFilter, statusFilter]);
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      active: { 
-        bg: "bg-gradient-to-r from-green-500/20 to-emerald-500/20", 
-        text: "text-green-400", 
+      active: {
+        bg: "bg-gradient-to-r from-green-500/20 to-emerald-500/20",
+        text: "text-green-400",
         border: "border-green-500/30",
-        label: "Active" 
+        label: "Active",
       },
-      draft: { 
-        bg: "bg-gradient-to-r from-yellow-500/20 to-orange-500/20", 
-        text: "text-yellow-400", 
+      draft: {
+        bg: "bg-gradient-to-r from-yellow-500/20 to-orange-500/20",
+        text: "text-yellow-400",
         border: "border-yellow-500/30",
-        label: "Draft" 
+        label: "Draft",
       },
-      archived: { 
-        bg: "bg-gradient-to-r from-gray-500/20 to-slate-500/20", 
-        text: "text-gray-400", 
+      archived: {
+        bg: "bg-gradient-to-r from-gray-500/20 to-slate-500/20",
+        text: "text-gray-400",
         border: "border-gray-500/30",
-        label: "Archived" 
+        label: "Archived",
       },
     };
     const config = statusConfig[status] || statusConfig.draft;
     return (
-      <span className={`px-3 py-1 ${config.bg} ${config.text} ${config.border} border text-xs rounded-full font-medium`}>
+      <span
+        className={`px-3 py-1 ${config.bg} ${config.text} ${config.border} border text-xs rounded-full font-medium`}
+      >
         {config.label}
       </span>
     );
@@ -109,30 +118,32 @@ export default function AdminExams() {
 
   const getTypeBadge = (type) => {
     const typeConfig = {
-      Quiz: { 
-        bg: "bg-gradient-to-r from-blue-500/20 to-cyan-500/20", 
-        text: "text-blue-400", 
-        border: "border-blue-500/30"
+      Quiz: {
+        bg: "bg-gradient-to-r from-blue-500/20 to-cyan-500/20",
+        text: "text-blue-400",
+        border: "border-blue-500/30",
       },
-      Exam: { 
-        bg: "bg-gradient-to-r from-purple-500/20 to-pink-500/20", 
-        text: "text-purple-400", 
-        border: "border-purple-500/30"
+      Exam: {
+        bg: "bg-gradient-to-r from-purple-500/20 to-pink-500/20",
+        text: "text-purple-400",
+        border: "border-purple-500/30",
       },
-      "Final Exam": { 
-        bg: "bg-gradient-to-r from-red-500/20 to-rose-500/20", 
-        text: "text-red-400", 
-        border: "border-red-500/30"
+      "Final Exam": {
+        bg: "bg-gradient-to-r from-red-500/20 to-rose-500/20",
+        text: "text-red-400",
+        border: "border-red-500/30",
       },
-      Project: { 
-        bg: "bg-gradient-to-r from-indigo-500/20 to-violet-500/20", 
-        text: "text-indigo-400", 
-        border: "border-indigo-500/30"
+      Project: {
+        bg: "bg-gradient-to-r from-indigo-500/20 to-violet-500/20",
+        text: "text-indigo-400",
+        border: "border-indigo-500/30",
       },
     };
     const config = typeConfig[type] || typeConfig.Quiz;
     return (
-      <span className={`px-3 py-1 ${config.bg} ${config.text} ${config.border} border text-xs rounded-full font-medium`}>
+      <span
+        className={`px-3 py-1 ${config.bg} ${config.text} ${config.border} border text-xs rounded-full font-medium`}
+      >
         {type}
       </span>
     );
@@ -200,7 +211,11 @@ export default function AdminExams() {
   const handleStatusToggle = async (id, newStatus) => {
     try {
       const updated = await apiUpdateExamStatus(id, newStatus);
-      setExams((prev) => prev.map((e) => (e.id === id ? { ...e, status: updated?.status || newStatus } : e)));
+      setExams((prev) =>
+        prev.map((e) =>
+          e.id === id ? { ...e, status: updated?.status || newStatus } : e
+        )
+      );
     } catch (err) {
       console.error(err);
       alert("Failed to update status");
@@ -208,7 +223,8 @@ export default function AdminExams() {
   };
 
   // Form helpers
-  const updateField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const updateField = (key, value) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
 
   const validateForm = () => {
     if (!form.title.trim()) return "Exam name is required";
@@ -261,7 +277,9 @@ export default function AdminExams() {
       if (editingExam) {
         const updated = await apiUpdateExam(editingExam.id, payload);
         const normalized = { ...updated, id: updated._id || editingExam.id };
-        setExams((prev) => prev.map((e) => (e.id === editingExam.id ? normalized : e)));
+        setExams((prev) =>
+          prev.map((e) => (e.id === editingExam.id ? normalized : e))
+        );
       } else {
         const created = await apiCreateExam(payload);
         const normalized = { ...created, id: created._id };
@@ -282,7 +300,9 @@ export default function AdminExams() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white">Exam Management</h1>
-          <p className="text-gray-300 mt-1">Create and manage exams, quizzes, and assessments</p>
+          <p className="text-gray-300 mt-1">
+            Create and manage exams, quizzes, and assessments
+          </p>
         </div>
         <button
           onClick={openAddModal}
@@ -296,24 +316,25 @@ export default function AdminExams() {
       {/* Filters and Search */}
       <div className="card-premium p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2">
-            <div className="relative">
-              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search exams by title or course..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-premium w-full pl-10"
-              />
-            </div>
+          <div className="md:col-span-2 input-with-icon">
+            <Search
+              size={18}
+              className="icon-left"
+              style={{ color: "var(--text-muted)" }}
+            />
+            <input
+              type="text"
+              placeholder="Search exams by title or course..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input-premium w-full pr-4 py-3"
+            />
           </div>
-          <div className="relative">
-            <Filter size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <div>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="input-premium w-full pl-10"
+              className="input-premium w-full px-4 py-3"
             >
               {examTypes.map((type) => (
                 <option key={type} value={type}>
@@ -322,16 +343,17 @@ export default function AdminExams() {
               ))}
             </select>
           </div>
-          <div className="relative">
-            <CheckCircle size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-premium w-full pl-10"
+              className="input-premium w-full px-4 py-3"
             >
               {["all", "active", "draft", "archived"].map((status) => (
                 <option key={status} value={status}>
-                  {status === "all" ? "All Status" : status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === "all"
+                    ? "All Status"
+                    : status.charAt(0).toUpperCase() + status.slice(1)}
                 </option>
               ))}
             </select>
@@ -352,7 +374,9 @@ export default function AdminExams() {
                 {getTypeBadge(exam.type)}
                 {getStatusBadge(exam.status)}
               </div>
-              <h3 className="text-lg font-bold line-clamp-2 mb-2">{exam.title}</h3>
+              <h3 className="text-lg font-bold line-clamp-2 mb-2">
+                {exam.title}
+              </h3>
               <div className="flex items-center gap-2 text-purple-100 text-sm">
                 <BookOpen size={14} />
                 <span>{exam.course}</span>
@@ -367,7 +391,9 @@ export default function AdminExams() {
                     <Clock size={16} className="text-blue-400" />
                     <span className="text-xs text-gray-400">Duration</span>
                   </div>
-                  <div className="text-2xl font-bold text-white">{exam.duration}</div>
+                  <div className="text-2xl font-bold text-white">
+                    {exam.duration}
+                  </div>
                   <div className="text-xs text-gray-400">Minutes</div>
                 </div>
                 <div className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
@@ -375,7 +401,9 @@ export default function AdminExams() {
                     <Target size={16} className="text-purple-400" />
                     <span className="text-xs text-gray-400">Questions</span>
                   </div>
-                  <div className="text-2xl font-bold text-white">{exam.totalQuestions}</div>
+                  <div className="text-2xl font-bold text-white">
+                    {exam.totalQuestions}
+                  </div>
                   <div className="text-xs text-gray-400">Total</div>
                 </div>
               </div>
@@ -383,19 +411,29 @@ export default function AdminExams() {
               <div className="space-y-3 mb-6 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Passing Score:</span>
-                  <span className="font-semibold text-white">{exam.passingScore}%</span>
+                  <span className="font-semibold text-white">
+                    {exam.passingScore}%
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Total Attempts:</span>
-                  <span className="font-semibold text-white">{exam.attempts}</span>
+                  <span className="font-semibold text-white">
+                    {exam.attempts}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Average Score:</span>
-                  <span className={`font-semibold ${
-                    exam.avgScore >= 80 ? 'text-green-400' :
-                    exam.avgScore >= 70 ? 'text-blue-400' :
-                    exam.avgScore >= 60 ? 'text-yellow-400' : 'text-red-400'
-                  }`}>
+                  <span
+                    className={`font-semibold ${
+                      exam.avgScore >= 80
+                        ? "text-green-400"
+                        : exam.avgScore >= 70
+                        ? "text-blue-400"
+                        : exam.avgScore >= 60
+                        ? "text-yellow-400"
+                        : "text-red-400"
+                    }`}
+                  >
                     {exam.avgScore > 0 ? `${exam.avgScore}%` : "N/A"}
                   </span>
                 </div>
@@ -404,11 +442,16 @@ export default function AdminExams() {
               <div className="text-xs text-gray-500 mb-6 space-y-1">
                 <div className="flex items-center gap-2">
                   <Calendar size={12} />
-                  <span>Created: {new Date(exam.createdAt).toLocaleDateString()}</span>
+                  <span>
+                    Created: {new Date(exam.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar size={12} />
-                  <span>Scheduled: {new Date(exam.scheduledDate).toLocaleDateString()}</span>
+                  <span>
+                    Scheduled:{" "}
+                    {new Date(exam.scheduledDate).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
 
@@ -423,7 +466,10 @@ export default function AdminExams() {
                 </button>
                 <button
                   onClick={() =>
-                    handleStatusToggle(exam.id, exam.status === "active" ? "draft" : "active")
+                    handleStatusToggle(
+                      exam.id,
+                      exam.status === "active" ? "draft" : "active"
+                    )
                   }
                   className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 flex items-center gap-1 ${
                     exam.status === "active"
@@ -459,14 +505,23 @@ export default function AdminExams() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="card-premium p-6 group hover-lift">
           <div className="flex items-center">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ 
-              background: 'linear-gradient(135deg, var(--brand)20, var(--brand)10)', 
-              border: '1px solid var(--brand)30' 
-            }}>
-              <FileText size={24} style={{ color: 'var(--brand)' }} />
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--brand)20, var(--brand)10)",
+                border: "1px solid var(--brand)30",
+              }}
+            >
+              <FileText size={24} style={{ color: "var(--brand)" }} />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Total Exams</p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Total Exams
+              </p>
               <p className="text-2xl font-bold text-white">{exams.length}</p>
             </div>
           </div>
@@ -474,14 +529,23 @@ export default function AdminExams() {
 
         <div className="card-premium p-6 group hover-lift">
           <div className="flex items-center">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ 
-              background: 'linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)', 
-              border: '1px solid var(--accent-gold)30' 
-            }}>
-              <CheckCircle size={24} style={{ color: 'var(--accent-gold)' }} />
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--accent-gold)20, var(--accent-gold)10)",
+                border: "1px solid var(--accent-gold)30",
+              }}
+            >
+              <CheckCircle size={24} style={{ color: "var(--accent-gold)" }} />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Active Exams</p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Active Exams
+              </p>
               <p className="text-2xl font-bold text-white">
                 {exams.filter((e) => e.status === "active").length}
               </p>
@@ -491,16 +555,27 @@ export default function AdminExams() {
 
         <div className="card-premium p-6 group hover-lift">
           <div className="flex items-center">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ 
-              background: 'linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)', 
-              border: '1px solid var(--accent-rose)30' 
-            }}>
-              <Users size={24} style={{ color: 'var(--accent-rose)' }} />
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)",
+                border: "1px solid var(--accent-rose)30",
+              }}
+            >
+              <Users size={24} style={{ color: "var(--accent-rose)" }} />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Total Attempts</p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Total Attempts
+              </p>
               <p className="text-2xl font-bold text-white">
-                {exams.reduce((acc, e) => acc + (e.attempts || 0), 0).toLocaleString()}
+                {exams
+                  .reduce((acc, e) => acc + (e.attempts || 0), 0)
+                  .toLocaleString()}
               </p>
             </div>
           </div>
@@ -508,19 +583,32 @@ export default function AdminExams() {
 
         <div className="card-premium p-6 group hover-lift">
           <div className="flex items-center">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ 
-              background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)', 
-              border: '1px solid var(--brand-strong)30' 
-            }}>
-              <BarChart3 size={24} style={{ color: 'var(--brand-strong)' }} />
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)",
+                border: "1px solid var(--brand-strong)30",
+              }}
+            >
+              <BarChart3 size={24} style={{ color: "var(--brand-strong)" }} />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Avg Score</p>
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Avg Score
+              </p>
               <p className="text-2xl font-bold text-white">
                 {(() => {
-                  const activeExams = exams.filter((e) => e.status === "active" && (e.avgScore || 0) > 0);
+                  const activeExams = exams.filter(
+                    (e) => e.status === "active" && (e.avgScore || 0) > 0
+                  );
                   if (activeExams.length === 0) return "N/A";
-                  const avg = activeExams.reduce((acc, e) => acc + (e.avgScore || 0), 0) / activeExams.length;
+                  const avg =
+                    activeExams.reduce((acc, e) => acc + (e.avgScore || 0), 0) /
+                    activeExams.length;
                   return `${avg.toFixed(1)}%`;
                 })()}
               </p>
@@ -537,15 +625,18 @@ export default function AdminExams() {
               <h2 className="text-xl font-semibold text-white">
                 {editingExam ? "Edit Exam" : "Create New Exam"}
               </h2>
-              <button 
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200" 
+              <button
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200"
                 onClick={closeModal}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-y-auto px-6 py-4 space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="max-h-[80vh] overflow-y-auto px-6 py-4 space-y-6"
+            >
               {errorMsg ? (
                 <div className="p-4 bg-red-500/20 text-red-400 rounded-lg border border-red-500/30 flex items-center gap-2">
                   <AlertCircle size={20} />
@@ -555,7 +646,9 @@ export default function AdminExams() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Exam Name</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Exam Name
+                  </label>
                   <input
                     type="text"
                     value={form.title}
@@ -567,7 +660,9 @@ export default function AdminExams() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Course</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Course
+                  </label>
                   <input
                     type="text"
                     value={form.course}
@@ -579,7 +674,9 @@ export default function AdminExams() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Type</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Type
+                  </label>
                   <select
                     value={form.type}
                     onChange={(e) => updateField("type", e.target.value)}
@@ -593,7 +690,9 @@ export default function AdminExams() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Duration (minutes)</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Duration (minutes)
+                  </label>
                   <input
                     type="number"
                     min="1"
@@ -606,12 +705,16 @@ export default function AdminExams() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Total Questions</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Total Questions
+                  </label>
                   <input
                     type="number"
                     min="1"
                     value={form.totalQuestions}
-                    onChange={(e) => updateField("totalQuestions", e.target.value)}
+                    onChange={(e) =>
+                      updateField("totalQuestions", e.target.value)
+                    }
                     className="input-premium w-full"
                     placeholder="25"
                     required
@@ -619,13 +722,17 @@ export default function AdminExams() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Passing Score (%)</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Passing Score (%)
+                  </label>
                   <input
                     type="number"
                     min="0"
                     max="100"
                     value={form.passingScore}
-                    onChange={(e) => updateField("passingScore", e.target.value)}
+                    onChange={(e) =>
+                      updateField("passingScore", e.target.value)
+                    }
                     className="input-premium w-full"
                     placeholder="70"
                     required
@@ -633,7 +740,9 @@ export default function AdminExams() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Status</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Status
+                  </label>
                   <select
                     value={form.status}
                     onChange={(e) => updateField("status", e.target.value)}
@@ -646,18 +755,33 @@ export default function AdminExams() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Scheduled Date</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Scheduled Date
+                  </label>
                   <input
                     type="date"
-                    value={form.scheduledDate ? new Date(form.scheduledDate).toISOString().slice(0, 10) : ""}
-                    onChange={(e) => updateField("scheduledDate", new Date(e.target.value).toISOString())}
+                    value={
+                      form.scheduledDate
+                        ? new Date(form.scheduledDate)
+                            .toISOString()
+                            .slice(0, 10)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateField(
+                        "scheduledDate",
+                        new Date(e.target.value).toISOString()
+                      )
+                    }
                     className="input-premium w-full"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Exam URL</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Exam URL
+                  </label>
                   <input
                     type="url"
                     value={form.examUrl}
@@ -668,7 +792,9 @@ export default function AdminExams() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-white mb-2">Description</label>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Description
+                  </label>
                   <textarea
                     value={form.description}
                     onChange={(e) => updateField("description", e.target.value)}
@@ -692,12 +818,18 @@ export default function AdminExams() {
                 <button
                   type="submit"
                   className={`btn-premium px-6 py-2 text-sm font-medium flex items-center gap-2 ${
-                    editingExam ? "bg-gradient-to-r from-blue-600 to-blue-700" : "bg-gradient-to-r from-green-600 to-green-700"
+                    editingExam
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700"
+                      : "bg-gradient-to-r from-green-600 to-green-700"
                   }`}
                   disabled={submitting}
                 >
                   <Save size={16} />
-                  {submitting ? "Saving..." : editingExam ? "Save Changes" : "Create Exam"}
+                  {submitting
+                    ? "Saving..."
+                    : editingExam
+                    ? "Save Changes"
+                    : "Create Exam"}
                 </button>
               </div>
             </form>
