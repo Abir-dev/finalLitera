@@ -26,7 +26,7 @@ export default function Logout() {
       </div>
 
       {/* Logout Confirmation Card (inline) */}
-      <div className="bg-white border rounded-xl p-8 shadow-sm max-w-2xl mx-auto">
+      <div className="bg-navyblue border rounded-xl p-8 shadow-sm max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@ export default function Logout() {
       <div className="mt-8 max-w-2xl mx-auto">
         <h3 className="text-lg font-semibold text-slate-900 mb-4">Other Account Actions</h3>
         <div className="space-y-4">
-          <div className="bg-white border rounded-xl p-6 shadow-sm">
+          <div className="bg-navyblue border rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -78,7 +78,7 @@ export default function Logout() {
             </div>
           </div>
 
-          <div className="bg-white border rounded-xl p-6 shadow-sm">
+          <div className="bg-navyblue border rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -97,7 +97,7 @@ export default function Logout() {
             </div>
           </div>
 
-          <div className="bg-white border rounded-xl p-6 shadow-sm">
+          <div className="bg-navyblue border rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
