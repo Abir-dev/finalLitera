@@ -279,7 +279,9 @@ export default function AdminAnalytics() {
                       style={{ width: `${demo.percentage}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12 text-right">{demo.percentage}%</span>
+                  <span className="text-sm font-semibold text-gray-900 w-12 text-right">
+                    {demo.percentage}%
+                  </span>
                 </div>
               </div>
             ))}
@@ -296,7 +298,9 @@ export default function AdminAnalytics() {
             {deviceUsage.map((device, index) => (
               <div key={index} className="flex items-center justify-between">
                 <span className="text-sm text-gray-700">{device.device}</span>
-                <span className="text-sm font-semibold text-gray-900">{device.percentage}%</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {device.percentage}%
+                </span>
               </div>
             ))}
           </div>
@@ -304,30 +308,42 @@ export default function AdminAnalytics() {
 
         {/* Course Categories */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Course Categories</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">
+            Course Categories
+          </h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-700">Frontend</span>
-              <span className="text-sm font-semibold text-gray-900">8 courses</span>
+              <span className="text-sm font-semibold text-gray-900">
+                8 courses
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-700">Backend</span>
-              <span className="text-sm font-semibold text-gray-900">6 courses</span>
+              <span className="text-sm font-semibold text-gray-900">
+                6 courses
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-700">Data Science</span>
-              <span className="text-sm font-semibold text-gray-900">4 courses</span>
+              <span className="text-sm font-semibold text-gray-900">
+                4 courses
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-700">Full Stack</span>
-              <span className="text-sm font-semibold text-gray-900">6 courses</span>
+              <span className="text-sm font-semibold text-gray-900">
+                6 courses
+              </span>
             </div>
           </div>
         </div>
 
         {/* Recent Activity */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">
+            Recent Activity
+          </h3>
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
               <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -351,15 +367,27 @@ export default function AdminAnalytics() {
 
       {/* Quick Insights */}
       <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">💡 Quick Insights</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          💡 Quick Insights
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-lg p-4 border border-red-200">
-            <h3 className="font-semibold text-gray-900 mb-2">🚀 Growth Opportunity</h3>
-            <p className="text-sm text-gray-600">Mobile usage is 30% - consider optimizing mobile experience to increase engagement.</p>
+            <h3 className="font-semibold text-gray-900 mb-2">
+              🚀 Growth Opportunity
+            </h3>
+            <p className="text-sm text-gray-600">
+              Mobile usage is 30% - consider optimizing mobile experience to
+              increase engagement.
+            </p>
           </div>
           <div className="bg-white rounded-lg p-4 border border-red-200">
-            <h3 className="font-semibold text-gray-900 mb-2">📈 Best Performing</h3>
-            <p className="text-sm text-gray-600">React course has highest completion rate (85%) - use as template for other courses.</p>
+            <h3 className="font-semibold text-gray-900 mb-2">
+              📈 Best Performing
+            </h3>
+            <p className="text-sm text-gray-600">
+              React course has highest completion rate (85%) - use as template
+              for other courses.
+            </p>
           </div>
         </div>
       </div>
