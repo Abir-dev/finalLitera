@@ -21,6 +21,7 @@ import Profile from "./pages/Profile.jsx";
 import Billing from "./pages/Billing.jsx";
 import Logout from "./pages/Logout.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import Internships from "./pages/Internships.jsx";
 import SelectedCourse from "./pages/SelectedCouse.jsx";
 import LaunchPad from "./pages/LaunchPad.jsx";
 import LaunchPadDetails from "./pages/LaunchPadDetails.jsx";
@@ -69,6 +70,7 @@ export default function App() {
         <Route path="live" element={<Live />} />
         <Route path="recordings" element={<Recordings />} />
         <Route path="algobridge" element={<AlgoBridge />} />
+        <Route path="internships" element={<Internships />} />
         <Route path="exam/:id" element={<ExamDetails />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="profile" element={<Profile />} />

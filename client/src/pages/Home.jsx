@@ -526,17 +526,17 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             <TestimonialCard
               quote="Exceptional courses at competitive prices. The value for money is outstanding, and the platform is completely trustworthy."
-              name="Swapnamoy Ghosh"
+              name="Keshav Mishra"
               role="Software Developer"
             />
             <TestimonialCard
               quote="I had an amazing experience during the consultation sessions. The mentors are incredibly knowledgeable and supportive."
-              name="Bhaskar Ghosh"
-              role="Data Analyst"
+              name="Uditi Jana"
+              role="Sales Manager"
             />
             <TestimonialCard
               quote="Premium courses at the best prices. The quality of education here is unmatched in the industry."
-              name="Nilesh Dubey"
+              name="Abir Lal Banerjee"
               role="Full Stack Developer"
             />
           </div>
