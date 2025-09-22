@@ -292,15 +292,52 @@ pre,
   transition: all var(--timing-normal) ease;
   position: relative;
   overflow: hidden;
-  min-height: 380px;
-  max-height: 420px;
+  height: auto;
+  min-height: fit-content;
 }
 
 /* Course Card Specific Heights */
 .card-premium.course-card {
-  height: 420px;
+  min-height: 420px;
+  height: auto;
   display: flex;
   flex-direction: column;
+}
+
+/* Dashboard Card Specific Styles */
+.card-premium.dashboard-stat-card {
+  min-height: 140px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-premium.dashboard-activity-card {
+  min-height: 400px;
+  height: auto;
+  max-height: 500px;
+}
+
+.card-premium.dashboard-course-card {
+  min-height: 200px;
+  height: auto;
+}
+
+.card-premium.dashboard-progress-card {
+  min-height: 220px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-premium.dashboard-action-card {
+  min-height: 120px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
 }
 
 .card-premium::before {
@@ -493,6 +530,44 @@ pre,
   backdrop-filter: blur(8px);
 }
 
+/* Force select elements to match the dark theme */
+select.input-premium,
+.input-premium select {
+  background-color: rgba(31, 41, 55, 1) !important; /* dark gray background */
+  color: rgba(249, 250, 251, 1) !important; /* light text */
+  border: 1px solid rgba(75, 85, 99, 1) !important; /* gray border */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D1D5DB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 16px !important;
+  padding-right: 2.5rem !important;
+}
+
+select.input-premium option,
+.input-premium select option {
+  background-color: rgba(31, 41, 55, 1) !important; /* dark gray background */
+  color: rgba(249, 250, 251, 1) !important; /* light text */
+  padding: 0.5rem !important;
+}
+
+/* Webkit specific fixes for select styling */
+select.input-premium::-webkit-scrollbar,
+.input-premium select::-webkit-scrollbar {
+  background: rgba(31, 41, 55, 1) !important;
+}
+
+/* Firefox specific fixes */
+@-moz-document url-prefix() {
+  select.input-premium,
+  .input-premium select {
+    background-color: rgba(31, 41, 55, 1) !important;
+    color: rgba(249, 250, 251, 1) !important;
+  }
+}
+
 .input-premium::placeholder {
   color: var(--text-muted);
   font-weight: 400;
@@ -520,6 +595,92 @@ pre,
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(16px);
+}
+
+/* Admin Input Styling with Icons */
+.input-premium.with-icon {
+  padding-left: 3rem; /* 48px to account for icon space */
+}
+
+.input-premium.with-dropdown-icon {
+  padding-left: 3rem;
+  padding-right: 3rem;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 20px;
+}
+
+/* Search and Filter Icon Positioning */
+.search-icon,
+.filter-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Better icon positioning for input fields */
+.input-with-icon {
+  position: relative;
+}
+
+/* Icon positioning for input fields only */
+.input-with-icon input {
+  padding-left: 2.75rem;
+}
+
+.input-with-icon .icon-left {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Different handling for select elements - no icon, just proper padding */
+.input-with-icon select {
+  padding-left: 1.5rem;
+  padding-right: 3rem;
+  background: var(--surface);
+  color: var(--text-primary);
+  position: relative;
+  z-index: 2;
+}
+
+/* Hide icon when it's next to a select element */
+.input-with-icon:has(select) .icon-left {
+  display: none;
+}
+
+/* Fallback for browsers that don't support :has() */
+.select-with-icon {
+  position: relative;
+}
+
+.select-with-icon select {
+  padding-left: 1.5rem;
+  padding-right: 3rem;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+/* Ensure the select text is not overlapped */
+.input-with-icon select option,
+.select-with-icon select option {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+/* Focus states */
+.input-with-icon select:focus,
+.select-with-icon select:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
 .input-elevated {
@@ -1093,12 +1254,70 @@ section {
   .card-premium .card-footer {
     padding: 0.75rem;
   }
+
+  /* Dashboard card responsive adjustments */
+  .card-premium.dashboard-stat-card {
+    min-height: 120px;
+    padding: 1rem;
+  }
+
+  .card-premium.dashboard-activity-card {
+    min-height: 300px;
+    max-height: 400px;
+  }
+
+  .card-premium.dashboard-course-card {
+    min-height: 180px;
+  }
+
+  .card-premium.dashboard-progress-card {
+    min-height: 200px;
+    padding: 1rem;
+  }
+
+  .card-premium.dashboard-action-card {
+    min-height: 100px;
+    padding: 1rem;
+  }
+
+  /* Mobile input adjustments */
+  .input-premium {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .input-premium.pl-12 {
+    padding-left: 2.5rem;
+  }
+
+  .search-icon,
+  .filter-icon {
+    left: 0.75rem;
+  }
+
+  .input-with-icon .icon-left {
+    left: 0.75rem;
+  }
+
+  .input-with-icon input,
+  .input-with-icon select {
+    padding-left: 2.5rem;
+  }
+
+  .input-with-icon select {
+    z-index: 2;
+  }
+
+  .select-with-icon select {
+    padding-left: 1.25rem;
+    padding-right: 2.5rem;
+  }
 }
 
 /* Custom Scrollbar for Dashboard */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--brand)40 var(--surface);
+  scrollbar-color: var(--brand) 40 var(--surface);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -1770,14 +1989,26 @@ section > * {
   /* Mobile grid adjustments */
   .grid.sm\:grid-cols-2 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
   }
 
   .grid.lg\:grid-cols-3 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
   }
 
   .grid.xl\:grid-cols-4 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  /* Ensure consistent gap on mobile for dashboard grids */
+  .grid[class*="gap-6"] {
+    gap: 1rem;
+  }
+
+  .grid[class*="gap-4"] {
+    gap: 0.75rem;
   }
 
   /* Mobile typography adjustments */
@@ -1835,6 +2066,59 @@ section > * {
   .card-premium {
     padding: 0.875rem;
     border-radius: 0.625rem;
+  }
+
+  /* Dashboard card tablet adjustments */
+  .card-premium.dashboard-stat-card {
+    min-height: 130px;
+    padding: 1.25rem;
+  }
+
+  .card-premium.dashboard-activity-card {
+    min-height: 350px;
+    max-height: 450px;
+  }
+
+  .card-premium.dashboard-course-card {
+    min-height: 190px;
+  }
+
+  .card-premium.dashboard-progress-card {
+    min-height: 210px;
+    padding: 1.25rem;
+  }
+
+  .card-premium.dashboard-action-card {
+    min-height: 110px;
+    padding: 1.25rem;
+  }
+
+  /* Tablet input adjustments */
+  .input-premium.pl-12 {
+    padding-left: 2.75rem;
+  }
+
+  .search-icon,
+  .filter-icon {
+    left: 0.875rem;
+  }
+
+  .input-with-icon .icon-left {
+    left: 0.875rem;
+  }
+
+  .input-with-icon input,
+  .input-with-icon select {
+    padding-left: 2.75rem;
+  }
+
+  .input-with-icon select {
+    z-index: 2;
+  }
+
+  .select-with-icon select {
+    padding-left: 1.375rem;
+    padding-right: 2.75rem;
   }
 
   .btn-premium {
@@ -1966,12 +2250,13 @@ section > * {
 
   .card-premium {
     padding: 0.625rem;
-    min-height: 340px;
-    max-height: 380px;
+    min-height: fit-content;
+    height: auto;
   }
 
   .card-premium.course-card {
-    height: 380px;
+    min-height: 380px;
+    height: auto;
   }
 
   .btn-premium {

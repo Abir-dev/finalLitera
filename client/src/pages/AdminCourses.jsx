@@ -32,6 +32,7 @@ import {
   Eye as EyeIcon,
   X,
 } from "lucide-react";
+import { AlertCircle, Save } from "lucide-react";
 
 const makePreview = (file) => (file ? URL.createObjectURL(file) : null);
 
@@ -481,30 +482,27 @@ export default function AdminCourses() {
       </div>
 
       {/* Premium Filters and Search */}
-      <div className="card-premium p-3 sm:p-4 lg:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="sm:col-span-2 lg:col-span-2 relative">
+      <div className="card-premium p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="sm:col-span-2 lg:col-span-2 input-with-icon">
             <Search
-              size={16}
-              className="sm:w-[18px] sm:h-[18px] absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={18}
+              className="icon-left"
+              style={{ color: "var(--text-muted)" }}
             />
             <input
               type="text"
               placeholder="Search courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-premium w-full pl-9 sm:pl-10 text-xs sm:text-sm lg:text-base py-2 sm:py-3"
+              className="input-premium w-full pr-4 py-3 text-sm sm:text-base"
             />
           </div>
-          <div className="relative">
-            <Filter
-              size={14}
-              className="sm:w-4 sm:h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
+          <div>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="input-premium w-full pl-9 sm:pl-10 text-xs sm:text-sm lg:text-base py-2 sm:py-3"
+              className="input-premium w-full px-4 py-3 text-sm sm:text-base"
             >
               {availableCategories.map((category) => (
                 <option key={category} value={category}>
@@ -513,15 +511,11 @@ export default function AdminCourses() {
               ))}
             </select>
           </div>
-          <div className="relative">
-            <CheckCircle
-              size={14}
-              className="sm:w-4 sm:h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
+          <div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-premium w-full pl-9 sm:pl-10 text-xs sm:text-sm lg:text-base py-2 sm:py-3"
+              className="input-premium w-full px-4 py-3 text-sm sm:text-base"
             >
               {statuses.map((status) => (
                 <option key={status} value={status}>
@@ -891,7 +885,7 @@ export default function AdminCourses() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-3xl card-premium overflow-hidden">
+          <div className="w-full max-w-3xl max-h-[80vh] card-premium overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-white">
                 {editingCourse ? "Edit Course" : "Add New Course"}
@@ -906,7 +900,7 @@ export default function AdminCourses() {
 
             <form
               onSubmit={handleSubmit}
-              className="max-h-[80vh] overflow-y-auto px-6 py-4 space-y-6"
+              className="flex-1 overflow-y-auto px-6 py-4 space-y-6"
             >
               {errorMsg ? (
                 <div className="p-4 bg-red-500/20 text-red-400 rounded-lg border border-red-500/30 flex items-center gap-2">

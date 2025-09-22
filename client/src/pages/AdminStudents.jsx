@@ -3,7 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import StudentProgressReport from "../components/StudentProgressReport.jsx";
 import EditStudentModal from "../components/EditStudentModal.jsx";
 import CourseAssignmentModal from "../components/CourseAssignmentModal.jsx";
-import { Users, UserCheck, GraduationCap, TrendingUp, Plus, Search, Filter, Edit, Trash2, Eye, BookOpen, BarChart3 } from "lucide-react";
+import {
+  Users,
+  UserCheck,
+  GraduationCap,
+  TrendingUp,
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Eye,
+  BookOpen,
+  BarChart3,
+} from "lucide-react";
 
 export default function AdminStudents() {
   const navigate = useNavigate();
@@ -27,7 +40,7 @@ export default function AdminStudents() {
     firstName: "",
     lastName: "",
     email: "",
-    password: ""
+    password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -35,8 +48,12 @@ export default function AdminStudents() {
 
   useEffect(() => {
     const transformUser = (u) => {
-      const fullName = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.name || "Unknown";
-      const firstEnrollment = (u.enrolledCourses && u.enrolledCourses[0]) || null;
+      const fullName =
+        [u.firstName, u.lastName].filter(Boolean).join(" ") ||
+        u.name ||
+        "Unknown";
+      const firstEnrollment =
+        (u.enrolledCourses && u.enrolledCourses[0]) || null;
       return {
         id: u._id,
         name: fullName,
@@ -46,7 +63,7 @@ export default function AdminStudents() {
         status: u.isActive ? "active" : "inactive",
         joinDate: u.createdAt,
         progress: 0,
-        lastActive: ""
+        lastActive: "",
       };
     };
 
@@ -54,89 +71,105 @@ export default function AdminStudents() {
       try {
         setLoading(true);
         setError("");
-        const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
-        const token = localStorage.getItem('adminToken');
+        const API_BASE =
+          import.meta.env.VITE_API_URL ||
+          "https://finallitera.onrender.com/api";
+        const token = localStorage.getItem("adminToken");
 
         // Debug logging
-        console.log('API_BASE:', API_BASE);
-        console.log('Token exists:', !!token);
-        console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
+        console.log("API_BASE:", API_BASE);
+        console.log("Token exists:", !!token);
+        console.log(
+          "Token preview:",
+          token ? token.substring(0, 20) + "..." : "No token"
+        );
 
         if (!token) {
-          setError('No admin token found. Redirecting to login...');
+          setError("No admin token found. Redirecting to login...");
           setLoading(false);
-          setTimeout(() => navigate('/admin/login'), 2000);
+          setTimeout(() => navigate("/admin/login"), 2000);
           return;
         }
 
         const res = await fetch(`${API_BASE}/admin/students?limit=200`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          credentials: 'include'
+          credentials: "include",
         });
 
-        console.log('Response status:', res.status);
-        console.log('Response ok:', res.ok);
+        console.log("Response status:", res.status);
+        console.log("Response ok:", res.ok);
 
         if (!res.ok) {
           const errorText = await res.text();
-          console.error('Error response:', errorText);
+          console.error("Error response:", errorText);
 
           if (res.status === 401) {
-            setError('Authentication failed. Please login again.');
-            localStorage.removeItem('adminToken');
-            setTimeout(() => navigate('/admin/login'), 2000);
+            setError("Authentication failed. Please login again.");
+            localStorage.removeItem("adminToken");
+            setTimeout(() => navigate("/admin/login"), 2000);
             return;
           }
 
-          throw new Error(`Failed to load students: ${res.status} ${res.statusText}`);
+          throw new Error(
+            `Failed to load students: ${res.status} ${res.statusText}`
+          );
         }
 
         const json = await res.json();
-        console.log('Response data:', json);
+        console.log("Response data:", json);
         const users = json.data?.users || [];
         setStudents(users.map(transformUser));
       } catch (e) {
-        console.error('Error loading students:', e);
-        setError(e.message || 'Failed to load students');
+        console.error("Error loading students:", e);
+        setError(e.message || "Failed to load students");
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.course.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || student.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || student.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const enrolledStudentsOnly = filteredStudents.filter(s => s.course && s.course !== "-");
+  const enrolledStudentsOnly = filteredStudents.filter(
+    (s) => s.course && s.course !== "-"
+  );
 
   const handleDeleteStudent = (id) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
-      setStudents(students.filter(student => student.id !== id));
+      setStudents(students.filter((student) => student.id !== id));
     }
   };
 
   const handleStatusToggle = (id) => {
-    setStudents(students.map(student =>
-      student.id === id
-        ? { ...student, status: student.status === "active" ? "inactive" : "active" }
-        : student
-    ));
+    setStudents(
+      students.map((student) =>
+        student.id === id
+          ? {
+              ...student,
+              status: student.status === "active" ? "inactive" : "active",
+            }
+          : student
+      )
+    );
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewStudent(prev => ({
+    setNewStudent((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear errors when user starts typing
     if (submitError) setSubmitError("");
@@ -149,7 +182,12 @@ export default function AdminStudents() {
     setSubmitSuccess("");
 
     // Client-side validation
-    if (!newStudent.firstName.trim() || !newStudent.lastName.trim() || !newStudent.email.trim() || !newStudent.password.trim()) {
+    if (
+      !newStudent.firstName.trim() ||
+      !newStudent.lastName.trim() ||
+      !newStudent.email.trim() ||
+      !newStudent.password.trim()
+    ) {
       setSubmitError("All fields are required");
       setIsSubmitting(false);
       return;
@@ -170,17 +208,18 @@ export default function AdminStudents() {
     }
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
-      const token = localStorage.getItem('adminToken');
+      const API_BASE =
+        import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+      const token = localStorage.getItem("adminToken");
 
       const response = await fetch(`${API_BASE}/admin/students`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        credentials: 'include',
-        body: JSON.stringify(newStudent)
+        credentials: "include",
+        body: JSON.stringify(newStudent),
       });
 
       const data = await response.json();
@@ -188,9 +227,9 @@ export default function AdminStudents() {
       if (!response.ok) {
         // Handle validation errors with detailed messages
         if (data.errors && Array.isArray(data.errors)) {
-          throw new Error(data.errors.join(', '));
+          throw new Error(data.errors.join(", "));
         }
-        throw new Error(data.message || 'Failed to create student');
+        throw new Error(data.message || "Failed to create student");
       }
 
       // Add the new student to the list
@@ -203,10 +242,10 @@ export default function AdminStudents() {
         status: data.data.student.isActive ? "active" : "inactive",
         joinDate: data.data.student.createdAt,
         progress: 0,
-        lastActive: ""
+        lastActive: "",
       };
 
-      setStudents(prev => [transformedStudent, ...prev]);
+      setStudents((prev) => [transformedStudent, ...prev]);
       setSubmitSuccess("Student created successfully!");
 
       // Reset form
@@ -214,7 +253,7 @@ export default function AdminStudents() {
         firstName: "",
         lastName: "",
         email: "",
-        password: ""
+        password: "",
       });
 
       // Close modal after a short delay
@@ -222,10 +261,9 @@ export default function AdminStudents() {
         setShowAddModal(false);
         setSubmitSuccess("");
       }, 1500);
-
     } catch (error) {
-      console.error('Error creating student:', error);
-      setSubmitError(error.message || 'Failed to create student');
+      console.error("Error creating student:", error);
+      setSubmitError(error.message || "Failed to create student");
     } finally {
       setIsSubmitting(false);
     }
@@ -237,7 +275,7 @@ export default function AdminStudents() {
       firstName: "",
       lastName: "",
       email: "",
-      password: ""
+      password: "",
     });
     setSubmitError("");
     setSubmitSuccess("");
@@ -265,16 +303,16 @@ export default function AdminStudents() {
 
   const handleStudentUpdate = (updatedStudent) => {
     // Update the student in the local state
-    setStudents(prevStudents =>
-      prevStudents.map(student =>
+    setStudents((prevStudents) =>
+      prevStudents.map((student) =>
         student.id === updatedStudent.id
           ? {
-            ...student,
-            name: `${updatedStudent.firstName} ${updatedStudent.lastName}`,
-            email: updatedStudent.email,
-            phone: updatedStudent.profile?.phone || "",
-            status: updatedStudent.isActive ? "active" : "inactive"
-          }
+              ...student,
+              name: `${updatedStudent.firstName} ${updatedStudent.lastName}`,
+              email: updatedStudent.email,
+              phone: updatedStudent.profile?.phone || "",
+              status: updatedStudent.isActive ? "active" : "inactive",
+            }
           : student
       )
     );
@@ -292,14 +330,14 @@ export default function AdminStudents() {
 
   const handleCourseAssigned = (assignmentData) => {
     // Update the student's course information in the local state
-    setStudents(prevStudents =>
-      prevStudents.map(student =>
+    setStudents((prevStudents) =>
+      prevStudents.map((student) =>
         student.id === assignmentData.student.id
           ? {
-            ...student,
-            course: assignmentData.course.title,
-            // You could also update other fields if needed
-          }
+              ...student,
+              course: assignmentData.course.title,
+              // You could also update other fields if needed
+            }
           : student
       )
     );
@@ -310,15 +348,35 @@ export default function AdminStudents() {
   };
 
   const getStatusBadge = (status) => {
-    return status === "active"
-      ? <span className="px-3 py-1 text-xs rounded-full flex items-center gap-1" style={{ background: 'var(--accent-gold)10', color: 'var(--accent-gold)' }}>
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--accent-gold)' }}></div>
-          Active
-        </span>
-      : <span className="px-3 py-1 text-xs rounded-full flex items-center gap-1" style={{ background: 'var(--text-muted)10', color: 'var(--text-muted)' }}>
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--text-muted)' }}></div>
-          Inactive
-        </span>;
+    return status === "active" ? (
+      <span
+        className="px-3 py-1 text-xs rounded-full flex items-center gap-1"
+        style={{
+          background: "var(--accent-gold)10",
+          color: "var(--accent-gold)",
+        }}
+      >
+        <div
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: "var(--accent-gold)" }}
+        ></div>
+        Active
+      </span>
+    ) : (
+      <span
+        className="px-3 py-1 text-xs rounded-full flex items-center gap-1"
+        style={{
+          background: "var(--text-muted)10",
+          color: "var(--text-muted)",
+        }}
+      >
+        <div
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: "var(--text-muted)" }}
+        ></div>
+        Inactive
+      </span>
+    );
   };
 
   const getProgressColor = (progress) => {
@@ -333,8 +391,18 @@ export default function AdminStudents() {
       {/* Premium Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="heading-1 text-2xl sm:text-3xl" style={{ color: 'var(--text-primary)' }}>Student Management</h1>
-          <p className="mt-1 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>Manage all registered students and their progress</p>
+          <h1
+            className="heading-1 text-2xl sm:text-3xl"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Student Management
+          </h1>
+          <p
+            className="mt-1 text-sm sm:text-base"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Manage all registered students and their progress
+          </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -347,41 +415,63 @@ export default function AdminStudents() {
       </div>
 
       {loading ? (
-        <div className="card-premium p-4" style={{ background: 'linear-gradient(135deg, var(--brand)10, var(--brand)5)', border: '1px solid var(--brand)30' }}>
+        <div
+          className="card-premium p-4"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--brand)10, var(--brand)5)",
+            border: "1px solid var(--brand)30",
+          }}
+        >
           <div className="flex items-center gap-3">
             <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
-            <span style={{ color: 'var(--text-primary)' }}>Loading students...</span>
+            <span style={{ color: "var(--text-primary)" }}>
+              Loading students...
+            </span>
           </div>
         </div>
       ) : null}
       {error ? (
-        <div className="card-premium p-4" style={{ background: 'linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)', border: '1px solid var(--accent-rose)30' }}>
+        <div
+          className="card-premium p-4"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)",
+            border: "1px solid var(--accent-rose)30",
+          }}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: 'var(--accent-rose)' }}></div>
-            <span style={{ color: 'var(--text-primary)' }}>{error}</span>
+            <div
+              className="w-5 h-5 rounded-full"
+              style={{ backgroundColor: "var(--accent-rose)" }}
+            ></div>
+            <span style={{ color: "var(--text-primary)" }}>{error}</span>
           </div>
         </div>
       ) : null}
 
       {/* Premium Search and Filter */}
-      <div className="card-premium p-4" style={{ display: 'none' }}>
-        <div className="flex flex-col lg:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+      <div className="card-premium p-4 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex-1 input-with-icon">
+            <Search
+              size={18}
+              className="icon-left"
+              style={{ color: "var(--text-muted)" }}
+            />
             <input
               type="text"
               placeholder="Search students by name, email, or course..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-premium pl-10 pr-4 py-2.5 text-sm w-full"
+              className="input-premium pr-4 py-3 text-sm w-full"
             />
           </div>
-          <div className="relative lg:w-44">
-            <Filter size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+          <div className="lg:w-48">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input-premium pl-10 pr-4 py-2.5 text-sm w-full"
+              className="input-premium px-4 py-3 text-sm w-full"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -393,42 +483,80 @@ export default function AdminStudents() {
 
       {/* Unified Students List */}
       <div className="card-premium overflow-hidden">
-        <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <div
+          className="px-4 py-3 border-b flex items-center justify-between"
+          style={{ borderColor: "var(--border)" }}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--brand), var(--brand-strong))",
+              }}
+            >
               <Users size={16} className="text-white" />
             </div>
             <div>
-              <h2 className="heading-3 text-lg" style={{ color: 'var(--text-primary)' }}>All Students</h2>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Click on any student to view details and manage</p>
+              <h2
+                className="heading-3 text-lg"
+                style={{ color: "var(--text-primary)" }}
+              >
+                All Students
+              </h2>
+              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                Click on any student to view details and manage
+              </p>
             </div>
           </div>
-          <span className="px-3 py-1 rounded-lg text-sm font-semibold" style={{ background: 'var(--surface)', color: 'var(--text-primary)' }}>
+          <span
+            className="px-3 py-1 rounded-lg text-sm font-semibold"
+            style={{
+              background: "var(--surface)",
+              color: "var(--text-primary)",
+            }}
+          >
             {filteredStudents.length} students
           </span>
         </div>
-        
+
         <div className="max-h-80 overflow-y-auto">
           {filteredStudents.length === 0 ? (
             <div className="p-6 text-center">
-              <Users size={40} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
-              <p className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No students found</p>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Try adjusting your search criteria</p>
+              <Users
+                size={40}
+                className="mx-auto mb-3"
+                style={{ color: "var(--text-muted)" }}
+              />
+              <p
+                className="text-base font-medium"
+                style={{ color: "var(--text-primary)" }}
+              >
+                No students found
+              </p>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                Try adjusting your search criteria
+              </p>
             </div>
           ) : (
             <div className="space-y-1 p-3">
               {filteredStudents.map((student) => (
                 <div key={student.id}>
                   {/* Student Card */}
-                  <div 
+                  <div
                     onClick={() => handleStudentClick(student)}
                     className="card-premium p-3 cursor-pointer transition-all duration-300 group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
                         <div className="relative">
-                          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg" 
-                               style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+                          <div
+                            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, var(--brand), var(--brand-strong))",
+                            }}
+                          >
                             {student.name.charAt(0)}
                           </div>
                           {student.status === "active" && (
@@ -437,92 +565,197 @@ export default function AdminStudents() {
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                            <h3
+                              className="font-bold text-sm"
+                              style={{ color: "var(--text-primary)" }}
+                            >
                               {student.name}
                             </h3>
                             {getStatusBadge(student.status)}
                           </div>
-                          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          <p
+                            className="text-xs"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
                             {student.email}
                           </p>
                           <div className="flex items-center gap-3 mt-1">
-                            <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--surface)', color: 'var(--text-muted)' }}>
+                            <span
+                              className="text-xs px-2 py-0.5 rounded"
+                              style={{
+                                background: "var(--surface)",
+                                color: "var(--text-muted)",
+                              }}
+                            >
                               {student.course}
                             </span>
-                            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                            <span
+                              className="text-xs"
+                              style={{ color: "var(--text-muted)" }}
+                            >
                               {new Date(student.joinDate).toLocaleDateString()}
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         {student.progress > 0 && (
                           <div className="flex items-center gap-1">
-                            <div className="w-12 rounded-full h-1.5" style={{ background: 'var(--surface)' }}>
+                            <div
+                              className="w-12 rounded-full h-1.5"
+                              style={{ background: "var(--surface)" }}
+                            >
                               <div
                                 className="h-1.5 rounded-full transition-all duration-1000"
-                                style={{ width: `${student.progress}%`, background: getProgressColor(student.progress) }}
+                                style={{
+                                  width: `${student.progress}%`,
+                                  background: getProgressColor(
+                                    student.progress
+                                  ),
+                                }}
                               ></div>
                             </div>
-                            <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                            <span
+                              className="text-xs font-medium"
+                              style={{ color: "var(--text-primary)" }}
+                            >
                               {student.progress}%
                             </span>
                           </div>
                         )}
-                        <div className={`transition-transform duration-300 ${expandedStudent?.id === student.id ? 'rotate-180' : ''}`}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <div
+                          className={`transition-transform duration-300 ${
+                            expandedStudent?.id === student.id
+                              ? "rotate-180"
+                              : ""
+                          }`}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
                             <polyline points="6,9 12,15 18,9"></polyline>
                           </svg>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Expanded Details */}
                   {expandedStudent?.id === student.id && (
                     <div className="ml-3 mr-3 mb-1">
-                      <div className="card-premium p-4 border-l-4" style={{ borderLeftColor: 'var(--brand)' }}>
+                      <div
+                        className="card-premium p-4 border-l-4"
+                        style={{ borderLeftColor: "var(--brand)" }}
+                      >
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           {/* Student Information */}
                           <div>
-                            <h4 className="font-bold text-base mb-3" style={{ color: 'var(--text-primary)' }}>
+                            <h4
+                              className="font-bold text-base mb-3"
+                              style={{ color: "var(--text-primary)" }}
+                            >
                               Student Information
                             </h4>
                             <div className="space-y-2">
                               <div className="flex justify-between">
-                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Full Name:</span>
-                                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{student.name}</span>
+                                <span
+                                  className="text-xs"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Full Name:
+                                </span>
+                                <span
+                                  className="font-medium text-sm"
+                                  style={{ color: "var(--text-primary)" }}
+                                >
+                                  {student.name}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Email:</span>
-                                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{student.email}</span>
+                                <span
+                                  className="text-xs"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Email:
+                                </span>
+                                <span
+                                  className="font-medium text-sm"
+                                  style={{ color: "var(--text-primary)" }}
+                                >
+                                  {student.email}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Phone:</span>
-                                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{student.phone || 'Not provided'}</span>
+                                <span
+                                  className="text-xs"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Phone:
+                                </span>
+                                <span
+                                  className="font-medium text-sm"
+                                  style={{ color: "var(--text-primary)" }}
+                                >
+                                  {student.phone || "Not provided"}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Current Course:</span>
-                                <span className="font-medium text-sm" style={{ color: 'var(--accent-gold)' }}>{student.course}</span>
+                                <span
+                                  className="text-xs"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Current Course:
+                                </span>
+                                <span
+                                  className="font-medium text-sm"
+                                  style={{ color: "var(--accent-gold)" }}
+                                >
+                                  {student.course}
+                                </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Progress:</span>
-                                <span className="font-medium text-sm" style={{ color: getProgressColor(student.progress) }}>{student.progress}%</span>
+                                <span
+                                  className="text-xs"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Progress:
+                                </span>
+                                <span
+                                  className="font-medium text-sm"
+                                  style={{
+                                    color: getProgressColor(student.progress),
+                                  }}
+                                >
+                                  {student.progress}%
+                                </span>
                               </div>
                               <div className="flex justify-between items-center">
-                                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Status:</span>
+                                <span
+                                  className="text-xs"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  Status:
+                                </span>
                                 {getStatusBadge(student.status)}
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Action Buttons */}
                           <div>
-                            <h4 className="font-bold text-base mb-3" style={{ color: 'var(--text-primary)' }}>
+                            <h4
+                              className="font-bold text-base mb-3"
+                              style={{ color: "var(--text-primary)" }}
+                            >
                               Quick Actions
                             </h4>
                             <div className="grid grid-cols-2 gap-2">
@@ -567,7 +800,7 @@ export default function AdminStudents() {
                                 Delete
                               </button>
                             </div>
-                            
+
                             {/* Status Toggle */}
                             <div className="mt-3">
                               <button
@@ -611,10 +844,26 @@ export default function AdminStudents() {
         <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Total Students</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{students.length}</p>
+              <p
+                className="text-xs font-medium mb-1"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Total Students
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {students.length}
+              </p>
             </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))' }}>
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--brand), var(--brand-strong))",
+              }}
+            >
               <Users size={20} className="text-white" />
             </div>
           </div>
@@ -623,12 +872,26 @@ export default function AdminStudents() {
         <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Active Students</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {students.filter(s => s.status === "active").length}
+              <p
+                className="text-xs font-medium mb-1"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Active Students
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {students.filter((s) => s.status === "active").length}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-emerald), var(--brand))' }}>
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--accent-emerald), var(--brand))",
+              }}
+            >
               <UserCheck size={20} className="text-white" />
             </div>
           </div>
@@ -637,12 +900,32 @@ export default function AdminStudents() {
         <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Enrolled Courses</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {new Set(students.filter(s => s.course !== "-").map(s => s.course)).size}
+              <p
+                className="text-xs font-medium mb-1"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Enrolled Courses
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {
+                  new Set(
+                    students
+                      .filter((s) => s.course !== "-")
+                      .map((s) => s.course)
+                  ).size
+                }
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-rose), var(--accent-rose-strong))' }}>
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--accent-rose), var(--accent-rose-strong))",
+              }}
+            >
               <GraduationCap size={20} className="text-white" />
             </div>
           </div>
@@ -651,12 +934,32 @@ export default function AdminStudents() {
         <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Avg Progress</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {students.length > 0 ? Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length) : 0}%
+              <p
+                className="text-xs font-medium mb-1"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Avg Progress
+              </p>
+              <p
+                className="text-2xl font-bold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {students.length > 0
+                  ? Math.round(
+                      students.reduce((acc, s) => acc + s.progress, 0) /
+                        students.length
+                    )
+                  : 0}
+                %
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent-gold), var(--accent-gold-strong))' }}>
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--accent-gold), var(--accent-gold-strong))",
+              }}
+            >
               <TrendingUp size={20} className="text-white" />
             </div>
           </div>
@@ -669,20 +972,35 @@ export default function AdminStudents() {
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Add New Student</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Add New Student
+                </h2>
                 <button
                   onClick={handleCloseModal}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
               <form onSubmit={handleSubmitStudent} className="space-y-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     First Name *
                   </label>
                   <input
@@ -698,7 +1016,10 @@ export default function AdminStudents() {
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Last Name *
                   </label>
                   <input
@@ -714,7 +1035,10 @@ export default function AdminStudents() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Email *
                   </label>
                   <input
@@ -730,7 +1054,10 @@ export default function AdminStudents() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Password *
                   </label>
                   <input
@@ -774,9 +1101,24 @@ export default function AdminStudents() {
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Creating...
                       </span>
