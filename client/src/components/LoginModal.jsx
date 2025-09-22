@@ -28,7 +28,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
       toast.success("Logged in successfully!");
       onClose();
       // Redirect to dashboard after successful login
-      navigate("/dashboard");
+      navigate("/dashboard/subscription");
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
