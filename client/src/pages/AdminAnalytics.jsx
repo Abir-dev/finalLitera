@@ -146,7 +146,7 @@ export default function AdminAnalytics() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             Analytics & Reports
@@ -155,7 +155,7 @@ export default function AdminAnalytics() {
             Comprehensive insights into your platform performance
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
@@ -166,19 +166,20 @@ export default function AdminAnalytics() {
             <option value="90d">Last 90 days</option>
             <option value="1y">Last year</option>
           </select>
-          <button className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300">
-            📊 Export Report
+          <button className="px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white text-xs sm:text-sm font-semibold rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300">
+            <span className="hidden sm:inline">📊 Export Report</span>
+            <span className="sm:hidden">📊 Export</span>
           </button>
         </div>
       </div>
 
       {/* Metric Selection */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {Object.entries(analyticsData).map(([key, data]) => (
           <button
             key={key}
             onClick={() => setSelectedMetric(key)}
-            className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+            className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 ${
               selectedMetric === key
                 ? "border-red-500 bg-red-50"
                 : "border-gray-200 bg-white hover:border-gray-300"
@@ -216,13 +217,13 @@ export default function AdminAnalytics() {
           </h2>
           <div className="text-sm text-gray-500">Time period: {timeRange}</div>
         </div>
-        <div className="h-80 flex items-center justify-center">
+        <div className="h-48 sm:h-80 flex items-center justify-center">
           {renderSimpleChart(analyticsData[selectedMetric].data)}
         </div>
       </div>
 
       {/* Performance Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top Performing Courses */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">
@@ -289,11 +290,11 @@ export default function AdminAnalytics() {
       </div>
 
       {/* Additional Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Device Usage */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Device Usage</h3>
-          <div className="space-y-3">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Device Usage</h3>
+          <div className="space-y-2 sm:space-y-3">
             {deviceUsage.map((device, index) => (
               <div key={index} className="flex items-center justify-between">
                 <span className="text-sm text-gray-700">{device.device}</span>
@@ -348,16 +349,16 @@ export default function AdminAnalytics() {
               <span className="w-2 h-2 bg-green-500 rounded-full"></span>
               <span className="text-gray-700">New student registered</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
               <span className="text-gray-700">Course completed</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
               <span className="text-gray-700">Payment received</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
               <span className="text-gray-700">Exam scheduled</span>
             </div>
           </div>

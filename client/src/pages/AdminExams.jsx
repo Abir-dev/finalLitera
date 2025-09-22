@@ -297,7 +297,7 @@ export default function AdminExams() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white">Exam Management</h1>
           <p className="text-gray-300 mt-1">
@@ -306,10 +306,11 @@ export default function AdminExams() {
         </div>
         <button
           onClick={openAddModal}
-          className="btn-premium px-6 py-3 text-sm font-semibold flex items-center gap-2"
+          className="btn-premium px-4 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 w-full sm:w-auto justify-center"
         >
-          <Plus size={16} />
-          Create New Exam
+          <Plus size={14} className="sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Create New Exam</span>
+          <span className="sm:hidden">Create Exam</span>
         </button>
       </div>
 
@@ -362,15 +363,15 @@ export default function AdminExams() {
       </div>
 
       {/* Exams Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {filteredExams.map((exam) => (
           <div
             key={exam.id}
             className="card-premium overflow-hidden group hover-lift"
           >
             {/* Exam Header */}
-            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-4 text-white">
-              <div className="flex items-center justify-between mb-3">
+            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-3 sm:p-4 text-white">
+              <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
                 {getTypeBadge(exam.type)}
                 {getStatusBadge(exam.status)}
               </div>
@@ -384,11 +385,11 @@ export default function AdminExams() {
             </div>
 
             {/* Exam Details */}
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Clock size={16} className="text-blue-400" />
+            <div className="p-4 sm:p-6">
+              <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                <div className="text-center p-2 sm:p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+                  <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                    <Clock size={12} className="sm:w-4 sm:h-4 text-blue-400" />
                     <span className="text-xs text-gray-400">Duration</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
@@ -396,9 +397,9 @@ export default function AdminExams() {
                   </div>
                   <div className="text-xs text-gray-400">Minutes</div>
                 </div>
-                <div className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Target size={16} className="text-purple-400" />
+                <div className="text-center p-2 sm:p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+                  <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                    <Target size={12} className="sm:w-4 sm:h-4 text-purple-400" />
                     <span className="text-xs text-gray-400">Questions</span>
                   </div>
                   <div className="text-2xl font-bold text-white">
@@ -408,7 +409,7 @@ export default function AdminExams() {
                 </div>
               </div>
 
-              <div className="space-y-3 mb-6 text-sm">
+              <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-xs sm:text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Passing Score:</span>
                   <span className="font-semibold text-white">
@@ -439,7 +440,7 @@ export default function AdminExams() {
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500 mb-6 space-y-1">
+              <div className="text-xs text-gray-500 mb-4 sm:mb-6 space-y-1">
                 <div className="flex items-center gap-2">
                   <Calendar size={12} />
                   <span>
@@ -456,12 +457,12 @@ export default function AdminExams() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <button
                   onClick={() => openEditModal(exam)}
-                  className="flex-1 btn-premium py-2 px-3 text-sm font-medium flex items-center justify-center gap-2"
+                  className="flex-1 btn-premium py-2 px-2 sm:px-3 text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2"
                 >
-                  <Edit size={14} />
+                  <Edit size={12} className="sm:w-3.5 sm:h-3.5" />
                   Edit
                 </button>
                 <button
@@ -471,7 +472,7 @@ export default function AdminExams() {
                       exam.status === "active" ? "draft" : "active"
                     )
                   }
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 flex items-center gap-1 ${
+                  className={`px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-1 flex-shrink-0 ${
                     exam.status === "active"
                       ? "bg-gradient-to-r from-yellow-600 to-orange-600 text-white hover:from-yellow-700 hover:to-orange-700"
                       : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
@@ -479,21 +480,24 @@ export default function AdminExams() {
                 >
                   {exam.status === "active" ? (
                     <>
-                      <Clock size={14} />
-                      Pause
+                      <Clock size={12} className="sm:w-3.5 sm:h-3.5" />
+                      <span className="hidden sm:inline">Pause</span>
+                      <span className="sm:hidden">⏸</span>
                     </>
                   ) : (
                     <>
-                      <CheckCircle size={14} />
-                      Activate
+                      <CheckCircle size={12} className="sm:w-3.5 sm:h-3.5" />
+                      <span className="hidden sm:inline">Activate</span>
+                      <span className="sm:hidden">▶</span>
                     </>
                   )}
                 </button>
                 <button
                   onClick={() => handleDeleteExam(exam.id)}
-                  className="px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center justify-center"
+                  className="px-2 sm:px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white text-xs sm:text-sm font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center justify-center flex-shrink-0"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} className="sm:w-3.5 sm:h-3.5" />
+                  <span className="hidden sm:inline ml-1">Delete</span>
                 </button>
               </div>
             </div>
@@ -502,7 +506,7 @@ export default function AdminExams() {
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="card-premium p-6 group hover-lift">
           <div className="flex items-center">
             <div

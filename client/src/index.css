@@ -1018,7 +1018,6 @@ section .reveal-scale {
 /* Ensure all sections have proper visibility and spacing */
 section {
   position: relative;
-  z-index: 1;
 }
 
 /* Course Grid Layout Improvements */
@@ -1832,7 +1831,6 @@ section.py-20 {
 /* Ensure proper display for all content */
 section > * {
   position: relative;
-  z-index: 2;
 }
 
 .reveal-left {

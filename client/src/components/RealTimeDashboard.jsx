@@ -370,16 +370,16 @@ const RealTimeDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Premium Header with Enhanced Design */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 rounded-3xl"></div>
-        <div className="relative card-premium p-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl">
-                  <BarChart3 size={24} className="text-white" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 rounded-2xl sm:rounded-3xl"></div>
+        <div className="relative card-premium p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4">
+            <div className="space-y-1 sm:space-y-2">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl">
+                  <BarChart3 size={20} className="sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
                   <h1
@@ -405,18 +405,19 @@ const RealTimeDashboard = () => {
                 {lastRefresh.toLocaleTimeString()}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 w-full lg:w-auto justify-between lg:justify-end">
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="btn-premium px-6 py-3 font-semibold disabled:opacity-50 flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300"
+                className="btn-premium px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold disabled:opacity-50 flex items-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 {loading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
                 ) : (
-                  <RefreshCw size={18} />
+                  <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />
                 )}
                 <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">↻</span>
               </button>
               <div
                 className={`px-4 py-2 rounded-2xl text-sm font-bold shadow-lg ${getStatusColor(
@@ -501,7 +502,7 @@ const RealTimeDashboard = () => {
         <div className="group card-premium dashboard-stat-card p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <p
                   className="text-sm font-semibold"
@@ -543,7 +544,7 @@ const RealTimeDashboard = () => {
         <div className="group card-premium dashboard-stat-card p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <p
                   className="text-sm font-semibold"
@@ -591,7 +592,7 @@ const RealTimeDashboard = () => {
         <div className="group card-premium dashboard-stat-card p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <p
                   className="text-sm font-semibold"
@@ -636,7 +637,7 @@ const RealTimeDashboard = () => {
         <div className="group card-premium dashboard-stat-card p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <p
                   className="text-sm font-semibold"
@@ -680,7 +681,7 @@ const RealTimeDashboard = () => {
       </div>
 
       {/* Enhanced Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Enhanced Real-Time Activities */}
         <div className="xl:col-span-2 relative">
           <div className="card-premium dashboard-activity-card p-6 h-full">
