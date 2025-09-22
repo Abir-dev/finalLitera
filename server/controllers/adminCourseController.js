@@ -596,6 +596,11 @@ export const updateCourseMeetLinks = async (req, res) => {
 
     // Handle live class settings
     let liveSessions = course.schedule?.liveSessions || [];
+    
+    // Hoist parsedDuration so it's available throughout the function
+    const parsedDuration = sessionDuration
+      ? Number(sessionDuration)
+      : course.duration || 60;
 
     if (isLiveClass === true || isLiveClass === "true") {
       if (!meetLink) {
@@ -607,9 +612,6 @@ export const updateCourseMeetLinks = async (req, res) => {
 
       // Compute date/time from either one-off date or recurring days+time
       const parsedDate = sessionDate ? new Date(sessionDate) : null;
-      const parsedDuration = sessionDuration
-        ? Number(sessionDuration)
-        : course.duration || 60;
 
       // Helper to map day {Mon..Sun} -> 0..6
       const dayToIndex = {

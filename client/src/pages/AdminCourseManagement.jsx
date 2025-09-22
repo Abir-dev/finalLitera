@@ -91,8 +91,7 @@ export default function AdminCourseManagement() {
         toast.error("Access denied. Insufficient permissions.");
       } else {
         toast.error(
-          `Failed to fetch courses: ${
-            error.response?.data?.message || error.message
+          `Failed to fetch courses: ${error.response?.data?.message || error.message
           }`
         );
       }
@@ -357,30 +356,20 @@ export default function AdminCourseManagement() {
     // Pre-fill with recurring config if exists, otherwise use first session
     const recurringConfig = course.schedule?.recurringConfig;
     const first = course.schedule?.liveSessions?.[0];
-    const prefillTime = first ? new Date(first.date) : null;
-    // Infer recurring days from existing sessions if present (Mon..Sun)
-    const weekdayAbbr = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    const inferredDays = Array.isArray(course.schedule?.liveSessions)
-      ? Array.from(
-          new Set(
-            course.schedule.liveSessions
-              .slice(0, 7)
-              .map((s) => {
-                const d = new Date(s.date);
-                return weekdayAbbr[d.getUTCDay()];
-              })
-          )
-        )
-      : [];
+
+    // Use recurringConfig data if available, otherwise fallback to liveSessions
+    const meetLink = recurringConfig?.meetingLink || first?.meetingLink || "";
+    const sessionDays = recurringConfig?.sessionDays || [];
+    const sessionTime = recurringConfig?.sessionTime || "";
+    const sessionDuration = recurringConfig?.sessionDuration || first?.duration || "";
+    const isLiveClass = course.schedule?.liveSessions?.length > 0 || false;
+
     setMeetLinkData({
-      meetLink: first?.meetingLink || "",
-      isLiveClass: course.schedule?.liveSessions?.length > 0 || false,
-      sessionDays: inferredDays,
-      // Use UTC components to avoid timezone shifts when reopening
-      sessionTime: prefillTime
-        ? `${String(prefillTime.getUTCHours()).padStart(2,'0')}:${String(prefillTime.getUTCMinutes()).padStart(2,'0')}`
-        : "",
-      sessionDuration: first?.duration || "",
+      meetLink,
+      isLiveClass,
+      sessionDays,
+      sessionTime,
+      sessionDuration,
     });
     setShowLinksModal(true);
   };
@@ -412,8 +401,7 @@ export default function AdminCourseManagement() {
         console.log(`🕐 [TIME DEBUG] Original input value: "${value}"`);
         console.log(`🕐 [TIME DEBUG] Value type: ${typeof value}`);
         console.log(
-          `🕐 [TIME DEBUG] Current timezone: ${
-            Intl.DateTimeFormat().resolvedOptions().timeZone
+          `🕐 [TIME DEBUG] Current timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone
           }`
         );
 
@@ -473,11 +461,11 @@ export default function AdminCourseManagement() {
       };
 
       const token = localStorage.getItem("adminToken");
-    const response = await axios.put(
-      `${backendURL}/admin/courses/${selectedCourse._id}/meet-links`,
-      payload,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+      const response = await axios.put(
+        `${backendURL}/admin/courses/${selectedCourse._id}/meet-links`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       console.log(`[Form Submit] Backend Response:`, response.data);
       toast.success("Meet links updated successfully!");
@@ -800,11 +788,9 @@ export default function AdminCourseManagement() {
                       onClick={() =>
                         setFormData((prev) => ({
                           ...prev,
-                          description: `Who this course is for\n• Beginners to ${
-                            formData.category || "the topic"
-                          }\n• Professionals upskilling to ${
-                            formData.level || "beginner"
-                          } level\n\nWhat you'll learn\n• Build real projects step‑by‑step\n• Master core concepts and best practices\n• Learn modern tools and workflows\n\nCourse overview\n• Clear learning path from basics to advanced\n• Hands‑on assignments and quizzes\n• Lifetime access and updates\n\nOutcomes\n• Build production‑ready apps\n• Strengthen your portfolio\n• Interview‑ready confidence`,
+                          description: `Who this course is for\n• Beginners to ${formData.category || "the topic"
+                            }\n• Professionals upskilling to ${formData.level || "beginner"
+                            } level\n\nWhat you'll learn\n• Build real projects step‑by‑step\n• Master core concepts and best practices\n• Learn modern tools and workflows\n\nCourse overview\n• Clear learning path from basics to advanced\n• Hands‑on assignments and quizzes\n• Lifetime access and updates\n\nOutcomes\n• Build production‑ready apps\n• Strengthen your portfolio\n• Interview‑ready confidence`,
                         }))
                       }
                       className="text-sm text-blue-600 hover:text-blue-800 underline"
@@ -844,21 +830,21 @@ export default function AdminCourseManagement() {
                     {/* Thumbnail Preview */}
                     {(files.thumbnail ||
                       (editingCourse && editingCourse.thumbnail)) && (
-                      <div className="mt-3">
-                        <p className="text-md text-gray-300 mb-2">Preview:</p>
-                        <div className="w-full h-32 border border-gray-600 rounded-lg overflow-hidden">
-                          <img
-                            src={
-                              files.thumbnail
-                                ? URL.createObjectURL(files.thumbnail)
-                                : editingCourse.thumbnail
-                            }
-                            alt="Thumbnail preview"
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="mt-3">
+                          <p className="text-md text-gray-300 mb-2">Preview:</p>
+                          <div className="w-full h-32 border border-gray-600 rounded-lg overflow-hidden">
+                            <img
+                              src={
+                                files.thumbnail
+                                  ? URL.createObjectURL(files.thumbnail)
+                                  : editingCourse.thumbnail
+                              }
+                              alt="Thumbnail preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
 
                   <div>
@@ -875,9 +861,9 @@ export default function AdminCourseManagement() {
                     />
                     {/* Video Preview */}
                     {(files.videos && files.videos.length > 0) ||
-                    (editingCourse &&
-                      editingCourse.videos &&
-                      editingCourse.videos.length > 0) ? (
+                      (editingCourse &&
+                        editingCourse.videos &&
+                        editingCourse.videos.length > 0) ? (
                       <div className="mt-3">
                         <p className="text-md text-gray-300 mb-2">
                           Video Preview:
@@ -1154,8 +1140,8 @@ export default function AdminCourseManagement() {
                     {submitting
                       ? "Saving..."
                       : editingCourse
-                      ? "Update Course"
-                      : "Create Course"}
+                        ? "Update Course"
+                        : "Create Course"}
                   </button>
                 </div>
               </form>
@@ -1204,11 +1190,10 @@ export default function AdminCourseManagement() {
                       />
                     ) : null}
                     <div
-                      className={`w-full h-full flex items-center justify-center text-gray-500 ${
-                        course.thumbnail && course.thumbnail.trim() !== ""
-                          ? "hidden"
-                          : ""
-                      }`}
+                      className={`w-full h-full flex items-center justify-center text-gray-500 ${course.thumbnail && course.thumbnail.trim() !== ""
+                        ? "hidden"
+                        : ""
+                        }`}
                     >
                       <div className="text-center">
                         <svg
@@ -1299,11 +1284,10 @@ export default function AdminCourseManagement() {
                       </button>
                       <button
                         onClick={() => handleAddLinks(course)}
-                        className={`flex-1 px-3 py-2 text-md rounded-lg transition-colors ${
-                          course.schedule?.liveSessions?.length > 0
-                            ? "bg-green-900/30 text-green-300 border border-green-600 hover:bg-green-900/50"
-                            : "bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700"
-                        }`}
+                        className={`flex-1 px-3 py-2 text-md rounded-lg transition-colors ${course.schedule?.liveSessions?.length > 0
+                          ? "bg-green-900/30 text-green-300 border border-green-600 hover:bg-green-900/50"
+                          : "bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700"
+                          }`}
                       >
                         {course.schedule?.liveSessions?.length > 0
                           ? "Manage Links"
@@ -1313,11 +1297,10 @@ export default function AdminCourseManagement() {
                         onClick={() =>
                           handleTogglePublish(course._id, course.isPublished)
                         }
-                        className={`flex-1 px-3 py-2 text-md rounded-lg transition-colors ${
-                          course.isPublished
-                            ? "bg-yellow-900/30 text-yellow-300 border border-yellow-600 hover:bg-yellow-900/50"
-                            : "bg-green-900/30 text-green-300 border border-green-600 hover:bg-green-900/50"
-                        }`}
+                        className={`flex-1 px-3 py-2 text-md rounded-lg transition-colors ${course.isPublished
+                          ? "bg-yellow-900/30 text-yellow-300 border border-yellow-600 hover:bg-yellow-900/50"
+                          : "bg-green-900/30 text-green-300 border border-green-600 hover:bg-green-900/50"
+                          }`}
                       >
                         {course.isPublished ? "Unpublish" : "Publish"}
                       </button>
@@ -1462,11 +1445,10 @@ export default function AdminCourseManagement() {
                             return (
                               <label
                                 key={d}
-                                className={`inline-flex items-center gap-1 text-sm px-2 py-1 rounded border cursor-pointer transition-all duration-200 ${
-                                  isSelected
-                                    ? "bg-blue-600/80 border-blue-500 text-white shadow-md"
-                                    : "bg-gray-800/60 border-gray-700 text-gray-200 hover:bg-gray-700/60 hover:border-gray-600"
-                                }`}
+                                className={`inline-flex items-center gap-1 text-sm px-2 py-1 rounded border cursor-pointer transition-all duration-200 ${isSelected
+                                  ? "bg-blue-600/80 border-blue-500 text-white shadow-md"
+                                  : "bg-gray-800/60 border-gray-700 text-gray-200 hover:bg-gray-700/60 hover:border-gray-600"
+                                  }`}
                               >
                                 <input
                                   type="checkbox"
@@ -1656,20 +1638,20 @@ export default function AdminCourseManagement() {
                             detectedPattern.sessionTime ||
                             (prefillTime
                               ? (() => {
-                                  const timeString = `${String(
-                                    prefillTime.getHours()
-                                  ).padStart(2, "0")}:${String(
-                                    prefillTime.getMinutes()
-                                  ).padStart(2, "0")}`;
-                                  console.log(
-                                    `🕐 [TIME DEBUG] Generated time from Date (modal): "${timeString}"`
-                                  );
-                                  console.log(
-                                    `🕐 [TIME DEBUG] Original Date object (modal):`,
-                                    prefillTime
-                                  );
-                                  return timeString;
-                                })()
+                                const timeString = `${String(
+                                  prefillTime.getHours()
+                                ).padStart(2, "0")}:${String(
+                                  prefillTime.getMinutes()
+                                ).padStart(2, "0")}`;
+                                console.log(
+                                  `🕐 [TIME DEBUG] Generated time from Date (modal): "${timeString}"`
+                                );
+                                console.log(
+                                  `🕐 [TIME DEBUG] Original Date object (modal):`,
+                                  prefillTime
+                                );
+                                return timeString;
+                              })()
                               : ""),
                           sessionDuration: first?.duration || "",
                         });
@@ -1694,11 +1676,10 @@ export default function AdminCourseManagement() {
                             Duration: {course.duration} min
                           </span>
                           <span
-                            className={`text-sm px-2 py-1 rounded-full ${
-                              course.isPublished
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
+                            className={`text-sm px-2 py-1 rounded-full ${course.isPublished
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                              }`}
                           >
                             {course.isPublished ? "Published" : "Draft"}
                           </span>
