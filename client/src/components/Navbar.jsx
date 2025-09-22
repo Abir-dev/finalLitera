@@ -24,6 +24,7 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const loginSuccessCallbackRef = useRef(null);
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -138,6 +139,17 @@ export default function Navbar() {
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [notifOpen]);
+
+  // ✅ Listen for global login requests (from anywhere in the app)
+  useEffect(() => {
+    const onOpenLogin = (e) => {
+      const detail = e?.detail || {};
+      loginSuccessCallbackRef.current = typeof detail.onSuccess === 'function' ? detail.onSuccess : null;
+      setIsLoginModalOpen(true);
+    };
+    window.addEventListener('openLogin', onOpenLogin);
+    return () => window.removeEventListener('openLogin', onOpenLogin);
+  }, []);
 
   const handleProfileClick = () => {
     navigate("/dashboard/profile");
@@ -375,6 +387,16 @@ export default function Navbar() {
         onSwitchToSignup={() => {
           setIsLoginModalOpen(false);
           setIsSignupModalOpen(true);
+        }}
+        onSuccess={() => {
+          // Run pending callback if provided (e.g., navigate to intended course)
+          const cb = loginSuccessCallbackRef.current;
+          loginSuccessCallbackRef.current = null;
+          if (typeof cb === 'function') {
+            cb();
+          } else {
+            navigate('/dashboard/subscription');
+          }
         }}
       />
       <SignupModal
