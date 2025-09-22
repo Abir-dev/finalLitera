@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAdminAuth } from "../context/AdminAuthContext.jsx";
-import { BarChart3, Users, BookOpen, FileText, Settings, Crown, LogOut, Menu, X } from "lucide-react";
+import { BarChart3, Users, BookOpen, FileText, Settings, Crown, LogOut, Menu, X, Briefcase } from "lucide-react";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -34,6 +34,7 @@ export default function AdminLayout() {
     { name: "Students", href: "/admin/students", icon: Users },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Exams", href: "/admin/exams", icon: FileText },
+    { name: "Internships", href: "/admin/internships", icon: Briefcase },
     // { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];

@@ -1,6 +1,34 @@
-import { Briefcase } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Briefcase, ArrowRight } from "lucide-react";
+import { listInternships, applyToInternship } from "../services/internshipService.js";
 
 export default function Internships() {
+  const [internships, setInternships] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await listInternships();
+        setInternships(res?.data?.internships || []);
+      } catch (e) {
+        console.error("Failed to load internships", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const onApply = async (internship) => {
+    try {
+      await applyToInternship(internship.id);
+    } catch {}
+    if (internship.applyUrl) {
+      window.open(internship.applyUrl, "_blank", "noopener");
+    }
+  };
+
   return (
     <div className="container-premium">
       <div className="card-premium p-8 mb-8 relative overflow-hidden">
@@ -27,25 +55,38 @@ export default function Internships() {
             </span>
           </div>
 
-          <div className="card-premium p-8 text-center">
-            <div className="mx-auto mb-4 w-16 h-16 rounded-2xl flex items-center justify-center" style={{ 
-              background: 'linear-gradient(135deg, var(--brand-strong)20, var(--brand-strong)10)',
-              border: '1px solid var(--brand-strong)30'
-            }}>
-              <Briefcase size={28} style={{ color: 'var(--brand-strong)' }} />
+          {loading ? (
+            <div className="card-premium p-8 text-center" style={{ color: 'var(--text-secondary)' }}>
+              Loading internships...
             </div>
-            <p className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Curated internships and application tracking are on the way
-            </p>
-            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-              Discover roles, save favorites, and track your applications right here.
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Stay tuned for updates.
-              </span>
+          ) : internships.length === 0 ? (
+            <div className="card-premium p-8 text-center" style={{ color: 'var(--text-secondary)' }}>
+              No internships available yet. Please check back later.
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              {internships.map((i) => (
+                <div key={i.id} className="card-premium p-6 group hover:scale-[1.01] transition-all duration-300">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{i.name}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>{i.role}</span>
+                      </div>
+                      <div className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{i.company} • {i.stipend || 'Stipend not specified'}</div>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{i.description}</p>
+                    </div>
+                    <div>
+                      <button onClick={() => onApply(i)} className="btn-premium inline-flex items-center gap-2">
+                        Apply
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

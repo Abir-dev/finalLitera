@@ -23,6 +23,7 @@ import paymentRoutes from "./routes/payment.js";
 import examRoutes from "./routes/exams.js";
 import liveClassRoutes from "./routes/liveClasses.js";
 import notificationRoutes from "./routes/notification.js";
+import internshipRoutes from "./routes/internships.js";
 import connectCloudinary from "./utils/cloudinary.js";
 
 // Import Admin model
@@ -192,6 +193,7 @@ app.use("/api/payments", paymentRoutes); // Razorpay payment routes
 app.use("/api/exams", examRoutes); // Exams routes
 app.use("/api/live-classes", liveClassRoutes); // Live classes routes
 app.use("/api/notifications", notificationRoutes); // Notifications routes
+app.use("/api/internships", internshipRoutes); // Internships routes
 
 // --- HEALTH CHECK ---
 app.get("/api/health", (req, res) => {
