@@ -282,46 +282,49 @@ const RealTimeDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Premium Header with Enhanced Design */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 rounded-3xl"></div>
-        <div className="relative card-premium p-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl">
-                  <BarChart3 size={24} className="text-white" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 rounded-2xl sm:rounded-3xl"></div>
+        <div className="relative card-premium p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4">
+            <div className="space-y-1 sm:space-y-2">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl">
+                  <BarChart3 size={20} className="sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="heading-1 text-2xl lg:text-3xl" style={{ color: 'var(--text-primary)' }}>
+                  <h1 className="heading-1 text-xl sm:text-2xl lg:text-3xl" style={{ color: 'var(--text-primary)' }}>
                     Real-Time Dashboard
                   </h1>
-                  <p className="text-base" style={{ color: 'var(--accent-gold)' }}>Admin Control Center</p>
+                  <p className="text-sm sm:text-base" style={{ color: 'var(--accent-gold)' }}>Admin Control Center</p>
                 </div>
               </div>
-              <p className="text-sm lg:text-base flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
-                <Clock size={16} />
-                Live data from your database • Last updated: {lastRefresh.toLocaleTimeString()}
+              <p className="text-xs sm:text-sm lg:text-base flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                <Clock size={14} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Live data from your database • Last updated: {lastRefresh.toLocaleTimeString()}</span>
+                <span className="sm:hidden">Live • {lastRefresh.toLocaleTimeString()}</span>
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 w-full lg:w-auto justify-between lg:justify-end">
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="btn-premium px-6 py-3 font-semibold disabled:opacity-50 flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300"
+                className="btn-premium px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold disabled:opacity-50 flex items-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 {loading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
                 ) : (
-                  <RefreshCw size={18} />
+                  <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />
                 )}
                 <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">↻</span>
               </button>
-              <div className={`px-4 py-2 rounded-2xl text-sm font-bold shadow-lg ${getStatusColor(dashboardData.systemHealth.serverStatus)}`}>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-current animate-pulse"></div>
-                  {dashboardData.systemHealth.serverStatus.toUpperCase()}
+              <div className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold shadow-lg ${getStatusColor(dashboardData.systemHealth.serverStatus)}`}>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-current animate-pulse"></div>
+                  <span className="hidden sm:inline">{dashboardData.systemHealth.serverStatus.toUpperCase()}</span>
+                  <span className="sm:hidden">●</span>
                 </div>
               </div>
             </div>
@@ -361,131 +364,134 @@ const RealTimeDashboard = () => {
       )}
 
       {/* Enhanced Real-Time Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div className="group card-premium p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div className="group card-premium p-4 sm:p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Total Students</p>
-                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+                <p className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>Total Students</p>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse flex-shrink-0"></div>
               </div>
-              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-xl sm:text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                 {dashboardData.stats.totalStudents.toLocaleString()}
               </p>
               <div className="flex items-center gap-1">
-                <TrendingUp size={12} style={{ color: 'var(--accent-gold)' }} />
-                <p className="text-xs font-medium" style={{ color: 'var(--accent-gold)' }}>
-                  +{dashboardData.stats.newEnrollments} new this week
+                <TrendingUp size={10} className="sm:w-3 sm:h-3 flex-shrink-0" style={{ color: 'var(--accent-gold)' }} />
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--accent-gold)' }}>
+                  <span className="hidden sm:inline">+{dashboardData.stats.newEnrollments} new this week</span>
+                  <span className="sm:hidden">+{dashboardData.stats.newEnrollments} new</span>
                 </p>
               </div>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500" 
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 flex-shrink-0" 
                  style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-strong))', border: '1px solid var(--brand)30' }}>
-              <Users size={24} className="text-white" />
+              <Users size={18} className="sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="group card-premium p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
+        <div className="group card-premium p-4 sm:p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Total Courses</p>
-                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--accent-gold)' }}></div>
+                <p className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>Total Courses</p>
+                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--accent-gold)' }}></div>
               </div>
-              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-xl sm:text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                 {dashboardData.stats.totalCourses}
               </p>
               <div className="flex items-center gap-1">
-                <GraduationCap size={12} style={{ color: 'var(--accent-gold)' }} />
-                <p className="text-xs font-medium" style={{ color: 'var(--accent-gold)' }}>
+                <GraduationCap size={10} className="sm:w-3 sm:h-3 flex-shrink-0" style={{ color: 'var(--accent-gold)' }} />
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--accent-gold)' }}>
                   {dashboardData.stats.totalInstructors} instructors
                 </p>
               </div>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500" 
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 flex-shrink-0" 
                  style={{ background: 'linear-gradient(135deg, var(--accent-gold), var(--accent-gold-strong))', border: '1px solid var(--accent-gold)30' }}>
-              <BookOpen size={24} className="text-white" />
+              <BookOpen size={18} className="sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="group card-premium p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
+        <div className="group card-premium p-4 sm:p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Active Users</p>
-                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--accent-rose)' }}></div>
+                <p className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>Active Users</p>
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0" style={{ backgroundColor: 'var(--accent-rose)' }}></div>
               </div>
-              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-xl sm:text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                 {dashboardData.stats.activeUsers.toLocaleString()}
               </p>
               <div className="flex items-center gap-1">
-                <BarChart3 size={12} style={{ color: 'var(--brand)' }} />
-                <p className="text-xs font-medium" style={{ color: 'var(--brand)' }}>
-                  {dashboardData.stats.completionRate}% completion rate
+                <BarChart3 size={10} className="sm:w-3 sm:h-3 flex-shrink-0" style={{ color: 'var(--brand)' }} />
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--brand)' }}>
+                  <span className="hidden sm:inline">{dashboardData.stats.completionRate}% completion rate</span>
+                  <span className="sm:hidden">{dashboardData.stats.completionRate}% complete</span>
                 </p>
               </div>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500" 
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 flex-shrink-0" 
                  style={{ background: 'linear-gradient(135deg, var(--accent-rose), var(--accent-rose-strong))', border: '1px solid var(--accent-rose)30' }}>
-              <UserCheck size={24} className="text-white" />
+              <UserCheck size={18} className="sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="group card-premium p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
+        <div className="group card-premium p-4 sm:p-6 hover:scale-[1.02] transition-all duration-500 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Revenue</p>
-                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--brand-strong)' }}></div>
+                <p className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-secondary)' }}>Revenue</p>
+                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--brand-strong)' }}></div>
               </div>
-              <p className="text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-xl sm:text-3xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                 ₹{(dashboardData.stats.revenue / 100000).toFixed(1)}L
               </p>
               <div className="flex items-center gap-1">
-                <TrendingUp size={12} style={{ color: 'var(--accent-gold)' }} />
-                <p className="text-xs font-medium" style={{ color: 'var(--accent-gold)' }}>
-                  +18% from last month
+                <TrendingUp size={10} className="sm:w-3 sm:h-3 flex-shrink-0" style={{ color: 'var(--accent-gold)' }} />
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--accent-gold)' }}>
+                  <span className="hidden sm:inline">+18% from last month</span>
+                  <span className="sm:hidden">+18%</span>
                 </p>
               </div>
             </div>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500" 
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 flex-shrink-0" 
                  style={{ background: 'linear-gradient(135deg, var(--brand-strong), var(--accent-emerald))', border: '1px solid var(--brand-strong)30' }}>
-              <TrendingUp size={24} className="text-white" />
+              <TrendingUp size={18} className="sm:w-6 sm:h-6 text-white" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Enhanced Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Enhanced Real-Time Activities */}
         <div className="xl:col-span-2 relative">
-          <div className="card-premium p-6 h-full">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-xl">
-                  <Clock size={24} className="text-white" />
+          <div className="card-premium p-4 sm:p-6 h-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-xl">
+                  <Clock size={20} className="sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="heading-3 text-xl" style={{ color: 'var(--text-primary)' }}>Live Activities</h2>
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Real-time platform events</p>
+                  <h2 className="heading-3 text-lg sm:text-xl" style={{ color: 'var(--text-primary)' }}>Live Activities</h2>
+                  <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>Real-time platform events</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                  <div className="w-3 h-3 rounded-full animate-pulse bg-green-400"></div>
-                  <span className="text-sm font-semibold text-green-400">Live</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full animate-pulse bg-green-400"></div>
+                  <span className="text-xs sm:text-sm font-semibold text-green-400">Live</span>
                 </div>
               </div>
             </div>
-            <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
+            <div className="space-y-2 sm:space-y-3 max-h-[300px] sm:max-h-[400px] overflow-y-auto custom-scrollbar">
               {dashboardData.recentActivities.map((activity, index) => (
                 <div key={activity.id} 
                      className="group relative card-premium p-4 hover:scale-[1.01] transition-all duration-300 border-l-4"

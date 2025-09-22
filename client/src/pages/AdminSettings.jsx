@@ -609,17 +609,17 @@ export default function AdminSettings() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Admin Settings</h1>
-          <p className="text-gray-300 mt-1">Configure your admin panel preferences and system settings</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Admin Settings</h1>
+          <p className="text-gray-300 mt-1 text-xs sm:text-sm lg:text-base">Configure your admin panel preferences and system settings</p>
         </div>
         <button
           onClick={handleSaveSettings}
           disabled={isSaving}
-          className="btn-premium px-6 py-3 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="btn-premium px-4 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-full sm:w-auto justify-center"
         >
-          <Save size={16} />
+          <Save size={14} className="sm:w-4 sm:h-4" />
           {isSaving ? "Saving..." : "Save Settings"}
         </button>
       </div>
@@ -627,54 +627,55 @@ export default function AdminSettings() {
       {/* Settings Tabs */}
       <div className="card-premium">
         <div className="border-b border-white/10">
-          <nav className="flex space-x-8 px-6">
+          <nav className="flex space-x-4 sm:space-x-8 px-3 sm:px-6 overflow-x-auto">
             {tabs.map((tab) => {
               const IconComponent = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 flex items-center gap-2 ${
+                  className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
                     activeTab === tab.id
                       ? "border-blue-500 text-blue-400"
                       : "border-transparent text-gray-400 hover:text-white hover:border-gray-300"
                   }`}
                 >
-                  <IconComponent size={16} />
-                  {tab.name}
+                  <IconComponent size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{tab.name}</span>
+                  <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
                 </button>
               );
             })}
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           {renderTabContent()}
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="card-premium p-6">
-        <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-blue-400 hover:bg-blue-500/10 transition-all duration-300 group">
-            <Download size={24} className="mb-2 group-hover:scale-110 transition-transform duration-300 text-blue-400" />
-            <span className="text-sm font-medium text-white group-hover:text-blue-400">Export Settings</span>
+      <div className="card-premium p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <button className="flex flex-col items-center p-3 sm:p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-blue-400 hover:bg-blue-500/10 transition-all duration-300 group">
+            <Download size={18} className="sm:w-6 sm:h-6 mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300 text-blue-400" />
+            <span className="text-xs sm:text-sm font-medium text-white group-hover:text-blue-400 text-center">Export Settings</span>
           </button>
           
-          <button className="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-green-400 hover:bg-green-500/10 transition-all duration-300 group">
-            <Upload size={24} className="mb-2 group-hover:scale-110 transition-transform duration-300 text-green-400" />
-            <span className="text-sm font-medium text-white group-hover:text-green-400">Import Settings</span>
+          <button className="flex flex-col items-center p-3 sm:p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-green-400 hover:bg-green-500/10 transition-all duration-300 group">
+            <Upload size={18} className="sm:w-6 sm:h-6 mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300 text-green-400" />
+            <span className="text-xs sm:text-sm font-medium text-white group-hover:text-green-400 text-center">Import Settings</span>
           </button>
           
-          <button className="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-yellow-400 hover:bg-yellow-500/10 transition-all duration-300 group">
-            <RotateCcw size={24} className="mb-2 group-hover:scale-110 transition-transform duration-300 text-yellow-400" />
-            <span className="text-sm font-medium text-white group-hover:text-yellow-400">Reset All</span>
+          <button className="flex flex-col items-center p-3 sm:p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-yellow-400 hover:bg-yellow-500/10 transition-all duration-300 group">
+            <RotateCcw size={18} className="sm:w-6 sm:h-6 mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300 text-yellow-400" />
+            <span className="text-xs sm:text-sm font-medium text-white group-hover:text-yellow-400 text-center">Reset All</span>
           </button>
           
-          <button className="flex flex-col items-center p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-purple-400 hover:bg-purple-500/10 transition-all duration-300 group">
-            <FileText size={24} className="mb-2 group-hover:scale-110 transition-transform duration-300 text-purple-400" />
-            <span className="text-sm font-medium text-white group-hover:text-purple-400">View Logs</span>
+          <button className="flex flex-col items-center p-3 sm:p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-purple-400 hover:bg-purple-500/10 transition-all duration-300 group">
+            <FileText size={18} className="sm:w-6 sm:h-6 mb-1 sm:mb-2 group-hover:scale-110 transition-transform duration-300 text-purple-400" />
+            <span className="text-xs sm:text-sm font-medium text-white group-hover:text-purple-400 text-center">View Logs</span>
           </button>
         </div>
       </div>

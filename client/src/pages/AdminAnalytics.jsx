@@ -116,49 +116,51 @@ export default function AdminAnalytics() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics & Reports</h1>
-          <p className="text-gray-600 mt-1">Comprehensive insights into your platform performance</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Analytics & Reports</h1>
+          <p className="text-gray-600 mt-1 text-xs sm:text-sm lg:text-base">Comprehensive insights into your platform performance</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+            className="px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400 text-xs sm:text-sm"
           >
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
             <option value="90d">Last 90 days</option>
             <option value="1y">Last year</option>
           </select>
-          <button className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300">
-            📊 Export Report
+          <button className="px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white text-xs sm:text-sm font-semibold rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300">
+            <span className="hidden sm:inline">📊 Export Report</span>
+            <span className="sm:hidden">📊 Export</span>
           </button>
         </div>
       </div>
 
       {/* Metric Selection */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {Object.entries(analyticsData).map(([key, data]) => (
           <button
             key={key}
             onClick={() => setSelectedMetric(key)}
-            className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+            className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 ${
               selectedMetric === key
                 ? "border-red-500 bg-red-50"
                 : "border-gray-200 bg-white hover:border-gray-300"
             }`}
           >
             <div className="text-center">
-              <div className="text-2xl mb-2">{getTrendIcon(data.trend)}</div>
-              <h3 className="text-sm font-medium text-gray-600">{data.title}</h3>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
+              <div className="text-xl sm:text-2xl mb-1 sm:mb-2">{getTrendIcon(data.trend)}</div>
+              <h3 className="text-xs sm:text-sm font-medium text-gray-600">{data.title}</h3>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-1">
                 {key === "revenue" ? `₹${(data.current / 100000).toFixed(1)}L` : 
                  key === "completion" ? `${data.current}%` : data.current.toLocaleString()}
               </p>
-              <p className={`text-sm font-medium mt-1 ${getChangeColor(data.change)}`}>
-                {data.change} from last period
+              <p className={`text-xs sm:text-sm font-medium mt-1 ${getChangeColor(data.change)}`}>
+                <span className="hidden sm:inline">{data.change} from last period</span>
+                <span className="sm:hidden">{data.change}</span>
               </p>
             </div>
           </button>
@@ -166,35 +168,35 @@ export default function AdminAnalytics() {
       </div>
 
       {/* Main Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">{analyticsData[selectedMetric].title}</h2>
-          <div className="text-sm text-gray-500">Time period: {timeRange}</div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">{analyticsData[selectedMetric].title}</h2>
+          <div className="text-xs sm:text-sm text-gray-500">Time period: {timeRange}</div>
         </div>
-        <div className="h-80 flex items-center justify-center">
+        <div className="h-48 sm:h-80 flex items-center justify-center">
           {renderSimpleChart(analyticsData[selectedMetric].data)}
         </div>
       </div>
 
       {/* Performance Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top Performing Courses */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Top Performing Courses</h2>
-          <div className="space-y-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Top Performing Courses</h2>
+          <div className="space-y-3 sm:space-y-4">
             {topPerformingCourses.map((course, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors duration-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+              <div key={index} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0">
                     {index + 1}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{course.name}</h3>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-gray-900 text-xs sm:text-sm line-clamp-1">{course.name}</h3>
                     <p className="text-xs text-gray-500">{course.students} students</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">₹{(course.revenue / 1000).toFixed(0)}K</div>
+                <div className="text-right flex-shrink-0 ml-2">
+                  <div className="text-xs sm:text-sm font-semibold text-gray-900">₹{(course.revenue / 1000).toFixed(0)}K</div>
                   <div className="text-xs text-gray-500">⭐ {course.rating} | {course.completion}%</div>
                 </div>
               </div>
@@ -203,20 +205,20 @@ export default function AdminAnalytics() {
         </div>
 
         {/* Student Demographics */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Student Demographics</h2>
-          <div className="space-y-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Student Demographics</h2>
+          <div className="space-y-3 sm:space-y-4">
             {studentDemographics.map((demo, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">{demo.age}</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
+              <div key={index} className="flex items-center justify-between gap-2 sm:gap-4">
+                <span className="text-xs sm:text-sm font-medium text-gray-700 flex-shrink-0">{demo.age}</span>
+                <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                  <div className="w-20 sm:w-32 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-gradient-to-r from-red-500 to-orange-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${demo.percentage}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12 text-right">{demo.percentage}%</span>
+                  <span className="text-xs sm:text-sm font-semibold text-gray-900 w-8 sm:w-12 text-right flex-shrink-0">{demo.percentage}%</span>
                 </div>
               </div>
             ))}
@@ -225,61 +227,61 @@ export default function AdminAnalytics() {
       </div>
 
       {/* Additional Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Device Usage */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Device Usage</h3>
-          <div className="space-y-3">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Device Usage</h3>
+          <div className="space-y-2 sm:space-y-3">
             {deviceUsage.map((device, index) => (
               <div key={index} className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">{device.device}</span>
-                <span className="text-sm font-semibold text-gray-900">{device.percentage}%</span>
+                <span className="text-xs sm:text-sm text-gray-700">{device.device}</span>
+                <span className="text-xs sm:text-sm font-semibold text-gray-900">{device.percentage}%</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Course Categories */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Course Categories</h3>
-          <div className="space-y-3">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Course Categories</h3>
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">Frontend</span>
-              <span className="text-sm font-semibold text-gray-900">8 courses</span>
+              <span className="text-xs sm:text-sm text-gray-700">Frontend</span>
+              <span className="text-xs sm:text-sm font-semibold text-gray-900">8 courses</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">Backend</span>
-              <span className="text-sm font-semibold text-gray-900">6 courses</span>
+              <span className="text-xs sm:text-sm text-gray-700">Backend</span>
+              <span className="text-xs sm:text-sm font-semibold text-gray-900">6 courses</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">Data Science</span>
-              <span className="text-sm font-semibold text-gray-900">4 courses</span>
+              <span className="text-xs sm:text-sm text-gray-700">Data Science</span>
+              <span className="text-xs sm:text-sm font-semibold text-gray-900">4 courses</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">Full Stack</span>
-              <span className="text-sm font-semibold text-gray-900">6 courses</span>
+              <span className="text-xs sm:text-sm text-gray-700">Full Stack</span>
+              <span className="text-xs sm:text-sm font-semibold text-gray-900">6 courses</span>
             </div>
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Recent Activity</h3>
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
               <span className="text-gray-700">New student registered</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
               <span className="text-gray-700">Course completed</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>
               <span className="text-gray-700">Payment received</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></span>
               <span className="text-gray-700">Exam scheduled</span>
             </div>
           </div>
@@ -287,16 +289,16 @@ export default function AdminAnalytics() {
       </div>
 
       {/* Quick Insights */}
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">💡 Quick Insights</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-red-200">
-            <h3 className="font-semibold text-gray-900 mb-2">🚀 Growth Opportunity</h3>
-            <p className="text-sm text-gray-600">Mobile usage is 30% - consider optimizing mobile experience to increase engagement.</p>
+      <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200 p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">💡 Quick Insights</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          <div className="bg-white rounded-lg p-3 sm:p-4 border border-red-200">
+            <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">🚀 Growth Opportunity</h3>
+            <p className="text-xs sm:text-sm text-gray-600">Mobile usage is 30% - consider optimizing mobile experience to increase engagement.</p>
           </div>
-          <div className="bg-white rounded-lg p-4 border border-red-200">
-            <h3 className="font-semibold text-gray-900 mb-2">📈 Best Performing</h3>
-            <p className="text-sm text-gray-600">React course has highest completion rate (85%) - use as template for other courses.</p>
+          <div className="bg-white rounded-lg p-3 sm:p-4 border border-red-200">
+            <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">📈 Best Performing</h3>
+            <p className="text-xs sm:text-sm text-gray-600">React course has highest completion rate (85%) - use as template for other courses.</p>
           </div>
         </div>
       </div>

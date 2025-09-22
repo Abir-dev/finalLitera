@@ -81,64 +81,64 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-10 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-3 sm:px-6 py-6 sm:py-10 relative overflow-hidden">
       {/* Background */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-gray-900 to-slate-800" />
 
       {/* Single card container with left + right sections */}
       <div
-        className={`relative w-full max-w-6xl mx-auto flex flex-col md:flex-row rounded-3xl overflow-hidden shadow-2xl transition-all duration-1000 ${
+        className={`relative w-full max-w-sm sm:max-w-md md:max-w-6xl mx-auto flex flex-col md:flex-row rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl transition-all duration-1000 ${
           isCardVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       >
         {/* Left Section */}
-        <div className="hidden md:flex flex-col justify-center bg-white/5 backdrop-blur-xl border-r border-white/10 p-8 w-1/2">
-          <div className="text-center mb-8">
-            <div className="relative w-20 h-20 mx-auto mb-4">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 animate-pulse"></div>
-              <div className="relative w-full h-full rounded-2xl flex items-center justify-center shadow-lg border-2 border-white/20">
-                <Shield size={32} className="text-white" />
+        <div className="hidden md:flex flex-col justify-center bg-white/5 backdrop-blur-xl border-r border-white/10 p-6 lg:p-8 w-1/2">
+          <div className="text-center mb-6 lg:mb-8">
+            <div className="relative w-16 h-16 lg:w-20 lg:h-20 mx-auto mb-3 lg:mb-4">
+              <div className="absolute inset-0 rounded-xl lg:rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 animate-pulse"></div>
+              <div className="relative w-full h-full rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg border-2 border-white/20">
+                <Shield size={28} className="lg:w-8 lg:h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-3">Admin Portal</h1>
-            <p className="text-gray-300 text-sm leading-relaxed max-w-md mx-auto">
+            <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2 lg:mb-3">Admin Portal</h1>
+            <p className="text-gray-300 text-xs lg:text-sm leading-relaxed max-w-md mx-auto">
               Access administrative controls and manage your platform with
               enterprise-level security
             </p>
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
-              <Users size={20} className="text-blue-400" />
-              <span className="text-xs text-gray-300">User Management</span>
-              <Star size={12} className="text-yellow-400 fill-current" />
+          <div className="grid grid-cols-3 gap-3 lg:gap-4">
+            <div className="flex flex-col items-center gap-1.5 lg:gap-2 p-2 lg:p-3 rounded-lg lg:rounded-xl bg-white/5 border border-white/10">
+              <Users size={16} className="lg:w-5 lg:h-5 text-blue-400" />
+              <span className="text-xs text-gray-300 text-center">User Management</span>
+              <Star size={10} className="lg:w-3 lg:h-3 text-yellow-400 fill-current" />
             </div>
-            <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
-              <BarChart3 size={20} className="text-green-400" />
-              <span className="text-xs text-gray-300">Analytics</span>
-              <Zap size={12} className="text-green-400" />
+            <div className="flex flex-col items-center gap-1.5 lg:gap-2 p-2 lg:p-3 rounded-lg lg:rounded-xl bg-white/5 border border-white/10">
+              <BarChart3 size={16} className="lg:w-5 lg:h-5 text-green-400" />
+              <span className="text-xs text-gray-300 text-center">Analytics</span>
+              <Zap size={10} className="lg:w-3 lg:h-3 text-green-400" />
             </div>
-            <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
-              <Server size={20} className="text-purple-400" />
-              <span className="text-xs text-gray-300">System Config</span>
-              <Award size={12} className="text-blue-400" />
+            <div className="flex flex-col items-center gap-1.5 lg:gap-2 p-2 lg:p-3 rounded-lg lg:rounded-xl bg-white/5 border border-white/10">
+              <Server size={16} className="lg:w-5 lg:h-5 text-purple-400" />
+              <span className="text-xs text-gray-300 text-center">System Config</span>
+              <Award size={10} className="lg:w-3 lg:h-3 text-blue-400" />
             </div>
           </div>
         </div>
 
         {/* Right Section */}
-        <div className="flex-1 backdrop-blur-xl bg-white/10 p-8 flex flex-col justify-center">
-          <form onSubmit={handleAdminLogin} className="space-y-6">
+        <div className="flex-1 backdrop-blur-xl bg-white/10 p-4 sm:p-6 lg:p-8 flex flex-col justify-center">
+          <form onSubmit={handleAdminLogin} className="space-y-4 sm:space-y-6">
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-white mb-2">
                 Administrator Email
               </label>
               <div className="relative">
                 <Mail
-                  size={18}
-                  className={`absolute left-3 top-3 ${
+                  size={16}
+                  className={`sm:w-[18px] sm:h-[18px] absolute left-3 top-3 sm:top-3.5 ${
                     focusedField === "email" ? "text-blue-400" : "text-gray-400"
                   }`}
                 />
@@ -150,7 +150,7 @@ export default function AdminLogin() {
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="admin@company.com"
-                  className={`w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 text-white border-2 focus:outline-none ${
+                  className={`w-full pl-10 pr-4 py-3 sm:py-3.5 rounded-lg sm:rounded-xl bg-white/5 text-white text-sm sm:text-base border-2 focus:outline-none ${
                     errors.email
                       ? "border-red-500/50 focus:border-red-400"
                       : focusedField === "email"
@@ -160,14 +160,14 @@ export default function AdminLogin() {
                 />
                 {formData.email && !errors.email && (
                   <CheckCircle
-                    size={18}
-                    className="absolute right-3 top-3 text-green-400"
+                    size={16}
+                    className="sm:w-[18px] sm:h-[18px] absolute right-3 top-3 sm:top-3.5 text-green-400"
                   />
                 )}
                 {errors.email && (
                   <AlertCircle
-                    size={18}
-                    className="absolute right-3 top-3 text-red-400"
+                    size={16}
+                    className="sm:w-[18px] sm:h-[18px] absolute right-3 top-3 sm:top-3.5 text-red-400"
                   />
                 )}
               </div>
@@ -180,13 +180,13 @@ export default function AdminLogin() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-white mb-2">
                 Secure Password
               </label>
               <div className="relative">
                 <Lock
-                  size={18}
-                  className={`absolute left-3 top-3 ${
+                  size={16}
+                  className={`sm:w-[18px] sm:h-[18px] absolute left-3 top-3 sm:top-3.5 ${
                     focusedField === "password"
                       ? "text-blue-400"
                       : "text-gray-400"
@@ -200,7 +200,7 @@ export default function AdminLogin() {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
                   placeholder="Enter secure password"
-                  className={`w-full pl-10 pr-10 py-3 rounded-xl bg-white/5 text-white border-2 focus:outline-none ${
+                  className={`w-full pl-10 pr-10 py-3 sm:py-3.5 rounded-lg sm:rounded-xl bg-white/5 text-white text-sm sm:text-base border-2 focus:outline-none ${
                     errors.password
                       ? "border-red-500/50 focus:border-red-400"
                       : focusedField === "password"
@@ -211,9 +211,9 @@ export default function AdminLogin() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-3 sm:top-3.5 text-gray-400 hover:text-white"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Eye size={16} className="sm:w-[18px] sm:h-[18px]" />}
                 </button>
               </div>
               {errors.password && (
@@ -227,41 +227,52 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition"
+              className="w-full py-3 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm sm:text-base font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition"
             >
               {isLoading ? (
                 <>
-                  <Loader2 size={20} className="animate-spin" />
-                  Authenticating...
+                  <Loader2 size={18} className="sm:w-5 sm:h-5 animate-spin" />
+                  <span className="hidden sm:inline">Authenticating...</span>
+                  <span className="sm:hidden">Loading...</span>
                 </>
               ) : (
                 <>
-                  <Shield size={20} /> Secure Admin Access
+                  <Shield size={18} className="sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Secure Admin Access</span>
+                  <span className="sm:hidden">Admin Login</span>
                 </>
               )}
             </button>
 
             {/* Security Tags */}
-            <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 text-xs text-gray-400">
               <span className="flex items-center gap-1">
-                <Fingerprint size={12} /> 2FA Ready
+                <Fingerprint size={10} className="sm:w-3 sm:h-3" />
+                <span className="hidden sm:inline">2FA Ready</span>
+                <span className="sm:hidden">2FA</span>
               </span>
               <span className="flex items-center gap-1">
-                <Database size={12} /> SSL Encrypted
+                <Database size={10} className="sm:w-3 sm:h-3" />
+                <span className="hidden sm:inline">SSL Encrypted</span>
+                <span className="sm:hidden">SSL</span>
               </span>
               <span className="flex items-center gap-1">
-                <Shield size={12} /> Audit Logged
+                <Shield size={10} className="sm:w-3 sm:h-3" />
+                <span className="hidden sm:inline">Audit Logged</span>
+                <span className="sm:hidden">Audit</span>
               </span>
             </div>
           </form>
 
           {/* Footer */}
-          <div className="mt-6 text-center">
+          <div className="mt-4 sm:mt-6 text-center">
             <a
               href="/"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/20 text-white hover:border-white/40 hover:bg-white/5 transition"
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl border border-white/20 text-white text-xs sm:text-sm hover:border-white/40 hover:bg-white/5 transition"
             >
-              <ArrowLeft size={16} /> Back to Main Site
+              <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Back to Main Site</span>
+              <span className="sm:hidden">Back</span>
             </a>
           </div>
         </div>

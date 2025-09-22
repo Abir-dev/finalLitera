@@ -329,7 +329,7 @@ export default function AdminStudents() {
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6">
       {/* Premium Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -364,7 +364,7 @@ export default function AdminStudents() {
       ) : null}
 
       {/* Premium Search and Filter */}
-      <div className="card-premium p-4 relative z-10">
+      <div className="card-premium p-4" style={{ display: 'none' }}>
         <div className="flex flex-col lg:flex-row gap-3">
           <div className="flex-1 relative">
             <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -422,7 +422,7 @@ export default function AdminStudents() {
                   {/* Student Card */}
                   <div 
                     onClick={() => handleStudentClick(student)}
-                    className="card-premium p-3 cursor-pointer hover:scale-[1.01] transition-all duration-300 group"
+                    className="card-premium p-3 cursor-pointer transition-all duration-300 group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
@@ -608,7 +608,7 @@ export default function AdminStudents() {
 
       {/* Premium Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+        <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Total Students</p>
@@ -620,7 +620,7 @@ export default function AdminStudents() {
           </div>
         </div>
 
-        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+        <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Active Students</p>
@@ -634,7 +634,7 @@ export default function AdminStudents() {
           </div>
         </div>
 
-        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+        <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Enrolled Courses</p>
@@ -648,7 +648,7 @@ export default function AdminStudents() {
           </div>
         </div>
 
-        <div className="card-premium p-4 hover:scale-[1.02] transition-all duration-300">
+        <div className="card-premium p-4 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Avg Progress</p>
@@ -665,7 +665,7 @@ export default function AdminStudents() {
 
       {/* Add Student Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
