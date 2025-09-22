@@ -55,7 +55,7 @@ const VideoPlaylist = ({ modules, onVideoComplete, onProgressUpdate }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className=" rounded-2xl shadow-xl p-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Course Videos</h2>
           <div className="text-sm text-gray-600">
@@ -68,7 +68,7 @@ const VideoPlaylist = ({ modules, onVideoComplete, onProgressUpdate }) => {
             <div key={module.id || moduleIndex} className="border border-gray-200 rounded-xl overflow-hidden">
               {/* Module Header */}
               <div 
-                className="bg-gray-50 p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                className=" p-4 cursor-pointer hover:bg-gray-900 transition-colors"
                 onClick={() => toggleModule(module.id || moduleIndex)}
               >
                 <div className="flex items-center justify-between">
@@ -108,7 +108,7 @@ const VideoPlaylist = ({ modules, onVideoComplete, onProgressUpdate }) => {
 
               {/* Module Videos */}
               {expandedModule === (module.id || moduleIndex) && (
-                <div className="p-4 bg-white">
+                <div className="p-4">
                   <div className="space-y-3">
                     {module.videos.map((video, videoIndex) => {
                       const progress = getVideoProgress(video.id);
@@ -120,7 +120,7 @@ const VideoPlaylist = ({ modules, onVideoComplete, onProgressUpdate }) => {
                           className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
                             isCompleted 
                               ? 'border-green-200 bg-green-50' 
-                              : 'border-gray-200 bg-white hover:border-blue-300'
+                              : ' hover:border-blue-300'
                           }`}
                           onClick={() => handleVideoClick(video, module)}
                         >

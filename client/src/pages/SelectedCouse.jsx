@@ -424,7 +424,7 @@ export default function SelectedCourse() {
   }, [courseData.modules]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen  ">
       <section className="max-w-7xl mx-auto px-6 md:px-10 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -462,12 +462,12 @@ export default function SelectedCourse() {
             />
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className=" rounded-2xl shadow-xl p-8">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   onClick={handleResumeCourse}
-                  className="p-4 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-left"
+                  className="p-4 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-left"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
@@ -484,7 +484,7 @@ export default function SelectedCourse() {
                 
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="p-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors text-left"
+                  className="p-4  border border-green-200 rounded-xl hover:bg-green-100 transition-colors text-left"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
@@ -509,7 +509,7 @@ export default function SelectedCourse() {
             />
 
             {/* Projects Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className=" rounded-2xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Hands-on Projects</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {courseData.projects.map((project, index) => (
@@ -539,7 +539,7 @@ export default function SelectedCourse() {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Course Image with Progress */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className=" rounded-2xl shadow-xl overflow-hidden">
               <div className="relative">
                 <img
                   src="/src/assets/Ai-pic.jpg"
@@ -574,7 +574,7 @@ export default function SelectedCourse() {
             </div>
 
             {/* Weekly Assessments */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className=" rounded-2xl shadow-xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Weekly Assessments</h3>
               <div className="space-y-3">
                 {courseData.assessments.map((assessment, index) => (
@@ -608,7 +608,7 @@ export default function SelectedCourse() {
             </div>
 
             {/* Certificate Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className=" rounded-2xl shadow-xl p-6">
               <div className="text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">🏆</span>
@@ -651,7 +651,7 @@ export default function SelectedCourse() {
             />
 
             {/* Enhanced Course Stats */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className=" rounded-2xl shadow-xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Course Statistics</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">

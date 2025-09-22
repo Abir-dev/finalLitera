@@ -190,7 +190,7 @@ const LaunchPadDetails = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
       <div className="max-w-7xl mx-auto">
         {/* Course Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <div className=" rounded-2xl shadow-xl p-8 mb-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Course Image */}
             <div className="lg:w-1/3">
@@ -360,7 +360,7 @@ const LaunchPadDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Course Modules */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className=" rounded-2xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Course Modules
               </h2>
@@ -391,7 +391,7 @@ const LaunchPadDetails = () => {
 
             {/* Course Videos Section */}
             {courseData.videos && courseData.videos.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-xl p-8 mt-8">
+              <div className=" rounded-2xl shadow-xl p-8 mt-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Course Videos
                 </h2>
