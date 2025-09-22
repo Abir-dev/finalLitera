@@ -571,7 +571,7 @@ export default function AdminCourseManagement() {
           {courses.length > 0 && (
             <button
               onClick={() => setShowCourseSelectionModal(true)}
-              className="btn-outline-premium px-6 py-3 text-sm font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
+              className="btn-outline-premium px-6 py-3 text-md font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
             >
               <svg
                 className="w-4 h-4"
@@ -595,7 +595,7 @@ export default function AdminCourseManagement() {
               setEditingCourse(null);
               setShowForm(true);
             }}
-            className="btn-premium px-6 py-3 text-sm font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
+            className="btn-premium px-6 py-3 text-md font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
           >
             <svg
               className="w-4 h-4"
@@ -615,7 +615,7 @@ export default function AdminCourseManagement() {
           {courses.length === 0 && (
             <button
               onClick={createSampleCourse}
-              className="btn-gold-premium px-6 py-3 text-sm font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
+              className="btn-gold-premium px-6 py-3 text-md font-semibold flex items-center gap-2 hover:scale-105 transition-all duration-300"
             >
               <svg
                 className="w-4 h-4"
@@ -674,7 +674,7 @@ export default function AdminCourseManagement() {
                 {/* Basic Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Course Title *
                     </label>
                     <input
@@ -688,7 +688,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Category *
                     </label>
                     <select
@@ -712,7 +712,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Level *
                     </label>
                     <select
@@ -729,7 +729,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Duration (hours) *
                     </label>
                     <input
@@ -743,7 +743,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Price *
                     </label>
                     <input
@@ -757,7 +757,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Original Price
                     </label>
                     <input
@@ -772,7 +772,7 @@ export default function AdminCourseManagement() {
 
                 {/* Descriptions */}
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
+                  <label className="block text-md font-semibold text-white mb-2">
                     Short Description *
                   </label>
                   <textarea
@@ -784,7 +784,7 @@ export default function AdminCourseManagement() {
                     className="input-premium"
                     required
                   />
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-sm text-gray-400">
                     Tip: Keep it concise (under 300 characters). Shown on course
                     cards and LaunchPad lists.
                   </p>
@@ -792,7 +792,7 @@ export default function AdminCourseManagement() {
 
                 <div>
                   <div className="flex items-center justify-between">
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Detailed Description *
                     </label>
                     <button
@@ -807,7 +807,7 @@ export default function AdminCourseManagement() {
                           } level\n\nWhat you'll learn\n• Build real projects step‑by‑step\n• Master core concepts and best practices\n• Learn modern tools and workflows\n\nCourse overview\n• Clear learning path from basics to advanced\n• Hands‑on assignments and quizzes\n• Lifetime access and updates\n\nOutcomes\n• Build production‑ready apps\n• Strengthen your portfolio\n• Interview‑ready confidence`,
                         }))
                       }
-                      className="text-xs text-blue-600 hover:text-blue-800 underline"
+                      className="text-sm text-blue-600 hover:text-blue-800 underline"
                     >
                       Use description template
                     </button>
@@ -823,7 +823,7 @@ export default function AdminCourseManagement() {
                     className="input-premium"
                     required
                   />
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-sm text-gray-400">
                     Shown on the Course Details and LaunchPad details pages.
                   </p>
                 </div>
@@ -831,7 +831,7 @@ export default function AdminCourseManagement() {
                 {/* Media Uploads */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Course Thumbnail
                     </label>
                     <input
@@ -845,7 +845,7 @@ export default function AdminCourseManagement() {
                     {(files.thumbnail ||
                       (editingCourse && editingCourse.thumbnail)) && (
                       <div className="mt-3">
-                        <p className="text-sm text-gray-300 mb-2">Preview:</p>
+                        <p className="text-md text-gray-300 mb-2">Preview:</p>
                         <div className="w-full h-32 border border-gray-600 rounded-lg overflow-hidden">
                           <img
                             src={
@@ -862,7 +862,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Course Videos
                     </label>
                     <input
@@ -879,7 +879,7 @@ export default function AdminCourseManagement() {
                       editingCourse.videos &&
                       editingCourse.videos.length > 0) ? (
                       <div className="mt-3">
-                        <p className="text-sm text-gray-300 mb-2">
+                        <p className="text-md text-gray-300 mb-2">
                           Video Preview:
                         </p>
                         <div className="space-y-2">
@@ -895,7 +895,7 @@ export default function AdminCourseManagement() {
                                   controls
                                   className="w-full h-full object-cover"
                                 />
-                                <p className="text-xs text-gray-500 p-2">
+                                <p className="text-sm text-gray-500 p-2">
                                   {video.name}
                                 </p>
                               </div>
@@ -933,7 +933,7 @@ export default function AdminCourseManagement() {
                                             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                                           />
                                         </svg>
-                                        <p className="text-xs text-center">
+                                        <p className="text-sm text-center">
                                           Click to open
                                         </p>
                                       </a>
@@ -966,12 +966,12 @@ export default function AdminCourseManagement() {
                                           d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                                         />
                                       </svg>
-                                      <p className="text-xs text-gray-500">
+                                      <p className="text-sm text-gray-500">
                                         Video not available
                                       </p>
                                     </div>
                                   </div>
-                                  <p className="text-xs text-gray-500 p-2">
+                                  <p className="text-sm text-gray-500 p-2">
                                     Existing {isUrl ? "Video Link" : "Video"}{" "}
                                     {index + 1}
                                   </p>
@@ -987,7 +987,7 @@ export default function AdminCourseManagement() {
                 {/* URLs */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Image URL (alternative to file upload)
                     </label>
                     <input
@@ -1000,7 +1000,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Video URL (alternative to file upload)
                     </label>
                     <input
@@ -1014,7 +1014,7 @@ export default function AdminCourseManagement() {
                     {/* Video URL Preview */}
                     {formData.videoUrl && formData.videoUrl.trim() !== "" && (
                       <div className="mt-3">
-                        <p className="text-sm text-gray-300 mb-2">
+                        <p className="text-md text-gray-300 mb-2">
                           URL Preview:
                         </p>
                         <div className="w-full h-24 border border-gray-600 rounded-lg overflow-hidden bg-gradient-to-br from-blue-900/20 to-indigo-900/20">
@@ -1037,12 +1037,12 @@ export default function AdminCourseManagement() {
                                 d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                               />
                             </svg>
-                            <p className="text-xs text-center">
+                            <p className="text-sm text-center">
                               Click to preview
                             </p>
                           </a>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1 truncate">
+                        <p className="text-sm text-gray-500 mt-1 truncate">
                           {formData.videoUrl}
                         </p>
                       </div>
@@ -1053,7 +1053,7 @@ export default function AdminCourseManagement() {
                 {/* Additional Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Tags (comma-separated)
                     </label>
                     <input
@@ -1067,7 +1067,7 @@ export default function AdminCourseManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Requirements (comma-separated)
                     </label>
                     <input
@@ -1082,7 +1082,7 @@ export default function AdminCourseManagement() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
+                  <label className="block text-md font-semibold text-white mb-2">
                     Learning Outcomes (comma-separated)
                   </label>
                   <input
@@ -1105,7 +1105,7 @@ export default function AdminCourseManagement() {
                       onChange={handleInputChange}
                       className="w-4 h-4 text-blue-500 border-gray-400 rounded focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-white">
+                    <span className="ml-2 text-md text-white">
                       Publish Course
                     </span>
                   </label>
@@ -1118,7 +1118,7 @@ export default function AdminCourseManagement() {
                       onChange={handleInputChange}
                       className="w-4 h-4 text-blue-500 border-gray-400 rounded focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-white">
+                    <span className="ml-2 text-md text-white">
                       Featured Course
                     </span>
                   </label>
@@ -1131,7 +1131,7 @@ export default function AdminCourseManagement() {
                       onChange={handleInputChange}
                       className="w-4 h-4 text-blue-500 border-gray-400 rounded focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-white">
+                    <span className="ml-2 text-md text-white">
                       LaunchPad Course
                     </span>
                   </label>
@@ -1180,7 +1180,7 @@ export default function AdminCourseManagement() {
               <p className="text-gray-300">
                 Create your first course to get started!
               </p>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-md text-gray-400 mt-2">
                 Courses count: {courses.length}
               </p>
             </div>
@@ -1224,7 +1224,7 @@ export default function AdminCourseManagement() {
                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        <p className="text-xs text-gray-400">No thumbnail</p>
+                        <p className="text-sm text-gray-400">No thumbnail</p>
                       </div>
                     </div>
                   </div>
@@ -1236,28 +1236,28 @@ export default function AdminCourseManagement() {
                       </h3>
                       <div className="flex space-x-1 ml-2">
                         {course.isPublished && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                             Published
                           </span>
                         )}
                         {course.isFeatured && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                             Featured
                           </span>
                         )}
                         {course.isLaunchPad && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                             LaunchPad
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-300 mb-3 line-clamp-2">
+                    <p className="text-md text-gray-300 mb-3 line-clamp-2">
                       {course.shortDescription}
                     </p>
 
-                    <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
+                    <div className="flex items-center justify-between text-md text-gray-400 mb-4">
                       <span>{course.level}</span>
                       <span>{course.duration}h</span>
                       <span>${course.price}</span>
@@ -1265,7 +1265,7 @@ export default function AdminCourseManagement() {
 
                     {/* Show video count if available */}
                     {course.videos && course.videos.length > 0 && (
-                      <div className="text-xs text-blue-600 mb-2">
+                      <div className="text-sm text-blue-600 mb-2">
                         {course.videos.some((video) => video.startsWith("http"))
                           ? "🔗"
                           : "📹"}{" "}
@@ -1277,7 +1277,7 @@ export default function AdminCourseManagement() {
                     {/* Live Class Status */}
                     {course.schedule?.liveSessions?.length > 0 && (
                       <div className="mb-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                           <svg
                             className="w-3 h-3 mr-1"
                             fill="currentColor"
@@ -1293,13 +1293,13 @@ export default function AdminCourseManagement() {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleEdit(course)}
-                        className="flex-1 px-3 py-2 text-sm btn-outline-premium rounded-lg transition-colors"
+                        className="flex-1 px-3 py-2 text-md btn-outline-premium rounded-lg transition-colors"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleAddLinks(course)}
-                        className={`flex-1 px-3 py-2 text-sm rounded-lg transition-colors ${
+                        className={`flex-1 px-3 py-2 text-md rounded-lg transition-colors ${
                           course.schedule?.liveSessions?.length > 0
                             ? "bg-green-900/30 text-green-300 border border-green-600 hover:bg-green-900/50"
                             : "bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700"
@@ -1313,7 +1313,7 @@ export default function AdminCourseManagement() {
                         onClick={() =>
                           handleTogglePublish(course._id, course.isPublished)
                         }
-                        className={`flex-1 px-3 py-2 text-sm rounded-lg transition-colors ${
+                        className={`flex-1 px-3 py-2 text-md rounded-lg transition-colors ${
                           course.isPublished
                             ? "bg-yellow-900/30 text-yellow-300 border border-yellow-600 hover:bg-yellow-900/50"
                             : "bg-green-900/30 text-green-300 border border-green-600 hover:bg-green-900/50"
@@ -1323,7 +1323,7 @@ export default function AdminCourseManagement() {
                       </button>
                       <button
                         onClick={() => handleDelete(course._id)}
-                        className="px-3 py-2 text-sm bg-red-900/30 text-red-300 border border-red-600 rounded-lg hover:bg-red-900/50 transition-colors"
+                        className="px-3 py-2 text-md bg-red-900/30 text-red-300 border border-red-600 rounded-lg hover:bg-red-900/50 transition-colors"
                       >
                         Delete
                       </button>
@@ -1338,19 +1338,19 @@ export default function AdminCourseManagement() {
 
       {/* Meet Links Modal */}
       {showLinksModal && selectedCourse && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="card-premium max-w-4xl w-full h-[75vh] flex flex-col overflow-y-auto">
-            <div className="p-4 sm:p-6 flex-shrink-0">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+          <div className="card-premium max-w-5xl w-full h-[80vh] flex flex-col">
+            <div className="p-2 sm:p-3 flex-shrink-0">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-semibold text-white">
                   Manage Live Class Links
                 </h2>
                 <button
                   onClick={handleCloseLinksModal}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors p-0"
                 >
                   <svg
-                    className="w-6 h-6"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1364,19 +1364,18 @@ export default function AdminCourseManagement() {
                   </svg>
                 </button>
               </div>
-
-              <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-600">
-                <h3 className="font-semibold text-white">
+              <div className="mb-2 p-2 bg-gray-800/50 rounded-lg border border-gray-600">
+                <h3 className="font-medium text-white text-base">
                   {selectedCourse.title}
                 </h3>
-                <p className="text-sm text-gray-300">
+                <p className="text-md text-gray-300">
                   Configure live class meeting links for this course
                 </p>
               </div>
             </div>
 
             {/* Scrollable form area */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-6">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-6" style={{ maxHeight: 'calc(80vh - 90px)' }}>
               <form onSubmit={handleMeetLinkSubmit} className="space-y-4">
                 <div>
                   <label className="flex items-center mb-4">
@@ -1387,7 +1386,7 @@ export default function AdminCourseManagement() {
                       onChange={handleMeetLinkChange}
                       className="w-4 h-4 text-blue-500 border-gray-400 rounded focus:ring-blue-500"
                     />
-                    <span className="ml-2 text-sm text-white">
+                    <span className="ml-2 text-md text-white">
                       Enable Live Class (Show in Live Classes section)
                     </span>
                   </label>
@@ -1395,7 +1394,7 @@ export default function AdminCourseManagement() {
 
                 {meetLinkData.isLiveClass && (
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-md font-semibold text-white mb-2">
                       Meeting Link *
                     </label>
                     <input
@@ -1407,7 +1406,7 @@ export default function AdminCourseManagement() {
                       className="input-premium"
                       required={meetLinkData.isLiveClass}
                     />
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="mt-1 text-sm text-gray-400">
                       Enter the Google Meet, Zoom, or other meeting platform
                       link for this live class.
                     </p>
@@ -1416,7 +1415,7 @@ export default function AdminCourseManagement() {
                     {meetLinkData.meetLink &&
                       meetLinkData.meetLink.trim() !== "" && (
                         <div className="mt-3">
-                          <p className="text-sm text-gray-300 mb-2">
+                          <p className="text-md text-gray-300 mb-2">
                             Meeting Link Preview:
                           </p>
                           <div className="w-full h-20 border border-gray-600 rounded-lg overflow-hidden bg-gradient-to-br from-green-900/20 to-emerald-900/20">
@@ -1439,12 +1438,12 @@ export default function AdminCourseManagement() {
                                   d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"
                                 />
                               </svg>
-                              <p className="text-xs text-center">
+                              <p className="text-sm text-center">
                                 Click to test meeting link
                               </p>
                             </a>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1 truncate">
+                          <p className="text-sm text-gray-500 mt-1 truncate">
                             {meetLinkData.meetLink}
                           </p>
                         </div>
@@ -1452,7 +1451,7 @@ export default function AdminCourseManagement() {
 
                     {/* New: Recurring days + time */}
                     <div className="mt-4">
-                      <label className="block text-sm font-semibold text-white mb-2">
+                      <label className="block text-md font-semibold text-white mb-2">
                         Live Session Days & Time
                       </label>
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
@@ -1463,7 +1462,7 @@ export default function AdminCourseManagement() {
                             return (
                               <label
                                 key={d}
-                                className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded border cursor-pointer transition-all duration-200 ${
+                                className={`inline-flex items-center gap-1 text-sm px-2 py-1 rounded border cursor-pointer transition-all duration-200 ${
                                   isSelected
                                     ? "bg-blue-600/80 border-blue-500 text-white shadow-md"
                                     : "bg-gray-800/60 border-gray-700 text-gray-200 hover:bg-gray-700/60 hover:border-gray-600"
@@ -1493,7 +1492,7 @@ export default function AdminCourseManagement() {
                           step="300"
                           placeholder="HH:MM"
                         />
-                        <p className="mt-1 text-xs text-gray-400">
+                        <p className="mt-1 text-sm text-gray-400">
                           Pick start time for selected days. We will
                           auto-generate sessions for the next 8 weeks.
                         </p>
@@ -1503,10 +1502,10 @@ export default function AdminCourseManagement() {
                       {meetLinkData.sessionDays?.length > 0 &&
                         meetLinkData.sessionTime && (
                           <div className="mt-3 p-3 bg-blue-900/20 border border-blue-800/50 rounded-lg">
-                            <p className="text-xs text-blue-300 mb-1">
+                            <p className="text-sm text-blue-300 mb-1">
                               ✨ Sessions will be generated for:
                             </p>
-                            <p className="text-xs text-blue-200">
+                            <p className="text-sm text-blue-200">
                               <strong>
                                 {meetLinkData.sessionDays.join(", ")}
                               </strong>{" "}
@@ -1518,14 +1517,14 @@ export default function AdminCourseManagement() {
                                 </span>
                               )}
                             </p>
-                            <p className="text-xs text-blue-400 mt-1">
+                            <p className="text-sm text-blue-400 mt-1">
                               🔄 Settings will persist across page reloads
                             </p>
                           </div>
                         )}
 
                       {/* Debug Info - Remove this after testing */}
-                      <div className="mt-3 p-2 bg-gray-800/50 border border-gray-600 rounded text-xs">
+                      <div className="mt-3 p-2 bg-gray-800/50 border border-gray-600 rounded text-sm">
                         <p className="text-yellow-400 mb-1">Debug Info:</p>
                         <p className="text-gray-300">
                           Session Time: "{meetLinkData.sessionTime}"
@@ -1548,7 +1547,7 @@ export default function AdminCourseManagement() {
 
                     {/* Live Session Duration */}
                     <div className="mt-4">
-                      <label className="block text-sm font-semibold text-white mb-2">
+                      <label className="block text-md font-semibold text-white mb-2">
                         Duration (minutes)
                       </label>
                       <input
@@ -1684,18 +1683,18 @@ export default function AdminCourseManagement() {
                         <h3 className="font-semibold text-white">
                           {course.title}
                         </h3>
-                        <p className="text-sm text-gray-300">
+                        <p className="text-md text-gray-300">
                           {course.description?.substring(0, 100)}...
                         </p>
                         <div className="flex items-center gap-4 mt-2">
-                          <span className="text-xs text-gray-400">
+                          <span className="text-sm text-gray-400">
                             Level: {course.level}
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-sm text-gray-400">
                             Duration: {course.duration} min
                           </span>
                           <span
-                            className={`text-xs px-2 py-1 rounded-full ${
+                            className={`text-sm px-2 py-1 rounded-full ${
                               course.isPublished
                                 ? "bg-green-100 text-green-800"
                                 : "bg-yellow-100 text-yellow-800"
@@ -1707,11 +1706,11 @@ export default function AdminCourseManagement() {
                       </div>
                       <div className="flex items-center gap-2">
                         {course.schedule?.liveSessions?.length > 0 ? (
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
                             Live Enabled
                           </span>
                         ) : (
-                          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
+                          <span className="text-sm bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
                             No Live Links
                           </span>
                         )}
