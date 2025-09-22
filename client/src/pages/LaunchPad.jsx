@@ -1,6 +1,7 @@
 // src/pages/LaunchPad.jsx
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 import { CheckCircle2, Rocket, Award, Users, Clock, Star, Play, Download, Share2, Target, Brain, Zap } from "lucide-react";
 import pic6 from "../assets/pic6.png";
 import Aipic from "../assets/Ai-pic.jpg";
@@ -14,6 +15,8 @@ const LaunchPad = () => {
   const [launchPadCourses, setLaunchPadCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Fetch LaunchPad courses from backend
   useEffect(() => {
@@ -101,6 +104,11 @@ const LaunchPad = () => {
     },
   ];
 
+  const requestLoginThenNavigate = (to, state) => {
+    const onSuccess = () => navigate(to, { state });
+    window.dispatchEvent(new CustomEvent('openLogin', { detail: { onSuccess } }));
+  };
+
   return (
     <div>
       {/* Premium Hero Section */}
@@ -133,6 +141,11 @@ const LaunchPad = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
                 to="/launchpad/details"
+                onClick={(e) => {
+                  if (user) return;
+                  e.preventDefault();
+                  requestLoginThenNavigate('/launchpad/details');
+                }}
                 className="btn-premium px-8 py-4 text-lg font-semibold"
               >
                 <span className="mr-2">🚀</span>
@@ -214,6 +227,11 @@ const LaunchPad = () => {
                 key={idx}
                 to="/launchpad/details"
                 state={{ bg: item.bg, title: item.phase, desc: item.detail }}
+                onClick={(e) => {
+                  if (user) return;
+                  e.preventDefault();
+                  requestLoginThenNavigate('/launchpad/details', { bg: item.bg, title: item.phase, desc: item.detail });
+                }}
                 className="group"
               >
                 <div className="card-premium overflow-hidden group-hover:scale-105 transition-all duration-300">
@@ -279,6 +297,16 @@ const LaunchPad = () => {
                       bg: course.thumbnail || Aipic,
                       title: course.title,
                       desc: course.shortDescription || course.description
+                    }}
+                    onClick={(e) => {
+                      if (user) return;
+                      e.preventDefault();
+                      requestLoginThenNavigate('/launchpad/details', { 
+                        course: course,
+                        bg: course.thumbnail || Aipic,
+                        title: course.title,
+                        desc: course.shortDescription || course.description
+                      });
                     }}
                     className="group"
                   >

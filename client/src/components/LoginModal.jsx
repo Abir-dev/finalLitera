@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { toast } from "react-hot-toast";
 
-export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
+export default function LoginModal({ isOpen, onClose, onSwitchToSignup, onSuccess }) {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -27,8 +27,12 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
       await login(formData.email, formData.password);
       toast.success("Logged in successfully!");
       onClose();
-      // Redirect to dashboard after successful login
-      navigate("/dashboard/subscription");
+      // Allow parent to control post-login navigation; fallback to dashboard
+      if (typeof onSuccess === "function") {
+        onSuccess();
+      } else {
+        navigate("/dashboard/subscription");
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     } finally {

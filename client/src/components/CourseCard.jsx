@@ -1,5 +1,6 @@
 // src/components/CourseCard.jsx
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 import { Play, Clock, Star, Users, Award } from "lucide-react";
 
 export default function CourseCard({
@@ -15,6 +16,16 @@ export default function CourseCard({
   students = 1250,
   instructor = "Expert Instructor",
 }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleViewCourse = (e) => {
+    if (user) return; // allow default link navigation
+    e.preventDefault();
+    // Ask for login via global event; after success, continue to target
+    const onSuccess = () => navigate(`/courses/${id}`);
+    window.dispatchEvent(new CustomEvent('openLogin', { detail: { onSuccess } }));
+  };
   return (
     <div className="card-premium course-card group hover-lift overflow-hidden relative">
       {/* Premium Image Section */}
@@ -150,7 +161,7 @@ export default function CourseCard({
               </div>
             )}
 
-            <Link to={`/courses/${id}`} className="flex-1 ml-2 sm:ml-3">
+            <Link to={`/courses/${id}`} onClick={handleViewCourse} className="flex-1 ml-2 sm:ml-3">
               <button className="w-full btn-premium btn-sm text-xs py-2">
                 <span>View Course</span>
                 <span>→</span>
