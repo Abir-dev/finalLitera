@@ -22,7 +22,7 @@ import fullstackPic from "../assets/FullStack-pic.jpg";
 
 // Testimonial images (use placeholders for now, update when real images are added)
 import uditiImg from "../assets/uditijana.jpg";
-import placeholderImg from "../assets/Ai-pic.jpg";
+import keshavmishra from "../assets/keshavmishra.jpg";
 import artiImg from "../assets/arti.jpeg";
 
 export default function Home() {
@@ -533,7 +533,7 @@ export default function Home() {
               quote="Exceptional courses at competitive prices. The value for money is outstanding, and the platform is completely trustworthy."
               name="Keshav Mishra"
               role="Software Developer"
-              img={placeholderImg} // Replace with keshav.jpg when available
+              img={keshavmishra} // Replace with keshav.jpg when available
             />
             <TestimonialCard
               quote="I had an amazing experience during the consultation sessions. The mentors are incredibly knowledgeable and supportive."

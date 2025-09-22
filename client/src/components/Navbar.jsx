@@ -242,48 +242,51 @@ export default function Navbar() {
                       )}
                     </button>
                     {notifOpen && (
-                      <div className="absolute right-0 mt-110 w-72 md:w-80 card-premium z-5 glass-notification">
-                        <div className="p-3 border-b border-[color:var(--border)] flex items-center justify-between">
-                          <span className="text-sm font-semibold">
+                      <div className="absolute mt-2 left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 w-[min(92vw,22rem)] sm:w-80 md:w-96 bg-gray-900/95 backdrop-blur-md z-50 rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden">
+                        <div className="p-4 border-b border-gray-700/50 flex items-center justify-between">
+                          <span className="text-sm font-bold text-white">
                             Notifications
                           </span>
                           {unreadCount > 0 && (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
+                            <span className="text-xs px-2 py-1 rounded-full bg-blue-500 text-white font-medium">
                               {unreadCount} new
                             </span>
                           )}
                         </div>
                         <div className="max-h-80 overflow-y-auto">
                           {notifications.length === 0 ? (
-                            <div className="p-4 text-sm text-gray-400">
-                              No recent notifications
+                            <div className="p-6 text-center">
+                              <div className="text-gray-400 text-sm mb-2">🔔</div>
+                              <div className="text-sm text-gray-400">
+                                No recent notifications
+                              </div>
                             </div>
                           ) : (
                             notifications.map((n) => (
                               <div
                                 key={n.id}
-                                className="p-3 hover:bg-white/5 cursor-default border-b border-[color:var(--border)] last:border-b-0"
+                                className="p-4 hover:bg-gray-800/50 cursor-pointer border-b border-gray-700/30 last:border-b-0 transition-colors"
                               >
-                                <div className="text-sm font-medium truncate">
+                                <div className="text-sm font-semibold text-white mb-1">
                                   {n.title}
                                 </div>
-                                <div className="text-xs text-gray-400 truncate mt-0.5">
+                                <div className="text-xs text-gray-300 mb-2 leading-relaxed">
                                   {n.message}
                                 </div>
-                                <div className="text-[11px] text-gray-500 mt-1">
+                                <div className="text-[11px] text-gray-500">
                                   {n.time}
                                 </div>
                               </div>
                             ))
                           )}
                         </div>
-                        <div className="p-2">
+                        <div className="p-3 border-t border-gray-700/50">
                           <button
                             onClick={() => {
                               setNotifOpen(false);
                               navigate("/dashboard/notifications");
                             }}
-                            className="w-full text-center text-sm font-semibold btn-outline-premium rounded-full py-2"
+                            className="w-full text-center text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors py-2"
                           >
                             View all
                           </button>
