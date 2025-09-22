@@ -559,7 +559,7 @@ export const updateCourseMeetLinks = async (req, res) => {
       });
     }
 
-    const { meetLink, isLiveClass, sessionDate, sessionDuration } = req.body;
+    const { meetLink, isLiveClass, sessionDate, sessionDuration, sessionDays, sessionTime } = req.body;
 
     // Handle live class settings
     let liveSessions = course.schedule?.liveSessions || [];
@@ -572,31 +572,67 @@ export const updateCourseMeetLinks = async (req, res) => {
         });
       }
 
-      // Compute date and duration overrides if provided
+      // Compute date/time from either one-off date or recurring days+time
       const parsedDate = sessionDate ? new Date(sessionDate) : null;
       const parsedDuration = sessionDuration
         ? Number(sessionDuration)
         : (course.duration || 60);
 
-      // Update or create live session (single primary session supported)
-      if (liveSessions.length > 0) {
-        liveSessions[0].meetingLink = meetLink;
-        liveSessions[0].title = course.title;
-        if (parsedDate && !isNaN(parsedDate.getTime())) {
-          liveSessions[0].date = parsedDate;
-        } else if (!liveSessions[0].date) {
-          liveSessions[0].date = new Date();
+      // Helper to map day {Mon..Sun} -> 0..6
+      const dayToIndex = {
+        Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+      };
+
+      if (Array.isArray(sessionDays) && sessionDays.length > 0 && sessionTime) {
+        // Generate upcoming sessions for selected weekdays for next 8 weeks
+        const [hh, mm] = String(sessionTime).split(":").map((n) => Number(n));
+        const now = new Date();
+        const weeksAhead = 8;
+        const generated = [];
+        for (let w = 0; w < weeksAhead; w++) {
+          sessionDays.forEach((d) => {
+            const targetDow = dayToIndex[d];
+            if (typeof targetDow !== "number") return;
+            const date = new Date(now);
+            // move to the start of week then add offset
+            const currentDow = date.getDay();
+            let diff = targetDow - currentDow + w * 7;
+            if (diff < 0) diff += 7;
+            date.setDate(date.getDate() + diff);
+            date.setHours(hh || 0, mm || 0, 0, 0);
+            if (date > now) {
+              generated.push({
+                title: course.title,
+                date,
+                duration: !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60),
+                meetingLink: meetLink,
+              });
+            }
+          });
         }
-        liveSessions[0].duration = !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60);
+        // Replace current schedule with generated recurring sessions
+        liveSessions = generated.sort((a, b) => a.date - b.date);
       } else {
-        liveSessions = [
-          {
-            title: course.title,
-            date: parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : new Date(),
-            duration: !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60),
-            meetingLink: meetLink,
-          },
-        ];
+        // Fallback: single explicit date or immediate
+        if (liveSessions.length > 0) {
+          liveSessions[0].meetingLink = meetLink;
+          liveSessions[0].title = course.title;
+          if (parsedDate && !isNaN(parsedDate.getTime())) {
+            liveSessions[0].date = parsedDate;
+          } else if (!liveSessions[0].date) {
+            liveSessions[0].date = new Date();
+          }
+          liveSessions[0].duration = !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60);
+        } else {
+          liveSessions = [
+            {
+              title: course.title,
+              date: parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : new Date(),
+              duration: !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60),
+              meetingLink: meetLink,
+            },
+          ];
+        }
       }
     } else if (isLiveClass === false || isLiveClass === "false") {
       // Disable live class

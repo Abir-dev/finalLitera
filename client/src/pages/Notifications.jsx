@@ -197,7 +197,7 @@ function NotificationPreference({
   icon,
 }) {
   return (
-    <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+    <div className="bg-navyblue border-2 border-gray-100 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4 flex-1">
           <div

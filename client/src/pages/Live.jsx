@@ -1,7 +1,9 @@
 // src/pages/LiveClasses.jsx
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import profileService from "../services/profileService.js";
+import { io } from "socket.io-client";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const styles = {
   brandBlue: "#18457A",
@@ -125,10 +127,9 @@ export default function LiveClasses() {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { user } = useAuth();
 
-  // Fetch enrolled courses and filter live classes
-  useEffect(() => {
-    const fetchEnrolledLiveClasses = async () => {
+  const fetchEnrolledLiveClasses = useCallback(async () => {
       try {
         setLoading(true);
         setError("");
@@ -189,7 +190,7 @@ export default function LiveClasses() {
           return;
         }
 
-        // Transform courses to include ONLY sessions that are currently live
+        // Transform into live and upcoming sessions
         const transformedCourses = coursesToShow.flatMap(course => {
           const sessions = Array.isArray(course.schedule?.liveSessions) ? course.schedule.liveSessions : [];
           const now = new Date();
@@ -202,23 +203,42 @@ export default function LiveClasses() {
             return now >= sessionStart && now <= sessionEnd;
           });
 
-          if (!currentSession) return [];
+          const items = [];
+          if (currentSession) {
+            items.push({
+              id: course._id,
+              title: course.title,
+              instructor: course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : 'Instructor',
+              viewers: Math.floor(Math.random() * 5000) + 100,
+              thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
+              meetLink: currentSession.meetingLink || "",
+              isLive: true,
+              startTime: new Date(currentSession.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+              duration: `${currentSession.duration || course.duration || 60} minutes`
+            });
+          }
 
-          return [{
-            id: course._id,
-            title: course.title,
-            instructor: course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : 'Instructor',
-            viewers: Math.floor(Math.random() * 5000) + 100,
-            thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
-            meetLink: currentSession.meetingLink || "",
-            isLive: true,
-            startTime: new Date(currentSession.date).toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true
-            }),
-            duration: `${currentSession.duration || course.duration || 60} minutes`
-          }];
+          // Upcoming sessions (future ones)
+          const upcoming = sessions
+            .filter(s => s?.date && new Date(s.date) > now)
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .slice(0, 3);
+
+          upcoming.forEach((s) => {
+            items.push({
+              id: course._id,
+              title: course.title,
+              instructor: course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : 'Instructor',
+              viewers: 0,
+              thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
+              meetLink: s.meetingLink || "",
+              isLive: false,
+              startTime: new Date(s.date).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }),
+              duration: `${s.duration || course.duration || 60} minutes`
+            });
+          });
+
+          return items;
         });
 
         setCourses(transformedCourses);
@@ -230,12 +250,75 @@ export default function LiveClasses() {
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchEnrolledLiveClasses();
   }, []);
 
+  // Initial load and auto-refresh hooks
+  useEffect(() => {
+    fetchEnrolledLiveClasses();
+
+    // Periodic refresh every 60s
+    const interval = setInterval(() => {
+      fetchEnrolledLiveClasses();
+    }, 60000);
+
+    // Refresh when tab becomes visible
+    const onVisibility = () => {
+      if (!document.hidden) fetchEnrolledLiveClasses();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [fetchEnrolledLiveClasses]);
+
+  // Socket listener for immediate updates from admin changes
+  useEffect(() => {
+    if (!user?.id && !user?._id) return;
+    const apiEnv = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
+    const normalizedApi = apiEnv.endsWith('/api') ? apiEnv : `${apiEnv.replace(/\/$/, '')}/api`;
+    const backendURL = normalizedApi.replace(/\/api$/, '');
+
+    let socket;
+    try {
+      socket = io(backendURL, {
+        withCredentials: true,
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        reconnectionAttempts: 3,
+        reconnectionDelay: 2000,
+        timeout: 10000,
+        forceNew: true,
+      });
+
+      socket.on('connect', () => {
+        const uid = user.id || user._id;
+        if (uid) socket.emit('register_user', uid);
+      });
+
+      socket.on('new_notification', (payload) => {
+        if (!payload) return;
+        if (payload.type === 'live_class_scheduled' || payload.type === 'course_updated' || payload.type === 'live_class_updated') {
+          fetchEnrolledLiveClasses();
+        }
+      });
+    } catch (e) {
+      console.warn('Live socket init failed:', e.message);
+    }
+
+    return () => {
+      try {
+        if (socket) {
+          socket.removeAllListeners();
+          socket.disconnect();
+        }
+      } catch {}
+    };
+  }, [user?.id, user?._id, fetchEnrolledLiveClasses]);
+
   const liveClasses = courses.filter(item => item.isLive);
+  const upcomingClasses = courses.filter(item => !item.isLive);
 
   return (
     <>
@@ -319,7 +402,20 @@ export default function LiveClasses() {
           </div>
         )}
 
-        {/* Upcoming Classes section removed as per requirements */}
+        {/* Upcoming Classes */}
+        {upcomingClasses.length > 0 && (
+          <div className="mt-10">
+            <div className="flex items-center gap-2 mb-3">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-slate-700" fill="currentColor" aria-hidden="true"><path d="M7 10h5v5H7z"/><path d="M3 4a2 2 0 012-2h1V0h2v2h6V0h2v2h1a2 2 0 012 2v16a2 2 0 01-2 2H5a2 2 0 01-2-2V4zm2 4h14V4H5v4zm14 2H5v10h14V10z"/></svg>
+              <h2 className="text-lg font-semibold text-slate-900">Upcoming</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingClasses.map((item, idx) => (
+                <LiveClassCard key={`${item.id}-${idx}`} {...item} />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* AI Features List */}

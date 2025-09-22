@@ -46,7 +46,9 @@ export default function AdminCourseManagement() {
   const [meetLinkData, setMeetLinkData] = useState({
     meetLink: "",
     isLiveClass: false,
-    sessionDate: "",
+    // New fields for recurring scheduling
+    sessionDays: [], // e.g., ['Mon','Wed']
+    sessionTime: "", // e.g., '15:30'
     sessionDuration: "",
   });
   const [linksSubmitting, setLinksSubmitting] = useState(false);
@@ -300,15 +302,15 @@ export default function AdminCourseManagement() {
   // Handle Add Links button click
   const handleAddLinks = (course) => {
     setSelectedCourse(course);
+    // Pre-fill with first session if exists
+    const first = course.schedule?.liveSessions?.[0];
+    const prefillTime = first ? new Date(first.date) : null;
     setMeetLinkData({
-      meetLink: course.schedule?.liveSessions?.[0]?.meetingLink || "",
+      meetLink: first?.meetingLink || "",
       isLiveClass: course.schedule?.liveSessions?.length > 0 || false,
-      sessionDate: course.schedule?.liveSessions?.[0]?.date
-        ? new Date(course.schedule.liveSessions[0].date)
-            .toISOString()
-            .slice(0, 16)
-        : "",
-      sessionDuration: course.schedule?.liveSessions?.[0]?.duration || "",
+      sessionDays: [],
+      sessionTime: prefillTime ? `${String(prefillTime.getHours()).padStart(2,'0')}:${String(prefillTime.getMinutes()).padStart(2,'0')}` : "",
+      sessionDuration: first?.duration || "",
     });
     setShowLinksModal(true);
   };
@@ -316,6 +318,16 @@ export default function AdminCourseManagement() {
   // Handle meet link input changes
   const handleMeetLinkChange = (e) => {
     const { name, value, type, checked } = e.target;
+    // For day checkboxes, manage an array
+    if (name === "sessionDays") {
+      setMeetLinkData((prev) => {
+        const set = new Set(prev.sessionDays);
+        if (checked) set.add(value);
+        else set.delete(value);
+        return { ...prev, sessionDays: Array.from(set) };
+      });
+      return;
+    }
     setMeetLinkData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -329,11 +341,11 @@ export default function AdminCourseManagement() {
 
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await axios.put(
-        `${backendURL}/admin/courses/${selectedCourse._id}/meet-links`,
-        meetLinkData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const response = await axios.put(
+      `${backendURL}/admin/courses/${selectedCourse._id}/meet-links`,
+      meetLinkData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
       toast.success("Meet links updated successfully!");
       setShowLinksModal(false);
@@ -355,7 +367,8 @@ export default function AdminCourseManagement() {
     setMeetLinkData({
       meetLink: "",
       isLiveClass: false,
-      sessionDate: "",
+      sessionDays: [],
+      sessionTime: "",
       sessionDuration: "",
     });
   };
@@ -1192,8 +1205,8 @@ export default function AdminCourseManagement() {
       {/* Meet Links Modal */}
       {showLinksModal && selectedCourse && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card-premium max-w-md w-full max-h-[90vh] flex flex-col">
-            <div className="p-6 flex-shrink-0">
+          <div className="card-premium max-w-4xl w-full h-[10vh] flex flex-col overflow-y-auto">
+            <div className="p-4 sm:p-6 flex-shrink-0">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">
                   Manage Live Class Links
@@ -1228,7 +1241,8 @@ export default function AdminCourseManagement() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6">
+            {/* Scrollable form area */}
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-6">
               <form onSubmit={handleMeetLinkSubmit} className="space-y-4">
                 <div>
                   <label className="flex items-center mb-4">
@@ -1265,81 +1279,51 @@ export default function AdminCourseManagement() {
                     </p>
 
                     {/* Meet Link Preview */}
-                    {meetLinkData.meetLink &&
-                      meetLinkData.meetLink.trim() !== "" && (
-                        <div className="mt-3">
-                          <p className="text-sm text-gray-300 mb-2">
-                            Meeting Link Preview:
-                          </p>
-                          <div className="w-full h-20 border border-gray-600 rounded-lg overflow-hidden bg-gradient-to-br from-green-900/20 to-emerald-900/20">
-                            <a
-                              href={meetLinkData.meetLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full h-full flex flex-col items-center justify-center text-green-600 hover:bg-green-100 transition-colors duration-300 cursor-pointer"
-                            >
-                              <svg
-                                className="w-6 h-6 mb-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"
-                                />
-                              </svg>
-                              <p className="text-xs text-center">
-                                Click to test meeting link
-                              </p>
-                            </a>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1 truncate">
-                            {meetLinkData.meetLink}
-                          </p>
+                    {meetLinkData.meetLink && meetLinkData.meetLink.trim() !== "" && (
+                      <div className="mt-3">
+                        <p className="text-sm text-gray-300 mb-2">Meeting Link Preview:</p>
+                        <div className="w-full h-20 border border-gray-600 rounded-lg overflow-hidden bg-gradient-to-br from-green-900/20 to-emerald-900/20">
+                          <a
+                            href={meetLinkData.meetLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full h-full flex flex-col items-center justify-center text-green-600 hover:bg-green-100 transition-colors duration-300 cursor-pointer"
+                          >
+                            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"/></svg>
+                            <p className="text-xs text-center">Click to test meeting link</p>
+                          </a>
                         </div>
-                      )}
+                        <p className="text-xs text-gray-500 mt-1 truncate">{meetLinkData.meetLink}</p>
+                      </div>
+                    )}
 
-                    {/* Live Session Date/Time */}
+                    {/* New: Recurring days + time */}
                     <div className="mt-4">
-                      <label className="block text-sm font-semibold text-white mb-2">
-                        Live Session Date & Time
-                      </label>
-                      <input
-                        type="datetime-local"
-                        name="sessionDate"
-                        value={meetLinkData.sessionDate}
-                        onChange={handleMeetLinkChange}
-                        className="input-premium"
-                      />
-                      <p className="mt-1 text-xs text-gray-400">
-                        Set when this course should go live.
-                      </p>
+                      <label className="block text-sm font-semibold text-white mb-2">Live Session Days & Time</label>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                        {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d) => (
+                          <label key={d} className="inline-flex items-center gap-1 text-xs bg-gray-800/60 px-2 py-1 rounded border border-gray-700 cursor-pointer">
+                            <input type="checkbox" name="sessionDays" value={d} checked={meetLinkData.sessionDays.includes(d)} onChange={handleMeetLinkChange} />
+                            <span className="text-gray-200">{d}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="mt-3 max-w-xs">
+                        <input type="time" name="sessionTime" value={meetLinkData.sessionTime} onChange={handleMeetLinkChange} className="input-premium" />
+                        <p className="mt-1 text-xs text-gray-400">Pick start time for selected days. We will auto-generate sessions.</p>
+                      </div>
                     </div>
 
                     {/* Live Session Duration */}
                     <div className="mt-4">
-                      <label className="block text-sm font-semibold text-white mb-2">
-                        Duration (minutes)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        name="sessionDuration"
-                        value={meetLinkData.sessionDuration}
-                        onChange={handleMeetLinkChange}
-                        placeholder="60"
-                        className="input-premium"
-                      />
+                      <label className="block text-sm font-semibold text-white mb-2">Duration (minutes)</label>
+                      <input type="number" min="1" step="1" name="sessionDuration" value={meetLinkData.sessionDuration} onChange={handleMeetLinkChange} placeholder="60" className="input-premium" />
                     </div>
                   </div>
                 )}
 
                 {/* Submit Buttons */}
-                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-600">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 sm:space-x-4 pt-6 border-t border-gray-600">
                   <button
                     type="button"
                     onClick={handleCloseLinksModal}
