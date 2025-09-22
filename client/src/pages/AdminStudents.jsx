@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import StudentProgressReport from "../components/StudentProgressReport.jsx";
 import EditStudentModal from "../components/EditStudentModal.jsx";
 import CourseAssignmentModal from "../components/CourseAssignmentModal.jsx";
+import StudentViewModal from "../components/StudentViewModal.jsx";
 import {
   Users,
   UserCheck,
@@ -34,6 +35,8 @@ export default function AdminStudents() {
   const [showCourseAssignment, setShowCourseAssignment] = useState(false);
   const [assignmentStudent, setAssignmentStudent] = useState(null);
   const [expandedStudent, setExpandedStudent] = useState(null);
+  const [showStudentView, setShowStudentView] = useState(false);
+  const [viewingStudent, setViewingStudent] = useState(null);
 
   // Add Student Form State
   const [newStudent, setNewStudent] = useState({
@@ -52,14 +55,20 @@ export default function AdminStudents() {
         [u.firstName, u.lastName].filter(Boolean).join(" ") ||
         u.name ||
         "Unknown";
-      const firstEnrollment =
-        (u.enrolledCourses && u.enrolledCourses[0]) || null;
+
       return {
         id: u._id,
         name: fullName,
         email: u.email,
         phone: u.profile?.phone || "",
-        course: firstEnrollment?.course?.title || "-",
+        enrolledCourses: u.enrolledCourses || [],
+        courseCount: (u.enrolledCourses && u.enrolledCourses.length) || 0,
+        course:
+          u.enrolledCourses && u.enrolledCourses.length > 0
+            ? `${u.enrolledCourses.length} course${
+                u.enrolledCourses.length > 1 ? "s" : ""
+              }`
+            : "-",
         status: u.isActive ? "active" : "inactive",
         joinDate: u.createdAt,
         progress: 0,
@@ -331,20 +340,46 @@ export default function AdminStudents() {
   const handleCourseAssigned = (assignmentData) => {
     // Update the student's course information in the local state
     setStudents((prevStudents) =>
-      prevStudents.map((student) =>
-        student.id === assignmentData.student.id
-          ? {
+      prevStudents.map((student) => {
+        if (student.id === assignmentData.student.id) {
+          if (assignmentData.removed) {
+            // Course was removed
+            const newCount = Math.max(0, student.courseCount - 1);
+            return {
               ...student,
-              course: assignmentData.course.title,
-              // You could also update other fields if needed
-            }
-          : student
-      )
+              courseCount: newCount,
+              course:
+                newCount > 0
+                  ? `${newCount} course${newCount > 1 ? "s" : ""}`
+                  : "-",
+            };
+          } else {
+            // Course was added
+            const newCount = student.courseCount + 1;
+            return {
+              ...student,
+              courseCount: newCount,
+              course: `${newCount} course${newCount > 1 ? "s" : ""}`,
+            };
+          }
+        }
+        return student;
+      })
     );
   };
 
   const handleStudentClick = (student) => {
     setExpandedStudent(expandedStudent?.id === student.id ? null : student);
+  };
+
+  const handleViewStudent = (student) => {
+    setViewingStudent(student);
+    setShowStudentView(true);
+  };
+
+  const handleCloseStudentView = () => {
+    setShowStudentView(false);
+    setViewingStudent(null);
   };
 
   const getStatusBadge = (status) => {
@@ -762,22 +797,22 @@ export default function AdminStudents() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleViewProgressReport(student);
+                                  handleViewStudent(student);
                                 }}
                                 className="btn-premium px-3 py-2 flex items-center gap-2 justify-center text-xs"
                               >
-                                <BarChart3 size={14} />
-                                Progress
+                                <Eye size={14} />
+                                View Details
                               </button>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleAssignCourse(student);
+                                  handleViewProgressReport(student);
                                 }}
                                 className="btn-outline-premium px-3 py-2 flex items-center gap-2 justify-center text-xs"
                               >
-                                <BookOpen size={14} />
-                                Assign
+                                <BarChart3 size={14} />
+                                Progress
                               </button>
                               <button
                                 onClick={(e) => {
@@ -1153,6 +1188,14 @@ export default function AdminStudents() {
         student={assignmentStudent}
         isOpen={showCourseAssignment}
         onClose={handleCloseCourseAssignment}
+        onCourseAssigned={handleCourseAssigned}
+      />
+
+      {/* Student View Modal */}
+      <StudentViewModal
+        student={viewingStudent}
+        isOpen={showStudentView}
+        onClose={handleCloseStudentView}
         onCourseAssigned={handleCourseAssigned}
       />
     </div>

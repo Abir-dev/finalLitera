@@ -108,7 +108,7 @@ export default function Faq() {
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent" style={{ background: 'radial-gradient(1000px 600px at 30% 20%, rgba(79,140,255,0.15), transparent 60%)' }}></div>
         <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
           <div className="reveal">
-            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white mt-6">
               Frequently Asked
               <span style={{ color: 'var(--brand)' }}> Questions</span>
             </h1>
@@ -225,7 +225,7 @@ export default function Faq() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 md:py-20">
+      {/* <section className="py-16 md:py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="card-premium p-12 md:p-16 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent" style={{ background: 'radial-gradient(800px 400px at 50% 50%, rgba(79,140,255,0.1), transparent 60%)' }}></div>
@@ -253,7 +253,7 @@ export default function Faq() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
