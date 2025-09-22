@@ -52,6 +52,16 @@ export const getAllCourses = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+    // Debug: Log recurringConfig for courses that have it
+    courses.forEach((course) => {
+      if (course.schedule?.recurringConfig?.isActive) {
+        console.log(
+          `[Backend Fetch] Course "${course.title}" recurringConfig:`,
+          course.schedule.recurringConfig
+        );
+      }
+    });
+
     const total = await Course.countDocuments(filter);
 
     res.status(200).json({
@@ -261,23 +271,25 @@ export const createCourse = async (req, res) => {
     // Send automatic notification to users if course is published
     if (course.isPublished) {
       try {
-        const instructorName = course.instructor ? 
-          `${course.instructor.firstName} ${course.instructor.lastName}` : 
-          'Admin';
-        
+        const instructorName = course.instructor
+          ? `${course.instructor.firstName} ${course.instructor.lastName}`
+          : "Admin";
+
         // Get socket.io instance if available
-        const io = req.app.get('io');
-        
+        const io = req.app.get("io");
+
         await sendNewCourseNotification(
-          course._id, 
-          course.title, 
+          course._id,
+          course.title,
           instructorName,
           io
         );
-        
-        console.log(`Sent automatic notifications for new course: ${course.title}`);
+
+        console.log(
+          `Sent automatic notifications for new course: ${course.title}`
+        );
       } catch (notificationError) {
-        console.error('Error sending course notifications:', notificationError);
+        console.error("Error sending course notifications:", notificationError);
         // Don't fail the course creation if notifications fail
       }
     }
@@ -499,30 +511,35 @@ export const toggleCoursePublish = async (req, res) => {
     const wasPublished = course.isPublished;
     course.isPublished = !course.isPublished;
     await course.save();
-    
+
     // Populate instructor info for notifications
     await course.populate("instructor", "firstName lastName email avatar");
 
     // Send automatic notification to users when course is newly published
     if (!wasPublished && course.isPublished) {
       try {
-        const instructorName = course.instructor ? 
-          `${course.instructor.firstName} ${course.instructor.lastName}` : 
-          'Admin';
-        
+        const instructorName = course.instructor
+          ? `${course.instructor.firstName} ${course.instructor.lastName}`
+          : "Admin";
+
         // Get socket.io instance if available
-        const io = req.app.get('io');
-        
+        const io = req.app.get("io");
+
         await sendNewCourseNotification(
-          course._id, 
-          course.title, 
+          course._id,
+          course.title,
           instructorName,
           io
         );
-        
-        console.log(`Sent automatic notifications for newly published course: ${course.title}`);
+
+        console.log(
+          `Sent automatic notifications for newly published course: ${course.title}`
+        );
       } catch (notificationError) {
-        console.error('Error sending course publish notifications:', notificationError);
+        console.error(
+          "Error sending course publish notifications:",
+          notificationError
+        );
         // Don't fail the operation if notifications fail
       }
     }
@@ -559,7 +576,23 @@ export const updateCourseMeetLinks = async (req, res) => {
       });
     }
 
-    const { meetLink, isLiveClass, sessionDate, sessionDuration, sessionDays, sessionTime } = req.body;
+    const {
+      meetLink,
+      isLiveClass,
+      sessionDate,
+      sessionDuration,
+      sessionDays,
+      sessionTime,
+    } = req.body;
+
+    console.log(`[Backend] Received meetLink data:`, {
+      meetLink,
+      isLiveClass,
+      sessionDate,
+      sessionDuration,
+      sessionDays,
+      sessionTime,
+    });
 
     // Handle live class settings
     let liveSessions = course.schedule?.liveSessions || [];
@@ -576,16 +609,24 @@ export const updateCourseMeetLinks = async (req, res) => {
       const parsedDate = sessionDate ? new Date(sessionDate) : null;
       const parsedDuration = sessionDuration
         ? Number(sessionDuration)
-        : (course.duration || 60);
+        : course.duration || 60;
 
       // Helper to map day {Mon..Sun} -> 0..6
       const dayToIndex = {
-        Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+        Sun: 0,
+        Mon: 1,
+        Tue: 2,
+        Wed: 3,
+        Thu: 4,
+        Fri: 5,
+        Sat: 6,
       };
 
       if (Array.isArray(sessionDays) && sessionDays.length > 0 && sessionTime) {
         // Generate upcoming sessions for selected weekdays for next 8 weeks
-        const [hh, mm] = String(sessionTime).split(":").map((n) => Number(n));
+        const [hh, mm] = String(sessionTime)
+          .split(":")
+          .map((n) => Number(n));
         const now = new Date();
         const weeksAhead = 8;
         const generated = [];
@@ -604,7 +645,9 @@ export const updateCourseMeetLinks = async (req, res) => {
               generated.push({
                 title: course.title,
                 date,
-                duration: !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60),
+                duration: !isNaN(parsedDuration)
+                  ? parsedDuration
+                  : course.duration || 60,
                 meetingLink: meetLink,
               });
             }
@@ -622,13 +665,20 @@ export const updateCourseMeetLinks = async (req, res) => {
           } else if (!liveSessions[0].date) {
             liveSessions[0].date = new Date();
           }
-          liveSessions[0].duration = !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60);
+          liveSessions[0].duration = !isNaN(parsedDuration)
+            ? parsedDuration
+            : course.duration || 60;
         } else {
           liveSessions = [
             {
               title: course.title,
-              date: parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : new Date(),
-              duration: !isNaN(parsedDuration) ? parsedDuration : (course.duration || 60),
+              date:
+                parsedDate && !isNaN(parsedDate.getTime())
+                  ? parsedDate
+                  : new Date(),
+              duration: !isNaN(parsedDuration)
+                ? parsedDuration
+                : course.duration || 60,
               meetingLink: meetLink,
             },
           ];
@@ -639,66 +689,110 @@ export const updateCourseMeetLinks = async (req, res) => {
       liveSessions = [];
     }
 
-    // Update course with new live session data
+    // Prepare recurring config
+    let recurringConfig = {};
+    if (isLiveClass === true || isLiveClass === "true") {
+      recurringConfig = {
+        sessionDays: Array.isArray(sessionDays) ? sessionDays : [],
+        sessionTime: sessionTime || "",
+        sessionDuration: !isNaN(parsedDuration)
+          ? parsedDuration
+          : course.duration || 60,
+        meetingLink: meetLink,
+        isActive: true,
+      };
+      console.log(`[Backend] Created recurring config:`, recurringConfig);
+    } else {
+      recurringConfig = {
+        sessionDays: [],
+        sessionTime: "",
+        sessionDuration: 0,
+        meetingLink: "",
+        isActive: false,
+      };
+      console.log(`[Backend] Disabled recurring config:`, recurringConfig);
+    }
+
+    // Update course with new live session data and recurring config
     const updatedCourse = await Course.findByIdAndUpdate(
       req.params.id,
       {
-        schedule: {
-          isSelfPaced: !(isLiveClass === true || isLiveClass === "true"),
-          liveSessions: liveSessions,
+        $set: {
+          "schedule.isSelfPaced": !(
+            isLiveClass === true || isLiveClass === "true"
+          ),
+          "schedule.liveSessions": liveSessions,
+          "schedule.recurringConfig": recurringConfig,
         },
       },
       { new: true, runValidators: true }
     ).populate("instructor", "firstName lastName email avatar");
 
+    console.log(`[Backend] Updated course schedule:`, updatedCourse.schedule);
+    console.log(
+      `[Backend] Saved recurringConfig:`,
+      updatedCourse.schedule.recurringConfig
+    );
+
     // Create notifications for enrolled users when a live class is scheduled
-    if ((isLiveClass === true || isLiveClass === "true") && liveSessions.length > 0) {
+    if (
+      (isLiveClass === true || isLiveClass === "true") &&
+      liveSessions.length > 0
+    ) {
       const targetDate = liveSessions[0].date;
       const durationMin = liveSessions[0].duration;
 
       // Find users enrolled in this course (support both Enrollment model and User.enrolledCourses fallback)
       let userIds = [];
       try {
-        const enrollments = await Enrollment.find({ course: updatedCourse._id }, 'user').populate('user', '_id');
-        userIds = enrollments.map(e => e.user?._id).filter(Boolean);
+        const enrollments = await Enrollment.find(
+          { course: updatedCourse._id },
+          "user"
+        ).populate("user", "_id");
+        userIds = enrollments.map((e) => e.user?._id).filter(Boolean);
       } catch (e) {
         // Fallback to scanning User model embedded enrollments
-        const users = await User.find({ 'enrolledCourses.course': updatedCourse._id }, '_id');
-        userIds = users.map(u => u._id);
+        const users = await User.find(
+          { "enrolledCourses.course": updatedCourse._id },
+          "_id"
+        );
+        userIds = users.map((u) => u._id);
       }
 
       if (userIds.length > 0) {
-        const notifications = userIds.map(uid => ({
+        const notifications = userIds.map((uid) => ({
           user: uid,
-          type: 'live_class_scheduled',
+          type: "live_class_scheduled",
           title: `Live class scheduled: ${updatedCourse.title}`,
-          message: `A live class is scheduled on ${new Date(targetDate).toLocaleString()} for ${durationMin} minutes.`,
+          message: `A live class is scheduled on ${new Date(
+            targetDate
+          ).toLocaleString()} for ${durationMin} minutes.`,
           data: {
             courseId: updatedCourse._id,
             sessionDate: targetDate,
             sessionDuration: durationMin,
-            meetingLink: liveSessions[0].meetingLink
+            meetingLink: liveSessions[0].meetingLink,
           },
-          priority: 'high',
+          priority: "high",
           actionUrl: `/live`,
-          actionText: 'View Live Classes'
+          actionText: "View Live Classes",
         }));
 
         const created = await Notification.insertMany(notifications);
 
         // Emit over Socket.IO if available
-        const io = req.app.get && req.app.get('io');
+        const io = req.app.get && req.app.get("io");
         if (io) {
           // Immediate real-time update event
-          userIds.forEach(uid => {
-            io.to(`user_${uid}`).emit('live_class_updated', {
+          userIds.forEach((uid) => {
+            io.to(`user_${uid}`).emit("live_class_updated", {
               courseId: updatedCourse._id,
               sessions: liveSessions,
             });
           });
 
-          created.forEach(n => {
-            io.to(`user_${n.user}`).emit('new_notification', {
+          created.forEach((n) => {
+            io.to(`user_${n.user}`).emit("new_notification", {
               id: n._id,
               type: n.type,
               title: n.title,
@@ -707,7 +801,7 @@ export const updateCourseMeetLinks = async (req, res) => {
               priority: n.priority,
               actionUrl: n.actionUrl,
               actionText: n.actionText,
-              timestamp: n.createdAt
+              timestamp: n.createdAt,
             });
           });
         }

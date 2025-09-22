@@ -299,10 +299,63 @@ export default function AdminCourseManagement() {
     }
   };
 
+  // Helper function to detect recurring pattern from existing sessions
+  const detectRecurringPattern = (liveSessions) => {
+    if (!liveSessions || liveSessions.length < 2)
+      return { sessionDays: [], sessionTime: "" };
+
+    const sessionsByDay = {};
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    let commonTime = null;
+
+    liveSessions.forEach((session) => {
+      if (session.date) {
+        const date = new Date(session.date);
+        const dayName = dayNames[date.getDay()];
+        const timeString = `${String(date.getHours()).padStart(
+          2,
+          "0"
+        )}:${String(date.getMinutes()).padStart(2, "0")}`;
+
+        if (!sessionsByDay[dayName]) {
+          sessionsByDay[dayName] = 0;
+        }
+        sessionsByDay[dayName]++;
+
+        // Check if all sessions have the same time
+        if (commonTime === null) {
+          commonTime = timeString;
+        } else if (commonTime !== timeString) {
+          commonTime = false; // Mixed times
+        }
+      }
+    });
+
+    // Find days that appear multiple times (likely recurring)
+    const recurringDays = Object.keys(sessionsByDay).filter(
+      (day) => sessionsByDay[day] > 1
+    );
+
+    return {
+      sessionDays: recurringDays,
+      sessionTime: commonTime || "",
+    };
+  };
+
   // Handle Add Links button click
   const handleAddLinks = (course) => {
     setSelectedCourse(course);
-    // Pre-fill with first session if exists
+
+    console.log(`[Form Open] Opening form for course:`, course.title);
+    console.log(`[Form Open] Course schedule:`, course.schedule);
+    console.log(
+      `[Form Open] Recurring config:`,
+      course.schedule?.recurringConfig
+    );
+    console.log(`[Form Open] Live sessions:`, course.schedule?.liveSessions);
+
+    // Pre-fill with recurring config if exists, otherwise use first session
+    const recurringConfig = course.schedule?.recurringConfig;
     const first = course.schedule?.liveSessions?.[0];
     const prefillTime = first ? new Date(first.date) : null;
     // Infer recurring days from existing sessions if present (Mon..Sun)
@@ -335,26 +388,68 @@ export default function AdminCourseManagement() {
   // Handle meet link input changes
   const handleMeetLinkChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    console.log(`[Form Input] Field: ${name}, Value: ${value}, Type: ${type}`);
+
     // For day checkboxes, manage an array
     if (name === "sessionDays") {
       setMeetLinkData((prev) => {
-        const set = new Set(prev.sessionDays);
+        const set = new Set(prev.sessionDays || []);
         if (checked) set.add(value);
         else set.delete(value);
-        return { ...prev, sessionDays: Array.from(set) };
+        const newState = { ...prev, sessionDays: Array.from(set) };
+        console.log(`[Form Update] Session Days:`, newState.sessionDays);
+        return newState;
       });
       return;
     }
-    setMeetLinkData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+
+    setMeetLinkData((prev) => {
+      let processedValue = type === "checkbox" ? checked : value;
+
+      // Special handling for sessionTime to ensure proper format
+      if (name === "sessionTime" && value) {
+        console.log(`🕐 [TIME DEBUG] Original input value: "${value}"`);
+        console.log(`🕐 [TIME DEBUG] Value type: ${typeof value}`);
+        console.log(
+          `🕐 [TIME DEBUG] Current timezone: ${
+            Intl.DateTimeFormat().resolvedOptions().timeZone
+          }`
+        );
+
+        // Ensure the time is in HH:MM format
+        const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timeRegex.test(value)) {
+          console.warn(`[Form Warning] Invalid time format: ${value}`);
+          // Try to fix common issues
+          if (value.length === 5 && value.includes(":")) {
+            processedValue = value; // Keep as is if it looks like HH:MM
+          }
+        } else {
+          processedValue = value;
+          console.log(`🕐 [TIME DEBUG] Processed value: "${processedValue}"`);
+        }
+      }
+
+      const newState = {
+        ...prev,
+        [name]: processedValue,
+      };
+      console.log(`[Form Update] ${name}:`, newState[name]);
+      console.log(`[Form State] Full meetLinkData:`, newState);
+      return newState;
+    });
   };
 
   // Handle meet link submission
   const handleMeetLinkSubmit = async (e) => {
     e.preventDefault();
     setLinksSubmitting(true);
+
+    console.log(`🚀 [FORM SUBMIT] BUTTON CLICKED - Starting submission...`);
+    console.log(`[Form Submit] Submitting meetLinkData:`, meetLinkData);
+    console.log(`[Form Submit] Course ID:`, selectedCourse._id);
+    console.log(`[Form Submit] Backend URL:`, backendURL);
 
     try {
       // Basic validation for recurring sessions timing
@@ -384,11 +479,13 @@ export default function AdminCourseManagement() {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
+      console.log(`[Form Submit] Backend Response:`, response.data);
       toast.success("Meet links updated successfully!");
       setShowLinksModal(false);
       fetchCourses();
     } catch (error) {
       console.error("Error updating meet links:", error);
+      console.log(`[Form Submit] Error response:`, error.response?.data);
       toast.error(
         error.response?.data?.message || "Failed to update meet links"
       );
@@ -1316,45 +1413,154 @@ export default function AdminCourseManagement() {
                     </p>
 
                     {/* Meet Link Preview */}
-                    {meetLinkData.meetLink && meetLinkData.meetLink.trim() !== "" && (
-                      <div className="mt-3">
-                        <p className="text-sm text-gray-300 mb-2">Meeting Link Preview:</p>
-                        <div className="w-full h-20 border border-gray-600 rounded-lg overflow-hidden bg-gradient-to-br from-green-900/20 to-emerald-900/20">
-                          <a
-                            href={meetLinkData.meetLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full h-full flex flex-col items-center justify-center text-green-600 hover:bg-green-100 transition-colors duration-300 cursor-pointer"
-                          >
-                            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"/></svg>
-                            <p className="text-xs text-center">Click to test meeting link</p>
-                          </a>
+                    {meetLinkData.meetLink &&
+                      meetLinkData.meetLink.trim() !== "" && (
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-300 mb-2">
+                            Meeting Link Preview:
+                          </p>
+                          <div className="w-full h-20 border border-gray-600 rounded-lg overflow-hidden bg-gradient-to-br from-green-900/20 to-emerald-900/20">
+                            <a
+                              href={meetLinkData.meetLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full h-full flex flex-col items-center justify-center text-green-600 hover:bg-green-100 transition-colors duration-300 cursor-pointer"
+                            >
+                              <svg
+                                className="w-6 h-6 mb-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z"
+                                />
+                              </svg>
+                              <p className="text-xs text-center">
+                                Click to test meeting link
+                              </p>
+                            </a>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1 truncate">
+                            {meetLinkData.meetLink}
+                          </p>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1 truncate">{meetLinkData.meetLink}</p>
-                      </div>
-                    )}
+                      )}
 
                     {/* New: Recurring days + time */}
                     <div className="mt-4">
-                      <label className="block text-sm font-semibold text-white mb-2">Live Session Days & Time</label>
+                      <label className="block text-sm font-semibold text-white mb-2">
+                        Live Session Days & Time
+                      </label>
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
-                        {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d) => (
-                          <label key={d} className="inline-flex items-center gap-1 text-xs bg-gray-800/60 px-2 py-1 rounded border border-gray-700 cursor-pointer">
-                            <input type="checkbox" name="sessionDays" value={d} checked={meetLinkData.sessionDays.includes(d)} onChange={handleMeetLinkChange} />
-                            <span className="text-gray-200">{d}</span>
-                          </label>
-                        ))}
+                        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+                          (d) => {
+                            const isSelected =
+                              meetLinkData.sessionDays?.includes(d) || false;
+                            return (
+                              <label
+                                key={d}
+                                className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded border cursor-pointer transition-all duration-200 ${
+                                  isSelected
+                                    ? "bg-blue-600/80 border-blue-500 text-white shadow-md"
+                                    : "bg-gray-800/60 border-gray-700 text-gray-200 hover:bg-gray-700/60 hover:border-gray-600"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  name="sessionDays"
+                                  value={d}
+                                  checked={isSelected}
+                                  onChange={handleMeetLinkChange}
+                                  className="w-3 h-3 text-blue-500 border-gray-400 rounded focus:ring-blue-500"
+                                />
+                                <span>{d}</span>
+                              </label>
+                            );
+                          }
+                        )}
                       </div>
                       <div className="mt-3 max-w-xs">
-                        <input type="time" name="sessionTime" value={meetLinkData.sessionTime} onChange={handleMeetLinkChange} className="input-premium" />
-                        <p className="mt-1 text-xs text-gray-400">Pick start time for selected days. We will auto-generate sessions.</p>
+                        <input
+                          type="time"
+                          name="sessionTime"
+                          value={meetLinkData.sessionTime}
+                          onChange={handleMeetLinkChange}
+                          className="input-premium"
+                          step="300"
+                          placeholder="HH:MM"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">
+                          Pick start time for selected days. We will
+                          auto-generate sessions for the next 8 weeks.
+                        </p>
+                      </div>
+
+                      {/* Show preview of what will be generated */}
+                      {meetLinkData.sessionDays?.length > 0 &&
+                        meetLinkData.sessionTime && (
+                          <div className="mt-3 p-3 bg-blue-900/20 border border-blue-800/50 rounded-lg">
+                            <p className="text-xs text-blue-300 mb-1">
+                              ✨ Sessions will be generated for:
+                            </p>
+                            <p className="text-xs text-blue-200">
+                              <strong>
+                                {meetLinkData.sessionDays.join(", ")}
+                              </strong>{" "}
+                              at <strong>{meetLinkData.sessionTime}</strong>
+                              {meetLinkData.sessionDuration && (
+                                <span>
+                                  {" "}
+                                  ({meetLinkData.sessionDuration} minutes)
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-blue-400 mt-1">
+                              🔄 Settings will persist across page reloads
+                            </p>
+                          </div>
+                        )}
+
+                      {/* Debug Info - Remove this after testing */}
+                      <div className="mt-3 p-2 bg-gray-800/50 border border-gray-600 rounded text-xs">
+                        <p className="text-yellow-400 mb-1">Debug Info:</p>
+                        <p className="text-gray-300">
+                          Session Time: "{meetLinkData.sessionTime}"
+                        </p>
+                        <p className="text-gray-300">
+                          Session Days: [{meetLinkData.sessionDays.join(", ")}]
+                        </p>
+                        <p className="text-gray-300">
+                          Duration: "{meetLinkData.sessionDuration}"
+                        </p>
+                        <p className="text-gray-300">
+                          Meeting Link: "{meetLinkData.meetLink}"
+                        </p>
+                        <p className="text-gray-300">
+                          Is Live Class:{" "}
+                          {meetLinkData.isLiveClass ? "true" : "false"}
+                        </p>
                       </div>
                     </div>
 
                     {/* Live Session Duration */}
                     <div className="mt-4">
-                      <label className="block text-sm font-semibold text-white mb-2">Duration (minutes)</label>
-                      <input type="number" min="1" step="1" name="sessionDuration" value={meetLinkData.sessionDuration} onChange={handleMeetLinkChange} placeholder="60" className="input-premium" />
+                      <label className="block text-sm font-semibold text-white mb-2">
+                        Duration (minutes)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        name="sessionDuration"
+                        value={meetLinkData.sessionDuration}
+                        onChange={handleMeetLinkChange}
+                        placeholder="60"
+                        className="input-premium"
+                      />
                     </div>
                   </div>
                 )}
@@ -1420,12 +1626,55 @@ export default function AdminCourseManagement() {
                     className="border border-gray-600 rounded-lg p-4 hover:bg-gray-800/50 cursor-pointer transition-colors"
                     onClick={() => {
                       setSelectedCourse(course);
-                      setMeetLinkData({
-                        meetLink:
-                          course.schedule?.liveSessions?.[0]?.meetingLink || "",
-                        isLiveClass:
-                          course.schedule?.liveSessions?.length > 0 || false,
-                      });
+
+                      // Pre-fill with recurring config if exists, otherwise use first session
+                      const recurringConfig = course.schedule?.recurringConfig;
+                      const first = course.schedule?.liveSessions?.[0];
+                      const prefillTime = first ? new Date(first.date) : null;
+
+                      // Use recurring config if available and active, otherwise try to detect pattern
+                      if (recurringConfig?.isActive) {
+                        setMeetLinkData({
+                          meetLink: recurringConfig.meetingLink || "",
+                          isLiveClass: recurringConfig.isActive || false,
+                          sessionDays: recurringConfig.sessionDays || [],
+                          sessionTime: recurringConfig.sessionTime || "",
+                          sessionDuration:
+                            recurringConfig.sessionDuration || "",
+                        });
+                      } else {
+                        // Try to detect recurring pattern from existing sessions
+                        const detectedPattern = detectRecurringPattern(
+                          course.schedule?.liveSessions
+                        );
+
+                        setMeetLinkData({
+                          meetLink: first?.meetingLink || "",
+                          isLiveClass:
+                            course.schedule?.liveSessions?.length > 0 || false,
+                          sessionDays: detectedPattern.sessionDays,
+                          sessionTime:
+                            detectedPattern.sessionTime ||
+                            (prefillTime
+                              ? (() => {
+                                  const timeString = `${String(
+                                    prefillTime.getHours()
+                                  ).padStart(2, "0")}:${String(
+                                    prefillTime.getMinutes()
+                                  ).padStart(2, "0")}`;
+                                  console.log(
+                                    `🕐 [TIME DEBUG] Generated time from Date (modal): "${timeString}"`
+                                  );
+                                  console.log(
+                                    `🕐 [TIME DEBUG] Original Date object (modal):`,
+                                    prefillTime
+                                  );
+                                  return timeString;
+                                })()
+                              : ""),
+                          sessionDuration: first?.duration || "",
+                        });
+                      }
                       setShowCourseSelectionModal(false);
                       setShowLinksModal(true);
                     }}

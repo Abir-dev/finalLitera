@@ -17,7 +17,12 @@ function LiveBadge() {
       className="pointer-events-none select-none inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] leading-none animate-pulse"
       style={{ borderColor: styles.liveRed, color: styles.liveRed }}
     >
-      <svg viewBox="0 0 24 24" className="w-3 h-3" fill="currentColor" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        className="w-3 h-3"
+        fill="currentColor"
+        aria-hidden="true"
+      >
         <circle cx="12" cy="12" r="5" />
       </svg>
       LIVE
@@ -25,10 +30,21 @@ function LiveBadge() {
   );
 }
 
-function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive = true, startTime, duration }) {
+function LiveClassCard({
+  title,
+  instructor,
+  viewers,
+  meetLink,
+  thumbnail,
+  isLive = true,
+  startTime,
+  duration,
+  sessionDays = [],
+  sessionTime,
+}) {
   const handleJoinClass = () => {
     if (meetLink) {
-      window.open(meetLink, '_blank', 'noopener,noreferrer');
+      window.open(meetLink, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -50,7 +66,11 @@ function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive
             {/* Join Button Overlay */}
             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="bg-white bg-opacity-90 rounded-full p-4 hover:bg-opacity-100 transition-all hover:scale-110">
-                <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-8 h-8 text-gray-800"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z" />
                 </svg>
               </div>
@@ -70,7 +90,11 @@ function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive
             {isLive && (
               <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
                 <div className="flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                   </svg>
                   AI Powered
@@ -87,6 +111,27 @@ function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive
         </h3>
         <p className="text-xs text-slate-600 mt-1">By {instructor}</p>
 
+        {/* Recurring Schedule Info */}
+        {sessionDays.length > 0 && (
+          <div className="mt-2">
+            <div className="flex flex-wrap gap-1 mb-1">
+              {sessionDays.map((day) => (
+                <span
+                  key={day}
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                >
+                  {day}
+                </span>
+              ))}
+            </div>
+            {sessionTime && (
+              <p className="text-xs text-slate-500">
+                📅 Every {sessionDays.join(", ")} at {sessionTime} • {duration}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Live Status Info */}
         {isLive ? (
           <div className="mt-2 flex items-center gap-2 text-xs text-slate-600">
@@ -96,6 +141,8 @@ function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive
             </span>
             <span>•</span>
             <span>{viewers} viewers</span>
+            <span>•</span>
+            <span>{duration}</span>
           </div>
         ) : (
           <div className="mt-2 flex items-center gap-2 text-xs text-slate-600">
@@ -103,7 +150,7 @@ function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z" />
               </svg>
-              Starts at {startTime}
+              Next: {startTime}
             </span>
             <span>•</span>
             <span>{duration}</span>
@@ -115,7 +162,7 @@ function LiveClassCard({ title, instructor, viewers, meetLink, thumbnail, isLive
           onClick={handleJoinClass}
           className="mt-3 w-full bg-gradient-to-r from-red-600 to-orange-600 text-white text-xs font-medium py-2 px-4 rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300 transform hover:scale-105"
         >
-          {isLive ? 'Join Live Class' : 'Join Meeting'}
+          {isLive ? "Join Live Class" : "Join Meeting"}
         </button>
       </div>
     </div>
@@ -127,14 +174,20 @@ export default function LiveClasses() {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
 
-  const fetchEnrolledLiveClasses = useCallback(async () => {
+  const fetchEnrolledLiveClasses = useCallback(
+    async (isAutoRefresh = false) => {
       try {
-        setLoading(true);
+        if (isAutoRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
         setError("");
 
-        console.log('Fetching enrolled courses for live classes...');
+        console.log("Fetching enrolled courses for live classes...");
 
         // First, try to get user's enrolled courses
         let enrolledCourseIds = [];
@@ -142,42 +195,54 @@ export default function LiveClasses() {
           const enrolledResponse = await profileService.getEnrolledCourses();
           const enrolled = enrolledResponse.enrolledCourses || [];
 
-          console.log('Enrolled courses response:', enrolled);
-          console.log('Enrolled courses count:', enrolled.length);
+          console.log("Enrolled courses response:", enrolled);
+          console.log("Enrolled courses count:", enrolled.length);
 
           // Extract course IDs from enrolled courses
-          enrolledCourseIds = enrolled.map(enrollment => {
-            // Handle different data structures
-            if (enrollment.course && enrollment.course._id) {
-              return enrollment.course._id;
-            } else if (enrollment._id) {
-              return enrollment._id;
-            } else if (typeof enrollment === 'string') {
-              return enrollment;
-            }
-            return null;
-          }).filter(Boolean);
+          enrolledCourseIds = enrolled
+            .map((enrollment) => {
+              // Handle different data structures
+              if (enrollment.course && enrollment.course._id) {
+                return enrollment.course._id;
+              } else if (enrollment._id) {
+                return enrollment._id;
+              } else if (typeof enrollment === "string") {
+                return enrollment;
+              }
+              return null;
+            })
+            .filter(Boolean);
 
-          console.log('Enrolled course IDs:', enrolledCourseIds);
+          console.log("Enrolled course IDs:", enrolledCourseIds);
           setEnrolledCourses(enrolled);
         } catch (enrollmentError) {
-          console.log('Failed to fetch enrolled courses, falling back to all courses:', enrollmentError);
+          console.log(
+            "Failed to fetch enrolled courses, falling back to all courses:",
+            enrollmentError
+          );
           // If enrollment fetch fails, we'll show all courses but with a warning
         }
 
         // Now fetch all courses with live sessions
-        const API_BASE = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
-        const response = await axios.get(`${API_BASE}/courses?liveClasses=true`);
+        const API_BASE =
+          import.meta.env.VITE_API_URL ||
+          "https://finallitera.onrender.com/api";
+        const response = await axios.get(
+          `${API_BASE}/courses?liveClasses=true`
+        );
 
-        console.log('All courses with live sessions:', response.data.data.courses);
+        console.log(
+          "All courses with live sessions:",
+          response.data.data.courses
+        );
 
         // Only show live classes from enrolled courses
         let coursesToShow = [];
         if (enrolledCourseIds.length > 0) {
-          coursesToShow = response.data.data.courses.filter(course =>
+          coursesToShow = response.data.data.courses.filter((course) =>
             enrolledCourseIds.includes(course._id)
           );
-          console.log('Filtered courses (enrolled only):', coursesToShow);
+          console.log("Filtered courses (enrolled only):", coursesToShow);
         }
 
         if (coursesToShow.length === 0) {
@@ -190,126 +255,370 @@ export default function LiveClasses() {
           return;
         }
 
-        // Transform into live and upcoming sessions
-        const transformedCourses = coursesToShow.flatMap(course => {
-          const sessions = Array.isArray(course.schedule?.liveSessions) ? course.schedule.liveSessions : [];
-          const now = new Date();
+        // Transform courses - ONE card per course with recurring schedule info
+        const transformedCourses = coursesToShow
+          .map((course) => {
+            const sessions = Array.isArray(course.schedule?.liveSessions)
+              ? course.schedule.liveSessions
+              : [];
+            const recurringConfig = course.schedule?.recurringConfig;
+            const now = new Date();
 
-          // Find a session that is currently live
-          const currentSession = sessions.find(session => {
-            if (!session?.date) return false;
-            const sessionStart = new Date(session.date);
-            const sessionEnd = new Date(sessionStart.getTime() + (session.duration || 60) * 60000);
-            return now >= sessionStart && now <= sessionEnd;
-          });
+            // Helper function to check if class is live based on recurring schedule
+            const isCurrentlyLiveBySchedule = (recurringConfig) => {
+              if (
+                !recurringConfig?.isActive ||
+                !recurringConfig.sessionDays?.length ||
+                !recurringConfig.sessionTime
+              ) {
+                return false;
+              }
 
-          const items = [];
-          if (currentSession) {
-            items.push({
+              const now = new Date();
+              const dayNames = [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+              ];
+              const todayName = dayNames[now.getDay()];
+
+              // Check if today is one of the scheduled days
+              if (!recurringConfig.sessionDays.includes(todayName)) {
+                return false;
+              }
+
+              // Parse the session time
+              const [hours, minutes] = recurringConfig.sessionTime
+                .split(":")
+                .map(Number);
+              const sessionStart = new Date();
+              sessionStart.setHours(hours, minutes, 0, 0);
+
+              // Calculate session end time
+              const sessionEnd = new Date(
+                sessionStart.getTime() +
+                  (recurringConfig.sessionDuration || 60) * 60 * 1000
+              );
+
+              // Add 5-minute buffer before start time
+              const bufferStart = new Date(
+                sessionStart.getTime() - 5 * 60 * 1000
+              );
+
+              return now >= bufferStart && now <= sessionEnd;
+            };
+
+            // Find a session that is currently live from scheduled sessions
+            const currentSession = sessions.find((session) => {
+              if (!session?.date) return false;
+              const sessionStart = new Date(session.date);
+              const sessionEnd = new Date(
+                sessionStart.getTime() + (session.duration || 60) * 60000
+              );
+              // Add 5-minute buffer before start
+              const bufferStart = new Date(
+                sessionStart.getTime() - 5 * 60 * 1000
+              );
+              return now >= bufferStart && now <= sessionEnd;
+            });
+
+            // Check if live by recurring schedule (this takes priority)
+            const isLiveBySchedule = isCurrentlyLiveBySchedule(recurringConfig);
+
+            // Debug logging for live detection
+            if (recurringConfig?.isActive) {
+              const now = new Date();
+              const dayNames = [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+              ];
+              const todayName = dayNames[now.getDay()];
+
+              console.log(`[Live Detection] Course: ${course.title}`);
+              console.log(`  - Recurring Config:`, recurringConfig);
+              console.log(
+                `  - Today: ${todayName} at ${now.toLocaleTimeString()}`
+              );
+              console.log(`  - Scheduled Days:`, recurringConfig.sessionDays);
+              console.log(`  - Scheduled Time:`, recurringConfig.sessionTime);
+              console.log(
+                `  - Is Today Scheduled:`,
+                recurringConfig.sessionDays.includes(todayName)
+              );
+              console.log(`  - Is Live by Schedule:`, isLiveBySchedule);
+              console.log(`  - Current Session:`, currentSession?.date);
+            }
+
+            // Get next upcoming session
+            const nextSession = sessions
+              .filter((s) => s?.date && new Date(s.date) > now)
+              .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+            // Use recurring config if available, otherwise try to extract from first session
+            const meetLink =
+              recurringConfig?.meetingLink ||
+              currentSession?.meetingLink ||
+              nextSession?.meetingLink ||
+              "";
+            const duration =
+              recurringConfig?.sessionDuration ||
+              currentSession?.duration ||
+              nextSession?.duration ||
+              course.duration ||
+              60;
+
+            // Determine the schedule information to display
+            let scheduleInfo = {
+              sessionDays: [],
+              sessionTime: "",
+              isLive: isLiveBySchedule || !!currentSession,
+              nextSessionDate: nextSession?.date,
+            };
+
+            if (
+              recurringConfig?.isActive &&
+              recurringConfig.sessionDays?.length > 0
+            ) {
+              // Use recurring config
+              scheduleInfo.sessionDays = recurringConfig.sessionDays;
+              scheduleInfo.sessionTime = recurringConfig.sessionTime;
+            } else if (sessions.length > 0) {
+              // Try to detect pattern from sessions
+              const sessionsByDay = {};
+              const dayNames = [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+              ];
+              let commonTime = null;
+
+              sessions.forEach((session) => {
+                if (session.date) {
+                  const date = new Date(session.date);
+                  const dayName = dayNames[date.getDay()];
+                  const timeString = `${String(date.getHours()).padStart(
+                    2,
+                    "0"
+                  )}:${String(date.getMinutes()).padStart(2, "0")}`;
+
+                  if (!sessionsByDay[dayName]) {
+                    sessionsByDay[dayName] = 0;
+                  }
+                  sessionsByDay[dayName]++;
+
+                  if (commonTime === null) {
+                    commonTime = timeString;
+                  } else if (commonTime !== timeString) {
+                    commonTime = false; // Mixed times
+                  }
+                }
+              });
+
+              scheduleInfo.sessionDays = Object.keys(sessionsByDay).filter(
+                (day) => sessionsByDay[day] > 0
+              );
+              scheduleInfo.sessionTime = commonTime || "";
+            }
+
+            // Determine display start time
+            let displayStartTime;
+            if (scheduleInfo.isLive) {
+              if (isLiveBySchedule) {
+                // Currently live by recurring schedule
+                displayStartTime = `Started at ${scheduleInfo.sessionTime}`;
+              } else if (currentSession) {
+                // Currently live by scheduled session
+                displayStartTime = new Date(
+                  currentSession.date
+                ).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                });
+              }
+            } else {
+              // Not currently live - show next occurrence
+              if (nextSession) {
+                displayStartTime = new Date(nextSession.date).toLocaleString(
+                  "en-US",
+                  {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  }
+                );
+              } else if (
+                scheduleInfo.sessionTime &&
+                scheduleInfo.sessionDays.length > 0
+              ) {
+                // Show next occurrence based on recurring schedule
+                const dayNames = [
+                  "Sun",
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                ];
+                const today = new Date().getDay();
+                const nextDayIndex = scheduleInfo.sessionDays
+                  .map((day) => dayNames.indexOf(day))
+                  .filter((dayIndex) => dayIndex !== -1)
+                  .sort((a, b) => {
+                    // Calculate days until each scheduled day
+                    const daysUntilA = (a - today + 7) % 7 || 7;
+                    const daysUntilB = (b - today + 7) % 7 || 7;
+                    return daysUntilA - daysUntilB;
+                  })[0];
+
+                if (nextDayIndex !== undefined) {
+                  const nextDate = new Date();
+                  const daysUntil = (nextDayIndex - today + 7) % 7 || 7;
+                  nextDate.setDate(nextDate.getDate() + daysUntil);
+                  const [hours, minutes] = scheduleInfo.sessionTime
+                    .split(":")
+                    .map(Number);
+                  nextDate.setHours(hours, minutes, 0, 0);
+
+                  displayStartTime = nextDate.toLocaleString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  });
+                } else {
+                  displayStartTime = scheduleInfo.sessionTime || "Schedule TBD";
+                }
+              } else {
+                displayStartTime = "Schedule TBD";
+              }
+            }
+
+            return {
               id: course._id,
               title: course.title,
-              instructor: course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : 'Instructor',
-              viewers: Math.floor(Math.random() * 5000) + 100,
-              thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
-              meetLink: currentSession.meetingLink || "",
-              isLive: true,
-              startTime: new Date(currentSession.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-              duration: `${currentSession.duration || course.duration || 60} minutes`
-            });
-          }
-
-          // Upcoming sessions (future ones)
-          const upcoming = sessions
-            .filter(s => s?.date && new Date(s.date) > now)
-            .sort((a, b) => new Date(a.date) - new Date(b.date))
-            .slice(0, 3);
-
-          upcoming.forEach((s) => {
-            items.push({
-              id: course._id,
-              title: course.title,
-              instructor: course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : 'Instructor',
-              viewers: 0,
-              thumbnail: course.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
-              meetLink: s.meetingLink || "",
-              isLive: false,
-              startTime: new Date(s.date).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }),
-              duration: `${s.duration || course.duration || 60} minutes`
-            });
+              instructor: course.instructor
+                ? `${course.instructor.firstName} ${course.instructor.lastName}`
+                : "Instructor",
+              viewers: scheduleInfo.isLive
+                ? Math.floor(Math.random() * 5000) + 100
+                : 0,
+              thumbnail:
+                course.thumbnail ||
+                "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
+              meetLink: meetLink,
+              isLive: scheduleInfo.isLive,
+              duration: `${duration} minutes`,
+              // Schedule information
+              sessionDays: scheduleInfo.sessionDays,
+              sessionTime: scheduleInfo.sessionTime,
+              nextSessionDate: scheduleInfo.nextSessionDate,
+              // For display purposes
+              startTime: displayStartTime,
+            };
+          })
+          .filter((course) => {
+            // Only include courses that have live sessions configured
+            return course.sessionDays.length > 0 || course.nextSessionDate;
           });
-
-          return items;
-        });
 
         setCourses(transformedCourses);
-
       } catch (error) {
-        console.error('Error fetching live classes:', error);
-        setError('Failed to load live classes. Please try again.');
+        console.error("Error fetching live classes:", error);
+        setError("Failed to load live classes. Please try again.");
         setCourses([]);
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
-  }, []);
+    },
+    []
+  );
 
   // Initial load and auto-refresh hooks
   useEffect(() => {
     fetchEnrolledLiveClasses();
 
-    // Periodic refresh every 60s
+    // Periodic refresh every 30s for better real-time updates
     const interval = setInterval(() => {
-      fetchEnrolledLiveClasses();
-    }, 60000);
+      fetchEnrolledLiveClasses(true); // Pass true for auto-refresh
+    }, 30000);
 
     // Refresh when tab becomes visible
     const onVisibility = () => {
       if (!document.hidden) fetchEnrolledLiveClasses();
     };
-    document.addEventListener('visibilitychange', onVisibility);
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       clearInterval(interval);
-      document.removeEventListener('visibilitychange', onVisibility);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [fetchEnrolledLiveClasses]);
 
   // Socket listener for immediate updates from admin changes
   useEffect(() => {
     if (!user?.id && !user?._id) return;
-    const apiEnv = import.meta.env.VITE_API_URL || 'https://finallitera.onrender.com/api';
-    const normalizedApi = apiEnv.endsWith('/api') ? apiEnv : `${apiEnv.replace(/\/$/, '')}/api`;
-    const backendURL = normalizedApi.replace(/\/api$/, '');
+    const apiEnv =
+      import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+    const normalizedApi = apiEnv.endsWith("/api")
+      ? apiEnv
+      : `${apiEnv.replace(/\/$/, "")}/api`;
+    const backendURL = normalizedApi.replace(/\/api$/, "");
 
     let socket;
     try {
       socket = io(backendURL, {
         withCredentials: true,
-        path: '/socket.io',
-        transports: ['websocket', 'polling'],
+        path: "/socket.io",
+        transports: ["websocket", "polling"],
         reconnectionAttempts: 3,
         reconnectionDelay: 2000,
         timeout: 10000,
         forceNew: true,
       });
 
-      socket.on('connect', () => {
+      socket.on("connect", () => {
         const uid = user.id || user._id;
-        if (uid) socket.emit('register_user', uid);
+        if (uid) socket.emit("register_user", uid);
       });
 
       const triggerRefresh = () => fetchEnrolledLiveClasses();
 
-      socket.on('new_notification', (payload) => {
+      socket.on("new_notification", (payload) => {
         if (!payload) return;
-        if (payload.type === 'live_class_scheduled' || payload.type === 'course_updated' || payload.type === 'live_class_updated') {
+        if (
+          payload.type === "live_class_scheduled" ||
+          payload.type === "course_updated" ||
+          payload.type === "live_class_updated"
+        ) {
           triggerRefresh();
         }
       });
 
       // Direct event from server when admin updates sessions
-      socket.on('live_class_updated', triggerRefresh);
+      socket.on("live_class_updated", triggerRefresh);
     } catch (e) {
-      console.warn('Live socket init failed:', e.message);
+      console.warn("Live socket init failed:", e.message);
     }
 
     return () => {
@@ -322,32 +631,42 @@ export default function LiveClasses() {
     };
   }, [user?.id, user?._id, fetchEnrolledLiveClasses]);
 
-  const liveClasses = courses.filter(item => item.isLive);
-  const upcomingClasses = courses.filter(item => !item.isLive);
+  const liveClasses = courses.filter((item) => item.isLive);
+  const upcomingClasses = courses.filter((item) => !item.isLive);
 
   return (
     <>
       <section className="max-w-7xl mx-auto px-6 md:px-10 py-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold" style={{ color: styles.brandBlue }}>
-              {enrolledCourses.length > 0 ? 'My Live Classes' : 'Live Classes'}
+            <h1
+              className="text-2xl md:text-3xl font-extrabold"
+              style={{ color: styles.brandBlue }}
+            >
+              {enrolledCourses.length > 0 ? "My Live Classes" : "Live Classes"}
             </h1>
             <p className="text-gray-600 mt-1">
               {enrolledCourses.length > 0
-                ? 'Live sessions from your enrolled courses'
-                : 'All available live sessions'
-              }
+                ? "Live sessions from your enrolled courses"
+                : "All available live sessions"}
             </p>
           </div>
 
-          <button
-            onClick={() => window.location.reload()}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-          >
-            {loading ? "Loading..." : "Refresh"}
-          </button>
+          <div className="flex items-center gap-3">
+            {refreshing && (
+              <div className="flex items-center gap-2 text-blue-600 text-sm">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span>Updating...</span>
+              </div>
+            )}
+            <button
+              onClick={() => fetchEnrolledLiveClasses()}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {loading ? "Loading..." : "Refresh"}
+            </button>
+          </div>
         </div>
 
         {loading && (
@@ -373,7 +692,8 @@ export default function LiveClasses() {
               No Live Classes Available
             </h3>
             <p className="text-gray-600 mb-4">
-              You don't have any enrolled courses with live sessions at the moment.
+              You don't have any enrolled courses with live sessions at the
+              moment.
             </p>
             <div className="space-y-2">
               <p className="text-sm text-gray-500">
@@ -384,7 +704,7 @@ export default function LiveClasses() {
               </p>
             </div>
             <button
-              onClick={() => window.location.href = "/courses"}
+              onClick={() => (window.location.href = "/courses")}
               className="mt-4 px-6 py-2 bg-[#1F4B7A] text-white rounded-lg hover:bg-[#1a3f6b] transition-colors"
             >
               Browse Courses
@@ -397,7 +717,9 @@ export default function LiveClasses() {
           <div className="mt-6">
             <div className="flex items-center gap-2 mb-3">
               <LiveBadge />
-              <h2 className="text-lg font-semibold text-slate-900">Happening Now</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Happening Now
+              </h2>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {liveClasses.map((item) => (
@@ -411,7 +733,15 @@ export default function LiveClasses() {
         {upcomingClasses.length > 0 && (
           <div className="mt-10">
             <div className="flex items-center gap-2 mb-3">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-slate-700" fill="currentColor" aria-hidden="true"><path d="M7 10h5v5H7z"/><path d="M3 4a2 2 0 012-2h1V0h2v2h6V0h2v2h1a2 2 0 012 2v16a2 2 0 01-2 2H5a2 2 0 01-2-2V4zm2 4h14V4H5v4zm14 2H5v10h14V10z"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                className="w-4 h-4 text-slate-700"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M7 10h5v5H7z" />
+                <path d="M3 4a2 2 0 012-2h1V0h2v2h6V0h2v2h1a2 2 0 012 2v16a2 2 0 01-2 2H5a2 2 0 01-2-2V4zm2 4h14V4H5v4zm14 2H5v10h14V10z" />
+              </svg>
               <h2 className="text-lg font-semibold text-slate-900">Upcoming</h2>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -425,51 +755,70 @@ export default function LiveClasses() {
 
       {/* AI Features List */}
       <div className="mt-12 bg-navyblue text-white border rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">AI-Powered Features</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">
+          AI-Powered Features
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Feature 1 */}
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4 text-green-600"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <h4 className="font-medium text-slate-900">Real-time Transcription</h4>
-              <p className="text-sm text-slate-600">Automatic speech-to-text with 99% accuracy</p>
+              <h4 className="font-medium text-slate-900">
+                Real-time Transcription
+              </h4>
+              <p className="text-sm text-slate-600">
+                Automatic speech-to-text with 99% accuracy
+              </p>
             </div>
           </div>
 
           {/* Feature 2 */}
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4 text-blue-600"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
               <h4 className="font-medium text-slate-900">Smart Q&A</h4>
-              <p className="text-sm text-slate-600">AI-powered question answering and explanations</p>
+              <p className="text-sm text-slate-600">
+                AI-powered question answering and explanations
+              </p>
             </div>
           </div>
 
           {/* Feature 3 */}
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-4 h-4 text-purple-600"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             <div>
               <h4 className="font-medium text-slate-900">Learning Analytics</h4>
-              <p className="text-sm text-slate-600">Personalized insights and progress tracking</p>
+              <p className="text-sm text-slate-600">
+                Personalized insights and progress tracking
+              </p>
             </div>
           </div>
         </div>
       </div>
     </>
   );
-
-
-
 }
