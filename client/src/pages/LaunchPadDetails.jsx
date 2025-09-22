@@ -187,10 +187,10 @@ const LaunchPadDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
+    <div className="min-h-screen bg-navyblue px-4 py-12">
       <div className="max-w-7xl mx-auto">
         {/* Course Header */}
-        <div className=" rounded-2xl shadow-xl p-8 mb-8">
+        <div className="bg-navyblue rounded-2xl shadow-xl p-8 mb-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Course Image */}
             <div className="lg:w-1/3">
@@ -360,7 +360,7 @@ const LaunchPadDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Course Modules */}
           <div className="lg:col-span-2">
-            <div className=" rounded-2xl shadow-xl p-8">
+            <div className="bg-navyblue rounded-2xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Course Modules
               </h2>
@@ -391,7 +391,7 @@ const LaunchPadDetails = () => {
 
             {/* Course Videos Section */}
             {courseData.videos && courseData.videos.length > 0 && (
-              <div className=" rounded-2xl shadow-xl p-8 mt-8">
+              <div className="bg-navyblue rounded-2xl shadow-xl p-8 mt-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   Course Videos
                 </h2>
@@ -401,7 +401,7 @@ const LaunchPadDetails = () => {
                     const isUrl = videoUrl.startsWith("http");
 
                     return (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4">
+                      <div key={index} className="bg-navyblue rounded-lg p-4">
                         {isUrl ? (
                           // For URLs, show a clickable link
                           <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg overflow-hidden mb-2 border-2 border-dashed border-blue-300">
@@ -493,11 +493,11 @@ const LaunchPadDetails = () => {
           <div className="space-y-6">
             {/* Next Lesson - Only show if user has progress */}
             {courseData.progress > 0 && (
-              <div className="bg-white rounded-2xl shadow-xl p-6">
+              <div className="bg-navyblue rounded-2xl shadow-xl p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
                   Next Lesson
                 </h3>
-                <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="bg-navyblue p-4 rounded-lg">
                   <h4 className="font-semibold text-blue-900 mb-2">
                     {courseData.nextLesson}
                   </h4>
@@ -515,7 +515,7 @@ const LaunchPadDetails = () => {
             )}
 
             {/* Certificate Section */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-navyblue rounded-2xl shadow-xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 Your Certificate
               </h3>
@@ -542,7 +542,7 @@ const LaunchPadDetails = () => {
             </div>
 
             {/* Course Description */}
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-navyblue rounded-2xl shadow-xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 About This Course
               </h3>
@@ -576,7 +576,7 @@ const LaunchPadDetails = () => {
       </div>
       {showCheckout && orderInfo && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+          <div className="bg-navyblue rounded-xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Confirm Purchase</h3>
               <button
@@ -615,7 +615,7 @@ const LaunchPadDetails = () => {
             {/* Terms and Conditions Checkboxes */}
             <div className="mt-4 space-y-3">
               {/* Terms & Conditions Checkbox */}
-              <div className="p-3 bg-gray-50 rounded-lg border">
+              <div className="p-3 bg-navyblue rounded-lg border">
                 <label className="flex items-start space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -636,7 +636,7 @@ const LaunchPadDetails = () => {
               </div>
 
               {/* Refund Policy Checkbox */}
-              <div className="p-3 bg-gray-50 rounded-lg border">
+              <div className="p-3 bg-navyblue rounded-lg border">
                 <label className="flex items-start space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -657,7 +657,7 @@ const LaunchPadDetails = () => {
               </div>
 
               {/* Privacy Policy Checkbox */}
-              <div className="p-3 bg-gray-50 rounded-lg border">
+              <div className="p-3 bg-navyblue rounded-lg border">
                 <label className="flex items-start space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
