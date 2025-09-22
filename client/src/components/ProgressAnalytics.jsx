@@ -58,11 +58,11 @@ const ProgressAnalytics = ({ courseProgressData, modules }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
+    <div className=" rounded-2xl shadow-xl p-8">
       <h3 className="text-xl font-bold text-gray-900 mb-6">Learning Analytics</h3>
       
       {/* Motivational Message */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-6">
+      <div className=" rounded-xl p-4 mb-6">
         <p className="text-center text-lg font-semibold text-gray-800">
           {getMotivationalMessage()}
         </p>
@@ -71,7 +71,7 @@ const ProgressAnalytics = ({ courseProgressData, modules }) => {
       {/* Analytics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Learning Streak */}
-        <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4">
+        <div className="rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-semibold text-gray-900">Learning Streak</h4>
@@ -87,7 +87,7 @@ const ProgressAnalytics = ({ courseProgressData, modules }) => {
         </div>
 
         {/* Average Session Time */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4">
+        <div className=" rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-semibold text-gray-900">Avg Session</h4>
@@ -113,7 +113,7 @@ const ProgressAnalytics = ({ courseProgressData, modules }) => {
         )}
 
         {/* Completion Rate */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
+        <div className=" rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-semibold text-gray-900">Completion Rate</h4>
@@ -151,7 +151,7 @@ const ProgressAnalytics = ({ courseProgressData, modules }) => {
       </div>
 
       {/* Learning Tips */}
-      <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+      <div className="mt-6  border border-yellow-200 rounded-xl p-4">
         <h4 className="font-semibold text-yellow-800 mb-2">💡 Learning Tip</h4>
         <p className="text-sm text-yellow-700">
           {analytics.completionRate < 30 

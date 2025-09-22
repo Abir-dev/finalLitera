@@ -141,7 +141,7 @@ const CourseProgressTracker = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className=" rounded-2xl shadow-xl p-8">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
@@ -154,7 +154,7 @@ const CourseProgressTracker = ({
   return (
     <div className="space-y-6">
       {/* Overall Course Progress */}
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className=" rounded-2xl shadow-xl p-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Course Progress</h2>
           <div className={`text-3xl font-bold ${getProgressTextColor(courseProgress)}`}>
@@ -181,13 +181,13 @@ const CourseProgressTracker = ({
 
         {/* Progress Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 bg-blue-50 rounded-xl">
+          <div className="text-center p-4 border border-blue-500 rounded-xl">
             <div className="text-2xl font-bold text-blue-600 mb-1">
               {modules.reduce((total, module) => total + module.videos.length, 0)}
             </div>
-            <div className="text-sm text-blue-800">Total Videos</div>
+            <div className="text-sm text-blue-600">Total Videos</div>
           </div>
-          <div className="text-center p-4 bg-green-50 rounded-xl">
+          <div className="text-center p-4 border border-green-500 rounded-xl">
             <div className="text-2xl font-bold text-green-600 mb-1">
               {modules.reduce((total, module) => {
                 return total + module.videos.filter(video => {
@@ -200,20 +200,20 @@ const CourseProgressTracker = ({
                 }).length;
               }, 0)}
             </div>
-            <div className="text-sm text-green-800">Completed Videos</div>
+            <div className="text-sm text-green-600">Completed Videos</div>
           </div>
-          <div className="text-center p-4 bg-purple-50 rounded-xl">
+          <div className="text-center p-4 border border-purple-500 rounded-xl">
             <div className="text-2xl font-bold text-purple-600 mb-1">
               {Math.round(timeProgress)}%
             </div>
-            <div className="text-sm text-purple-800">Time Watched</div>
+            <div className="text-sm text-purple-600">Time Watched</div>
           </div>
         </div>
       </div>
 
       {/* Detailed Module Progress */}
       {showDetailed && (
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="rounded-2xl shadow-xl p-8">
           <h3 className="text-xl font-bold text-gray-900 mb-6">Module Progress</h3>
           <div className="space-y-4">
             {moduleProgress.map((module, index) => (
@@ -292,14 +292,14 @@ const CourseProgressTracker = ({
       </div>
 
       {/* Next Steps */}
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className="rounded-2xl shadow-xl p-8">
         <h3 className="text-xl font-bold text-gray-900 mb-4">Next Steps</h3>
         <div className="space-y-3">
           {moduleProgress
             .filter(module => module.progress < 100)
             .slice(0, 3)
             .map((module, index) => (
-              <div key={module.id || index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div key={module.id || index} className="flex items-center space-x-3 p-3 rounded-lg">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                   <span className="text-sm font-bold text-blue-600">{index + 1}</span>
                 </div>
