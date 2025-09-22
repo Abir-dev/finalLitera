@@ -20,6 +20,11 @@ import reactPic from "../assets/react-pic.jpg";
 import nodePic from "../assets/Node-pic.jpg";
 import fullstackPic from "../assets/FullStack-pic.jpg";
 
+// Testimonial images (use placeholders for now, update when real images are added)
+import uditiImg from "../assets/uditijana.jpg";
+import placeholderImg from "../assets/Ai-pic.jpg";
+import artiImg from "../assets/arti.jpeg";
+
 export default function Home() {
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -528,16 +533,19 @@ export default function Home() {
               quote="Exceptional courses at competitive prices. The value for money is outstanding, and the platform is completely trustworthy."
               name="Keshav Mishra"
               role="Software Developer"
+              img={placeholderImg} // Replace with keshav.jpg when available
             />
             <TestimonialCard
               quote="I had an amazing experience during the consultation sessions. The mentors are incredibly knowledgeable and supportive."
               name="Uditi Jana"
               role="Sales Manager"
+              img={uditiImg}
             />
             <TestimonialCard
               quote="Premium courses at the best prices. The quality of education here is unmatched in the industry."
               name="Aarti Yadav"
               role="Full Stack Developer"
+              img={artiImg} // Replace with aarti.jpg when available
             />
           </div>
         </div>

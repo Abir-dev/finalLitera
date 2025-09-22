@@ -8,7 +8,8 @@ export default function TestimonialCard({
   role = "Student", 
   rating = 5,
   verified = true,
-  course = "Full Stack Development"
+  course = "Full Stack Development",
+  img
 }) {
   return (
     <div className="card-premium p-8 group hover-lift relative overflow-hidden">
@@ -54,7 +55,7 @@ export default function TestimonialCard({
         <div className="relative">
           <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-blue-400/30 group-hover:border-blue-400/50 transition-colors duration-300">
             <img 
-              src={pic7} 
+              src={img || pic7} 
               alt={name} 
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             />
