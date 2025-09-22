@@ -297,12 +297,17 @@ export default function LiveClasses() {
         if (uid) socket.emit('register_user', uid);
       });
 
+      const triggerRefresh = () => fetchEnrolledLiveClasses();
+
       socket.on('new_notification', (payload) => {
         if (!payload) return;
         if (payload.type === 'live_class_scheduled' || payload.type === 'course_updated' || payload.type === 'live_class_updated') {
-          fetchEnrolledLiveClasses();
+          triggerRefresh();
         }
       });
+
+      // Direct event from server when admin updates sessions
+      socket.on('live_class_updated', triggerRefresh);
     } catch (e) {
       console.warn('Live socket init failed:', e.message);
     }

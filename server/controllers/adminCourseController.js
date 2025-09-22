@@ -689,6 +689,14 @@ export const updateCourseMeetLinks = async (req, res) => {
         // Emit over Socket.IO if available
         const io = req.app.get && req.app.get('io');
         if (io) {
+          // Immediate real-time update event
+          userIds.forEach(uid => {
+            io.to(`user_${uid}`).emit('live_class_updated', {
+              courseId: updatedCourse._id,
+              sessions: liveSessions,
+            });
+          });
+
           created.forEach(n => {
             io.to(`user_${n.user}`).emit('new_notification', {
               id: n._id,
