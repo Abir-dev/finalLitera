@@ -32,6 +32,7 @@ import {
   Eye as EyeIcon,
   X,
 } from "lucide-react";
+import { AlertCircle, Save } from "lucide-react";
 
 const makePreview = (file) => (file ? URL.createObjectURL(file) : null);
 
@@ -882,7 +883,7 @@ export default function AdminCourses() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-3xl card-premium overflow-hidden">
+          <div className="w-full max-w-3xl max-h-[80vh] card-premium overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-white">
                 {editingCourse ? "Edit Course" : "Add New Course"}
@@ -897,7 +898,7 @@ export default function AdminCourses() {
 
             <form
               onSubmit={handleSubmit}
-              className="max-h-[80vh] overflow-y-auto px-6 py-4 space-y-6"
+              className="flex-1 overflow-y-auto px-6 py-4 space-y-6"
             >
               {errorMsg ? (
                 <div className="p-4 bg-red-500/20 text-red-400 rounded-lg border border-red-500/30 flex items-center gap-2">

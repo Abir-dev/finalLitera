@@ -492,9 +492,9 @@ export default function AdminCourseManagement() {
       {/* Course Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card-premium max-w-4xl w-full max-h-[90vh] flex flex-col">
-            <div className="p-6 flex-shrink-0">
-              <div className="flex justify-between items-center mb-6">
+          <div className="card-premium max-w-4xl w-full h-[75vh] flex flex-col">
+            <div className="p-6 flex-shrink-0 border-b border-white/10">
+              <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white">
                   {editingCourse ? "Edit Course" : "Add New Course"}
                 </h2>
@@ -519,7 +519,10 @@ export default function AdminCourseManagement() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6">
+            <div
+              className="flex-1 overflow-y-scroll px-6 py-6"
+              style={{ maxHeight: "calc(75vh - 100px)" }}
+            >
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
