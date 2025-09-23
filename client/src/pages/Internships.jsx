@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Briefcase, ArrowRight } from "lucide-react";
+import { Briefcase, ArrowRight, Eye } from "lucide-react";
 import { listInternships, applyToInternship } from "../services/internshipService.js";
+import InternshipPreviewModal from "../components/InternshipPreviewModal.jsx";
 
 export default function Internships() {
   const [internships, setInternships] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [selectedInternship, setSelectedInternship] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -29,7 +32,13 @@ export default function Internships() {
     }
   };
 
+  const onPreview = (internship) => {
+    setSelectedInternship(internship);
+    setPreviewOpen(true);
+  };
+
   return (
+    <>
     <div className="container-premium">
       <div className="card-premium p-8 mb-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div>
@@ -76,7 +85,11 @@ export default function Internships() {
                       <div className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{i.company} • {i.stipend || 'Stipend not specified'}</div>
                       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{i.description}</p>
                     </div>
-                    <div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => onPreview(i)} className="btn-outline-premium inline-flex items-center gap-2">
+                        <Eye size={16} />
+                        Preview
+                      </button>
                       <button onClick={() => onApply(i)} className="btn-premium inline-flex items-center gap-2">
                         Apply
                         <ArrowRight size={16} />
@@ -90,6 +103,12 @@ export default function Internships() {
         </div>
       </div>
     </div>
+    <InternshipPreviewModal
+      internship={selectedInternship}
+      isOpen={previewOpen}
+      onClose={() => setPreviewOpen(false)}
+    />
+    </>
   );
 }
 
