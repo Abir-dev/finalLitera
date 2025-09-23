@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 const styles = {
   brandBlue: "#18457A",
-  liveRed: "#D14343",
+  liveRed: "#90EE90",
   navyblue: "#18457A",
 };
 
