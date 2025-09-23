@@ -238,12 +238,29 @@ export default function CourseDetails() {
 
     try {
       console.log("Creating order for course:", display.id);
-      const result = await courseService.createOrder(display.id);
+      // send coupon code if present to apply discount immediately
+      const result = await courseService.createOrder(display.id, couponCode || appliedCoupon);
       setOrderInfo(result.data);
       setShowCheckout(true);
     } catch (e) {
       console.error("Order creation error:", e);
       alert(e.message || "Failed to initiate payment");
+    }
+  };
+
+  const [couponCode, setCouponCode] = React.useState("");
+  const [appliedCoupon, setAppliedCoupon] = React.useState("");
+  const [couponError, setCouponError] = React.useState("");
+
+  const applyCoupon = async () => {
+    setCouponError("");
+    try {
+      if (!couponCode) return;
+      await courseService.validateCoupon(couponCode, display.id);
+      setAppliedCoupon(couponCode);
+      alert("Coupon applied. Proceed to pay to see updated amount.");
+    } catch (err) {
+      setCouponError(err.message || "Invalid coupon");
     }
   };
 
@@ -855,6 +872,35 @@ export default function CourseDetails() {
               </button>
             </div>
             <div className="space-y-3">
+              {/* Coupon Input */}
+              <div className="flex gap-2 items-start">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Enter coupon code"
+                  className="flex-1 p-2 rounded border"
+                  style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  className="px-4 py-2 rounded font-semibold"
+                  style={{ background: "var(--brand)", color: "var(--text-accent)" }}
+                >
+                  Apply
+                </button>
+              </div>
+              {appliedCoupon && (
+                <p className="text-xs" style={{ color: "var(--accent-emerald)" }}>
+                  Applied: {appliedCoupon}
+                </p>
+              )}
+              {couponError && (
+                <p className="text-xs" style={{ color: "var(--accent-rose)" }}>
+                  {couponError}
+                </p>
+              )}
               <div className="flex items-center justify-between">
                 <span
                   className="text-xs sm:text-sm"
@@ -879,6 +925,11 @@ export default function CourseDetails() {
                   style={{ color: "var(--text-primary)" }}
                 >
                   You Pay
+                  {orderInfo.course.discountPercent > 0 && (
+                    <span className="ml-2 text-xs" style={{ color: "var(--accent-gold)" }}>
+                      ({orderInfo.course.discountPercent}% OFF)
+                    </span>
+                  )}
                 </span>
                 <span
                   className="text-lg sm:text-xl font-bold"

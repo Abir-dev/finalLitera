@@ -39,6 +39,7 @@ import AdminExams from "./pages/AdminExams.jsx";
 import AdminAnalytics from "./pages/AdminAnalytics.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
 import AdminInternships from "./pages/AdminInternships.jsx";
+import AdminCoupons from "./pages/AdminCoupons.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
 
@@ -97,6 +98,7 @@ export default function App() {
   <Route path="internships" element={<AdminInternships />} />
   <Route path="analytics" element={<AdminAnalytics />} />
   <Route path="settings" element={<AdminSettings />} />
+  <Route path="coupons" element={<AdminCoupons />} />
 </Route>
 
 <Route path="/unauthorized" element={<Unauthorized />} />

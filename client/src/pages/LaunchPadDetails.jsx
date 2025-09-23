@@ -126,13 +126,30 @@ const LaunchPadDetails = () => {
     alert(`Resuming course: ${courseData.nextLesson}`);
   };
 
+  const [couponCode, setCouponCode] = React.useState("");
+  const [appliedCoupon, setAppliedCoupon] = React.useState("");
+  const [couponError, setCouponError] = React.useState("");
+
+  const applyCoupon = async () => {
+    setCouponError("");
+    try {
+      if (!couponCode) return;
+      await courseService.validateCoupon(couponCode, course?._id);
+      setAppliedCoupon(couponCode);
+      alert("Coupon applied. Proceed to pay to see updated amount.");
+    } catch (err) {
+      setCouponError(err.message || "Invalid coupon");
+    }
+  };
+
   const handleEnrollClick = async () => {
     if (!user) {
       navigate("/login", { replace: true, state: { from: "/launchpad" } });
       return;
     }
     try {
-      const result = await courseService.createOrder(course?._id);
+      // send coupon code if present to apply discount immediately
+      const result = await courseService.createOrder(course?._id, couponCode || appliedCoupon);
       setOrderInfo(result.data);
       setShowCheckout(true);
     } catch (e) {
@@ -592,6 +609,22 @@ const LaunchPadDetails = () => {
               </button>
             </div>
             <div className="space-y-3">
+              <div className="flex gap-2 items-start">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Enter coupon code"
+                  className="flex-1 p-2 rounded bg-white/5 border border-white/10"
+                />
+                <button type="button" onClick={applyCoupon} className="px-4 py-2 rounded bg-[#1B4A8B] text-white">Apply</button>
+              </div>
+              {appliedCoupon && (
+                <p className="text-xs text-green-400">Applied: {appliedCoupon}</p>
+              )}
+              {couponError && (
+                <p className="text-xs text-rose-400">{couponError}</p>
+              )}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600">Original Price</span>
                 <span className="text-sm line-through text-slate-400">
@@ -604,7 +637,9 @@ const LaunchPadDetails = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-slate-700">
-                  You Pay
+                  You Pay {orderInfo.course.discountPercent > 0 && (
+                    <span className="ml-2 text-xs text-amber-400">({orderInfo.course.discountPercent}% OFF)</span>
+                  )}
                 </span>
                 <span className="text-xl font-bold text-[#1b3b6b]">
                   ₹{Number(orderInfo.course.price).toLocaleString("en-IN")}

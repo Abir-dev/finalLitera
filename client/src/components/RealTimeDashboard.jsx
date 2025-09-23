@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Users,
   BookOpen,
@@ -40,6 +40,7 @@ const RealTimeDashboard = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
@@ -429,6 +430,12 @@ const RealTimeDashboard = () => {
                   {dashboardData.systemHealth.serverStatus.toUpperCase()}
                 </div>
               </div>
+              <button
+                onClick={() => navigate("/admin/coupons")}
+                className="btn-premium px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold flex items-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl transition-all duration-300"
+              >
+                <span>Generate Promocode</span>
+              </button>
             </div>
           </div>
         </div>

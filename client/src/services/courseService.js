@@ -205,13 +205,22 @@ export const courseService = {
   },
 
   // Payments
-  createOrder: async (courseId) => {
+  createOrder: async (courseId, promoCode) => {
     try {
-      const response = await api.post("/payments/create-order", { courseId });
+      const response = await api.post("/payments/create-order", { courseId, promoCode });
       return response.data; // { status, data: { order, course } }
     } catch (error) {
       console.error("Error creating order:", error);
       throw error.response?.data || { message: "Failed to create order" };
+    }
+  },
+  // Coupons
+  validateCoupon: async (code, courseId) => {
+    try {
+      const response = await api.get(`/coupons/validate`, { params: { code, courseId } });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Invalid coupon" };
     }
   },
 };

@@ -48,7 +48,7 @@ router.post("/create-order", protect, async (req, res) => {
       body: req.body,
     });
 
-    const { courseId } = req.body;
+    const { courseId, promoCode } = req.body;
     if (!courseId) {
       return res
         .status(400)
@@ -65,7 +65,38 @@ router.post("/create-order", protect, async (req, res) => {
         .json({ status: "error", message: "Course not available" });
     }
 
-    const amountInPaise = Math.round(Number(course.price) * 100);
+    let price = Number(course.price);
+    let appliedDiscount = 0;
+
+    // Apply promo code if provided
+    if (promoCode) {
+      try {
+        const { default: Coupon } = await import("../models/Coupon.js");
+        const coupon = await Coupon.findOne({ code: String(promoCode).trim().toUpperCase(), course: courseId, isActive: true });
+        if (coupon && !coupon.isExpired()) {
+          appliedDiscount = Math.min(100, Math.max(0, Number(coupon.percentOff)));
+          const discounted = price * (1 - appliedDiscount / 100);
+          price = Math.max(0, Math.round(discounted));
+          // Increment usage count asynchronously
+          try {
+            coupon.usageCount = (coupon.usageCount || 0) + 1;
+            await coupon.save();
+          } catch (incErr) {
+            console.warn("Failed to increment coupon usage:", incErr?.message);
+          }
+          // Attach coupon to notes
+          orderOptions.notes = {
+            ...orderOptions.notes,
+            couponCode: coupon.code,
+            discountPercent: appliedDiscount,
+          };
+        }
+      } catch (e) {
+        console.warn("Promo code apply failed:", e?.message);
+      }
+    }
+
+    const amountInPaise = Math.round(price * 100);
     console.log("Creating Razorpay order with amount:", amountInPaise);
 
     const orderOptions = {
@@ -134,9 +165,11 @@ router.post("/create-order", protect, async (req, res) => {
         order,
         course: {
           title: course.title,
-          price: course.price,
+          price: price,
           originalPrice: course.originalPrice,
           currency: course.currency || "INR",
+          discountPercent: appliedDiscount,
+          appliedCoupon: promoCode ? String(promoCode).trim().toUpperCase() : undefined,
         },
         enrollment: {
           id: enrollment._id,
