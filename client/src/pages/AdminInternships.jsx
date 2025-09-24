@@ -48,7 +48,10 @@ export default function AdminInternships() {
   const [editing, setEditing] = useState(false);
 
   // Resolve the canonical id for an internship item
-  const getId = (item) => item?.id || item?._id;
+  const getId = (item) => {
+    if (!item) return null;
+    return item.id || item._id || null;
+  };
 
   useEffect(() => {
     (async () => {
@@ -56,11 +59,15 @@ export default function AdminInternships() {
         setLoading(true);
         const res = await listInternships();
         const items = res?.data?.internships || [];
-        const normalized = items.map((it) => ({ ...it, id: it.id || it._id }));
+        // Filter out any null/undefined items and normalize IDs
+        const normalized = items
+          .filter((item) => item && (item.id || item._id))
+          .map((it) => ({ ...it, id: it.id || it._id }));
         setInternships(normalized);
       } catch (e) {
         console.error("Failed to load internships", e);
         setApiError(`Load failed: ${e?.status || ""} ${e?.message || ""}`);
+        setInternships([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
@@ -405,80 +412,85 @@ export default function AdminInternships() {
                   No internships yet. Create your first posting above.
                 </div>
               ) : (
-                internships.map((i) => (
-                  <div key={getId(i)} className="card-premium p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className="text-lg font-semibold"
-                            style={{ color: "var(--text-primary)" }}
-                          >
-                            {i.name}
-                          </span>
-                          <span
-                            className="text-xs px-2 py-0.5 rounded-full"
-                            style={{
-                              background: "var(--bg-elevated)",
-                              border: "1px solid var(--border)",
-                              color: "var(--text-secondary)",
-                            }}
-                          >
-                            {i.role}
-                          </span>
-                        </div>
-                        <div
-                          className="text-sm mb-2"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          {i.company} • {i.stipend || "Stipend not specified"}
-                        </div>
-                        <p
-                          className="text-sm mb-3"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          {i.description}
-                        </p>
-                        <div
-                          className="flex items-center gap-4 text-xs"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          <span className="inline-flex items-center gap-1">
-                            <Phone size={14} /> {i.contactNumber}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Mail size={14} /> {i.contactEmail}
-                          </span>
-                          {i.applyUrl && (
-                            <a
-                              className="inline-flex items-center gap-1 hover:underline"
-                              href={i.applyUrl}
-                              target="_blank"
-                              rel="noreferrer"
+                internships
+                  .filter((i) => i && (i.id || i._id))
+                  .map((i) => (
+                    <div key={getId(i)} className="card-premium p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span
+                              className="text-lg font-semibold"
+                              style={{ color: "var(--text-primary)" }}
                             >
-                              <LinkIcon size={14} /> Apply URL
-                            </a>
-                          )}
+                              {i?.name || "Untitled Internship"}
+                            </span>
+                            <span
+                              className="text-xs px-2 py-0.5 rounded-full"
+                              style={{
+                                background: "var(--bg-elevated)",
+                                border: "1px solid var(--border)",
+                                color: "var(--text-secondary)",
+                              }}
+                            >
+                              {i?.role || "No role specified"}
+                            </span>
+                          </div>
+                          <div
+                            className="text-sm mb-2"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            {i?.company || "No company"} •{" "}
+                            {i?.stipend || "Stipend not specified"}
+                          </div>
+                          <p
+                            className="text-sm mb-3"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            {i?.description || "No description available"}
+                          </p>
+                          <div
+                            className="flex items-center gap-4 text-xs"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <Phone size={14} />{" "}
+                              {i?.contactNumber || "No contact number"}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Mail size={14} />{" "}
+                              {i?.contactEmail || "No contact email"}
+                            </span>
+                            {i?.applyUrl && (
+                              <a
+                                className="inline-flex items-center gap-1 hover:underline"
+                                href={i.applyUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                <LinkIcon size={14} /> Apply URL
+                              </a>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => startEdit(i)}
-                          className="btn-secondary inline-flex items-center gap-2 border px-3 py-1.5 rounded-md"
-                          style={{ borderColor: "var(--border)" }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => requestDelete(getId(i))}
-                          className="btn-danger inline-flex items-center gap-2"
-                        >
-                          <Trash2 size={16} /> Delete
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => i && startEdit(i)}
+                            className="btn-secondary inline-flex items-center gap-2 border px-3 py-1.5 rounded-md"
+                            style={{ borderColor: "var(--border)" }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => i && requestDelete(getId(i))}
+                            className="btn-danger inline-flex items-center gap-2"
+                          >
+                            <Trash2 size={16} /> Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))
               )}
             </div>
           </div>
