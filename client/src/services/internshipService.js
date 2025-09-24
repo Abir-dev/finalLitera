@@ -30,8 +30,21 @@ function adminAuthHeaders() {
 }
 
 async function handleResponse(res) {
+  console.log("Response status:", res.status);
+  console.log("Response headers:", Object.fromEntries(res.headers.entries()));
+
   const isJson = res.headers.get("content-type")?.includes("application/json");
-  const data = isJson ? await res.json().catch(() => null) : null;
+  console.log("Is JSON response:", isJson);
+
+  const data = isJson
+    ? await res.json().catch((e) => {
+        console.error("JSON parse error:", e);
+        return null;
+      })
+    : null;
+
+  console.log("Parsed response data:", data);
+
   if (!res.ok) {
     const message =
       data?.message || data?.error || res.statusText || `HTTP ${res.status}`;
@@ -72,8 +85,23 @@ export async function listInternships() {
       headers: { ...authHeaders() },
     });
 
+    console.log("Raw response status:", res.status);
+    console.log("Raw response ok:", res.ok);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
     const result = await handleResponse(res);
     console.log("List internships success:", result);
+
+    // If result is null, try to get the response text
+    if (result === null) {
+      const text = await res.text();
+      console.log("Response text:", text);
+      throw new Error("Received null response from server");
+    }
+
     return result; // { status, data: { internships } }
   } catch (e) {
     console.error("Internships API error:", {
@@ -101,8 +129,23 @@ export async function createInternship(payload) {
       body: JSON.stringify(payload),
     });
 
+    console.log("Raw response status:", res.status);
+    console.log("Raw response ok:", res.ok);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
     const result = await handleResponse(res);
     console.log("Create internship success:", result);
+
+    // If result is null, try to get the response text
+    if (result === null) {
+      const text = await res.text();
+      console.log("Response text:", text);
+      throw new Error("Received null response from server");
+    }
+
     return result; // { status, data: { internship } }
   } catch (e) {
     console.error("Create internship API error:", {

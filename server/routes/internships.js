@@ -1,8 +1,20 @@
 import express from "express";
 import { adminAuth } from "../middleware/adminAuth.js";
-import { listInternships, createInternship, updateInternship, deleteInternship, applyInternship } from "../controllers/internshipController.js";
+import {
+  listInternships,
+  createInternship,
+  updateInternship,
+  deleteInternship,
+  applyInternship,
+} from "../controllers/internshipController.js";
 
 const router = express.Router();
+
+// Test endpoint
+router.get("/test", (req, res) => {
+  console.log("Internships test endpoint hit");
+  res.json({ status: "ok", message: "Internships API is working" });
+});
 
 // Public: list internships
 router.get("/", listInternships);
@@ -16,5 +28,3 @@ router.put("/:id", adminAuth, updateInternship);
 router.delete("/:id", adminAuth, deleteInternship);
 
 export default router;
-
-

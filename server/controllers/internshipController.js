@@ -2,12 +2,17 @@ import Internship from "../models/Internship.js";
 
 export async function listInternships(req, res) {
   try {
+    console.log("listInternships called");
     const internships = await Internship.find({ isActive: true })
       .sort({ createdAt: -1 })
       .populate("createdBy", "firstName lastName email")
       .lean();
 
-    return res.json({ status: "ok", data: { internships } });
+    console.log("Found internships:", internships.length);
+    const response = { status: "ok", data: { internships } };
+    console.log("Sending response:", response);
+
+    return res.json(response);
   } catch (e) {
     console.error("listInternships error", e);
     return res.status(500).json({
@@ -20,6 +25,9 @@ export async function listInternships(req, res) {
 
 export async function createInternship(req, res) {
   try {
+    console.log("createInternship called with body:", req.body);
+    console.log("Admin info:", req.admin);
+
     const {
       name,
       company,
@@ -40,6 +48,7 @@ export async function createInternship(req, res) {
       !contactNumber ||
       !contactEmail
     ) {
+      console.log("Validation failed - missing required fields");
       return res.status(400).json({
         status: "error",
         message: "Missing required fields",
@@ -57,11 +66,24 @@ export async function createInternship(req, res) {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(contactEmail)) {
+      console.log("Validation failed - invalid email format");
       return res.status(400).json({
         status: "error",
         message: "Invalid email format",
       });
     }
+
+    console.log("Creating internship with data:", {
+      name: name.trim(),
+      company: company.trim(),
+      role: role.trim(),
+      stipend: stipend ? stipend.trim() : "",
+      description: description.trim(),
+      contactNumber: contactNumber.trim(),
+      contactEmail: contactEmail.trim().toLowerCase(),
+      applyUrl: applyUrl ? applyUrl.trim() : "",
+      createdBy: req.admin?.id || null,
+    });
 
     const internship = await Internship.create({
       name: name.trim(),
@@ -75,7 +97,11 @@ export async function createInternship(req, res) {
       createdBy: req.admin?.id || null,
     });
 
-    return res.status(201).json({ status: "ok", data: { internship } });
+    console.log("Internship created successfully:", internship);
+    const response = { status: "ok", data: { internship } };
+    console.log("Sending response:", response);
+
+    return res.status(201).json(response);
   } catch (e) {
     console.error("createInternship error", e);
 
