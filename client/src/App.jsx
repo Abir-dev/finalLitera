@@ -19,6 +19,7 @@ import AlgoBridge from "./pages/AlgoBridge.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import Profile from "./pages/Profile.jsx";
 import Billing from "./pages/Billing.jsx";
+import DashboardWallet from "./pages/DashboardWallet.jsx";
 import Logout from "./pages/Logout.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Internships from "./pages/Internships.jsx";
@@ -40,6 +41,7 @@ import AdminAnalytics from "./pages/AdminAnalytics.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
 import AdminInternships from "./pages/AdminInternships.jsx";
 import AdminCoupons from "./pages/AdminCoupons.jsx";
+import AdminCoins from "./pages/AdminCoins.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
 
@@ -75,6 +77,7 @@ export default function App() {
         <Route path="internships" element={<Internships />} />
         <Route path="exam/:id" element={<ExamDetails />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="wallet" element={<DashboardWallet />} />
         <Route path="profile" element={<Profile />} />
         <Route path="billing" element={<Billing />} />
         <Route path="logout" element={<Logout />} />
@@ -83,26 +86,26 @@ export default function App() {
 
       {/* Admin Routes */}
       <Route
-  path="/admin"
-  element={
-    <ProtectedRoute requiredRole="admin">
-      <AdminLayout />
-    </ProtectedRoute>
-  }
->
-  <Route index element={<Navigate to="dashboard" replace />} />
-  <Route path="dashboard" element={<AdminDashboard />} />
-  <Route path="students" element={<AdminStudents />} />
-  <Route path="courses" element={<AdminCourseManagement />} />
-  <Route path="exams" element={<AdminExams />} />
-  <Route path="internships" element={<AdminInternships />} />
-  <Route path="analytics" element={<AdminAnalytics />} />
-  <Route path="settings" element={<AdminSettings />} />
-  <Route path="coupons" element={<AdminCoupons />} />
-</Route>
+        path="/admin"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="students" element={<AdminStudents />} />
+        <Route path="courses" element={<AdminCourseManagement />} />
+        <Route path="exams" element={<AdminExams />} />
+        <Route path="internships" element={<AdminInternships />} />
+        <Route path="analytics" element={<AdminAnalytics />} />
+        <Route path="settings" element={<AdminSettings />} />
+        <Route path="coupons" element={<AdminCoupons />} />
+        <Route path="coins" element={<AdminCoins />} />
+      </Route>
 
-<Route path="/unauthorized" element={<Unauthorized />} />
-
+      <Route path="/unauthorized" element={<Unauthorized />} />
 
       {/* Redirect old subscription route to dashboard */}
       <Route
