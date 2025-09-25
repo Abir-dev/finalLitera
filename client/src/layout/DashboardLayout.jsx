@@ -1,5 +1,5 @@
 // src/layout/DashboardLayout.jsx
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useState, useEffect } from "react";
@@ -24,7 +24,8 @@ const menu = [
 ];
 
 export default function DashboardLayout() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [userStats, setUserStats] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -53,15 +54,17 @@ export default function DashboardLayout() {
             {/* Standard Sidebar Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <span className="text-lg">📚</span>
+                <div className="">
+                  <img 
+                    className="w-15 h-15" src="/icons/kinglogo.png" alt="logo"
+                  />
                 </div>
                 <div>
-                  <h1 className="text-base font-bold text-white">Litera</h1>
+                  <h1 className="font-thin text-xl text-white">Litera</h1>
                   <p className="text-xs text-gray-400">Learning Platform</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex flex-col items-center gap-1">
                 <button
                   onClick={() => window.location.reload()}
                   className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/10 transition-all duration-200"
@@ -82,6 +85,28 @@ export default function DashboardLayout() {
                     <path d="M21 3v5h-5" />
                     <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
                     <path d="M8 16H3v5" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/10 transition-all duration-200"
+                  title="Home"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 11.5L12 4l9 7.5" />
+                    <path d="M9 21V12h6v9" />
                   </svg>
                 </button>
               </div>
@@ -170,8 +195,8 @@ export default function DashboardLayout() {
             </div>
 
             {/* Enhanced Bottom Actions */}
-            <div className="p-4 border-t border-white/10 sticky bottom-0 bg-gray-900/80 backdrop-blur-sm">
-              <NavLink
+            <div className="p-4 border-t border-white/10 ">
+              {/* <NavLink
                 to="/"
                 className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-300 group hover:scale-105"
               >
@@ -193,7 +218,16 @@ export default function DashboardLayout() {
                 <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors duration-300">
                   Home
                 </span>
-              </NavLink>
+              </NavLink> */}
+
+              <div onClick={async () => { await logout(); navigate('/'); }} className="items-center justify-center flex flex-row gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-300 group hover:scale-105 cursor-pointer" role="button" tabIndex={0}>
+                <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors duration-300 ">
+                  Logout
+                </span>
+                <img
+                    className="w-8 h-8 rounded-full invert" src="/icons/logout.svg" alt="logout"
+                  />
+              </div>
             </div>
           </div>
         </aside>
@@ -250,17 +284,15 @@ export default function DashboardLayout() {
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                        <span className="text-lg">📚</span>
-                      </div>
-                      <div>
-                        <h1 className="text-base font-bold text-white">
-                          Litera
-                        </h1>
-                        <p className="text-xs text-gray-400">
-                          Learning Platform
-                        </p>
-                      </div>
+                       <div className="">
+                  <img 
+                    className="w-15 h-15" src="/icons/kinglogo.png" alt="logo"
+                  />
+                </div>
+                <div>
+                  <h1 className="font-thin text-xl text-white">Litera</h1>
+                  <p className="text-xs text-gray-400">Learning Platform</p>
+                </div>
                     </div>
                     <button
                       onClick={() => setMobileMenuOpen(false)}

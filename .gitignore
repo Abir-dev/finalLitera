@@ -53,3 +53,4 @@ client/coverage/
 # Temporary files
 *.tmp
 *.temp
+.config/
