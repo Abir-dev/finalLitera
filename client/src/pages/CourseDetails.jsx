@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { courseService } from "../services/courseService";
@@ -6,6 +6,8 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import LoginModal from "../components/LoginModal.jsx";
 import SignupModal from "../components/SignupModal.jsx";
+import { getUserWallet } from "../services/walletService.js";
+import { listCoinSettings } from "../services/walletService.js";
 
 function Star({ filled }) {
   return (
@@ -31,12 +33,22 @@ export default function CourseDetails() {
   const [error, setError] = useState(null);
   const [similarCourses, setSimilarCourses] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [orderInfo, setOrderInfo] = useState(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [refundAccepted, setRefundAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [walletInfo, setWalletInfo] = useState(null);
+  const [coinSetting, setCoinSetting] = useState(null);
+  const [coinsToUse, setCoinsToUse] = useState(0);
+  const [coinPreview, setCoinPreview] = useState({
+    usableCoins: 0,
+    discountValue: 0,
+    finalPricePreview: null,
+  });
 
   useEffect(() => {
     const existing = location.state?.course;
@@ -82,6 +94,56 @@ export default function CourseDetails() {
       }
     })();
   }, [course]);
+
+  // Load wallet and coin settings when checkout opens (hooks must run before returns)
+  useEffect(() => {
+    (async () => {
+      if (!showCheckout || !user) return;
+      try {
+        const uid = user?.id || user?._id;
+        const w = await getUserWallet(uid);
+        setWalletInfo(w);
+      } catch {
+        setWalletInfo(null);
+      }
+      try {
+        const settings = await listCoinSettings();
+        setCoinSetting(
+          Array.isArray(settings) && settings.length > 0 ? settings[0] : null
+        );
+      } catch {
+        setCoinSetting(null);
+      }
+    })();
+  }, [showCheckout, user]);
+
+  // Recalculate coin discount preview when inputs change
+  useEffect(() => {
+    if (!course?.price || !coinSetting) {
+      setCoinPreview({
+        usableCoins: 0,
+        discountValue: 0,
+        finalPricePreview: null,
+      });
+      return;
+    }
+    const price = Number(course.price) || 0;
+    const balance = Number(walletInfo?.wallet?.balance || 0);
+    const rate = Number(coinSetting.coinToCurrencyRate || 0);
+    const maxPct = Number(coinSetting.maxDiscountPercentPerPurchase || 0);
+    const maxDiscountAllowed = price * (maxPct / 100);
+    const requestedCoins = Math.max(0, Math.floor(Number(coinsToUse) || 0));
+    const maxCoinsByBalance = balance;
+    const maxCoinsByPct = rate > 0 ? Math.floor(maxDiscountAllowed / rate) : 0;
+    const usableCoins = Math.min(
+      requestedCoins,
+      maxCoinsByBalance,
+      maxCoinsByPct
+    );
+    const discountValue = usableCoins * rate;
+    const finalPricePreview = Math.max(0, price - discountValue);
+    setCoinPreview({ usableCoins, discountValue, finalPricePreview });
+  }, [coinsToUse, walletInfo, coinSetting, course]);
 
   if (!user && !isLoginModalOpen) {
     // If user is not logged in and landed directly here, prompt login first
@@ -192,7 +254,7 @@ export default function CourseDetails() {
         .split(/\n/)
         .map((l) => l.trim())
         .filter(Boolean);
-      const bulletLines = lines.filter((l) => /^(\-|\*|•)\s+/.test(l));
+      const bulletLines = lines.filter((l) => /^(-|\*|•)\s+/.test(l));
       if (bulletLines.length === lines.length && lines.length > 0) {
         return (
           <ul
@@ -201,7 +263,7 @@ export default function CourseDetails() {
             style={{ color: "var(--text-secondary)" }}
           >
             {bulletLines.map((l, i) => (
-              <li key={i}>{l.replace(/^(\-|\*|•)\s+/, "")}</li>
+              <li key={i}>{l.replace(/^(-|\*|•)\s+/, "")}</li>
             ))}
           </ul>
         );
@@ -220,37 +282,21 @@ export default function CourseDetails() {
 
   // Enroll/Register handlers
   const handleEnrollClick = async () => {
+    // Always clear any stale checkout state before starting a new flow
+    setShowCheckout(false);
+    setTermsAccepted(false);
+    setRefundAccepted(false);
+    setPrivacyAccepted(false);
+
     if (!user) {
       setIsLoginModalOpen(true);
       return;
     }
 
-    // Debug: Test authentication first
-    try {
-      console.log("Testing authentication...");
-      const authTest = await courseService.testAuth();
-      console.log("Auth test result:", authTest);
-    } catch (authError) {
-      console.error("Auth test failed:", authError);
-      alert("Authentication failed. Please login again.");
-      return;
-    }
-
-    try {
-      console.log("Creating order for course:", display.id);
-      // send coupon code if present to apply discount immediately
-      const result = await courseService.createOrder(display.id, couponCode || appliedCoupon);
-      setOrderInfo(result.data);
-      setShowCheckout(true);
-    } catch (e) {
-      console.error("Order creation error:", e);
-      alert(e.message || "Failed to initiate payment");
-    }
+    // Just show the checkout modal without creating an order
+    // Order will be created only when user clicks "Pay Now"
+    setShowCheckout(true);
   };
-
-  const [couponCode, setCouponCode] = React.useState("");
-  const [appliedCoupon, setAppliedCoupon] = React.useState("");
-  const [couponError, setCouponError] = React.useState("");
 
   const applyCoupon = async () => {
     setCouponError("");
@@ -264,17 +310,8 @@ export default function CourseDetails() {
     }
   };
 
-  const launchRazorpay = () => {
+  const launchRazorpay = async () => {
     console.log("launchRazorpay called");
-    console.log("orderInfo:", orderInfo);
-    console.log("window.Razorpay:", window.Razorpay);
-    console.log("VITE_RAZORPAY_KEY_ID:", import.meta.env.VITE_RAZORPAY_KEY_ID);
-
-    if (!orderInfo?.order) {
-      console.error("No order info available");
-      alert("Order information not available");
-      return;
-    }
 
     if (!termsAccepted || !refundAccepted || !privacyAccepted) {
       alert(
@@ -296,25 +333,62 @@ export default function CourseDetails() {
     }
 
     try {
+      // Calculate payment amount (no order creation yet)
+      const coursePrice = Number(course.price) || 0;
+      const discountAmount = coinPreview.discountValue || 0;
+      const finalAmount = Math.max(0, coursePrice - discountAmount);
+      const amountInPaise = Math.round(finalAmount * 100); // Convert to paise
+
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderInfo.order.amount,
-        currency: orderInfo.order.currency,
+        amount: amountInPaise,
+        currency: "INR",
         name: display.title,
         description: "Course Enrollment",
-        order_id: orderInfo.order.id,
-        notes: orderInfo.order.notes,
-        handler: function (response) {
-          // After payment success, close modal and redirect
-          setShowCheckout(false);
-          setOrderInfo(null);
-          navigate("/dashboard/subscription");
+        notes: {
+          courseId: display.id,
+          couponCode: couponCode || appliedCoupon,
+          coinsUsed: coinPreview.usableCoins,
+        },
+        handler: async function (response) {
+          console.log("Payment successful:", response);
+
+          try {
+            // Verify payment and create enrollment only after successful payment
+            console.log("Verifying payment and creating enrollment...");
+            const paymentData = {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id || null, // May be null for direct payments
+              razorpay_signature: response.razorpay_signature,
+              courseId: display.id,
+              couponCode: couponCode || appliedCoupon,
+              coinsUsed: coinPreview.usableCoins,
+            };
+
+            const result = await courseService.verifyPayment(paymentData);
+
+            if (result?.status === "success") {
+              console.log(
+                "Payment verified and enrollment created successfully"
+              );
+              // Close modal and redirect
+              setShowCheckout(false);
+              navigate("/dashboard/subscription");
+            } else {
+              throw new Error("Payment verification failed");
+            }
+          } catch (error) {
+            console.error("Error verifying payment:", error);
+            alert(
+              "Payment successful but enrollment failed. Please contact support."
+            );
+            setShowCheckout(false);
+          }
         },
         modal: {
           ondismiss: function () {
             // When user closes the modal, reset state
             setShowCheckout(false);
-            setOrderInfo(null);
           },
         },
         prefill: {},
@@ -333,15 +407,10 @@ export default function CourseDetails() {
       rzp.open();
       console.log("Razorpay opened");
     } catch (error) {
-      console.error("Error launching Razorpay:", error);
-      // Suppress CORS-related errors that are harmless
-      if (error.message && error.message.includes("x-rtb-fingerprint-id")) {
-        console.warn(
-          "CORS warning suppressed - this is a known Razorpay issue and doesn't affect functionality"
-        );
-        return;
-      }
-      alert("Error in opening checkout: " + error.message);
+      console.error("Error launching payment:", error);
+      alert("Error launching payment: " + error.message);
+      // Clear any residual state
+      setShowCheckout(false);
     }
   };
 
@@ -410,7 +479,10 @@ export default function CourseDetails() {
                 {display.rating}
               </span>
             </div>
-            <span className="text-xs sm:text-sm" style={{ color: "var(--text-muted)" }}>
+            <span
+              className="text-xs sm:text-sm"
+              style={{ color: "var(--text-muted)" }}
+            >
               {display.students} students enrolled
             </span>
           </div>
@@ -426,7 +498,10 @@ export default function CourseDetails() {
             >
               Course Overview
             </h2>
-            <div className="text-sm sm:text-base" style={{ color: "var(--text-secondary)" }}>
+            <div
+              className="text-sm sm:text-base"
+              style={{ color: "var(--text-secondary)" }}
+            >
               {renderDescription(display.description)}
             </div>
 
@@ -559,7 +634,9 @@ export default function CourseDetails() {
                                     d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                                   />
                                 </svg>
-                                <p className="text-xs sm:text-sm">Video not available</p>
+                                <p className="text-xs sm:text-sm">
+                                  Video not available
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -841,7 +918,7 @@ export default function CourseDetails() {
       </div>
 
       {/* Checkout Modal */}
-      {showCheckout && orderInfo && (
+      {showCheckout && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-3 sm:p-4">
           <div
             className="rounded-xl shadow-xl w-full max-w-sm sm:max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto"
@@ -860,7 +937,6 @@ export default function CourseDetails() {
               <button
                 onClick={() => {
                   setShowCheckout(false);
-                  setOrderInfo(null);
                   setTermsAccepted(false);
                   setRefundAccepted(false);
                   setPrivacyAccepted(false);
@@ -880,63 +956,248 @@ export default function CourseDetails() {
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   placeholder="Enter coupon code"
                   className="flex-1 p-2 rounded border"
-                  style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                  style={{
+                    background: "var(--bg-secondary)",
+                    border: "1px solid var(--border)",
+                    color: "var(--text-primary)",
+                  }}
                 />
                 <button
                   type="button"
                   onClick={applyCoupon}
                   className="px-4 py-2 rounded font-semibold"
-                  style={{ background: "var(--brand)", color: "var(--text-accent)" }}
+                  style={{
+                    background: "var(--brand)",
+                    color: "var(--text-accent)",
+                  }}
                 >
                   Apply
                 </button>
               </div>
               {appliedCoupon && (
-                <p className="text-xs" style={{ color: "var(--accent-emerald)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--accent-emerald)" }}
+                >
                   Applied: {appliedCoupon}
                 </p>
               )}
+              {/* Coins usage */}
+              <div
+                className="mt-2 p-3 rounded border"
+                style={{
+                  background: "var(--bg-secondary)",
+                  border: "1px solid var(--border)",
+                }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    💰 Use Coins
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-xs px-2 py-1 rounded"
+                      style={{
+                        background: "var(--surface)",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      Balance: {walletInfo?.wallet?.balance ?? 0}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={coinsToUse}
+                    onChange={(e) => setCoinsToUse(e.target.value)}
+                    className="flex-1 p-2 rounded border"
+                    style={{
+                      background: "var(--bg-primary)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text-primary)",
+                    }}
+                    placeholder="Coins to use"
+                  />
+                  <button
+                    type="button"
+                    className="px-3 py-2 rounded font-semibold text-xs"
+                    style={{
+                      background: "var(--brand)",
+                      color: "var(--text-accent)",
+                    }}
+                    onClick={() => {
+                      if (!coinSetting) return;
+                      const price = Number(course?.price || 0);
+                      const balance = Number(walletInfo?.wallet?.balance || 0);
+                      const rate = Number(coinSetting.coinToCurrencyRate || 0);
+                      const maxPct = Number(
+                        coinSetting.maxDiscountPercentPerPurchase || 0
+                      );
+                      const maxDiscountAllowed = price * (maxPct / 100);
+                      const maxCoinsByPct =
+                        rate > 0 ? Math.floor(maxDiscountAllowed / rate) : 0;
+                      setCoinsToUse(String(Math.min(balance, maxCoinsByPct)));
+                    }}
+                  >
+                    Max
+                  </button>
+                </div>
+
+                {coinSetting && (
+                  <div
+                    className="mt-2 text-xs p-2 rounded"
+                    style={{
+                      background: "var(--surface)",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    💡 Rate: 1 coin = ₹{coinSetting.coinToCurrencyRate} | Max{" "}
+                    {coinSetting.maxDiscountPercentPerPurchase}% of course price
+                  </div>
+                )}
+
+                {/* Coin Preview */}
+                {coinPreview.usableCoins > 0 && (
+                  <div
+                    className="mt-3 p-2 rounded"
+                    style={{ background: "var(--surface)" }}
+                  >
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="text-center">
+                        <div style={{ color: "var(--text-muted)" }}>
+                          Coins Applied
+                        </div>
+                        <div
+                          className="font-semibold"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {coinPreview.usableCoins}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div style={{ color: "var(--text-muted)" }}>
+                          Discount Value
+                        </div>
+                        <div
+                          className="font-semibold"
+                          style={{ color: "var(--accent-emerald)" }}
+                        >
+                          ₹{coinPreview.discountValue.toLocaleString("en-IN")}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Validation Messages */}
+                {Number(coinsToUse) >
+                  Number(walletInfo?.wallet?.balance || 0) && (
+                  <div
+                    className="mt-2 text-xs"
+                    style={{ color: "var(--accent-rose)" }}
+                  >
+                    ⚠️ You don't have enough coins
+                  </div>
+                )}
+                {Number(coinsToUse) > 0 &&
+                  coinPreview.usableCoins < Number(coinsToUse) && (
+                    <div
+                      className="mt-2 text-xs"
+                      style={{ color: "var(--accent-rose)" }}
+                    >
+                      ⚠️ Maximum coins allowed: {coinPreview.usableCoins}
+                    </div>
+                  )}
+              </div>
               {couponError && (
                 <p className="text-xs" style={{ color: "var(--accent-rose)" }}>
                   {couponError}
                 </p>
               )}
-              <div className="flex items-center justify-between">
-                <span
-                  className="text-xs sm:text-sm"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  Original Price
-                </span>
-                <span
-                  className="text-xs sm:text-sm line-through"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {orderInfo.course.originalPrice
-                    ? `₹${Number(orderInfo.course.originalPrice).toLocaleString(
-                        "en-IN"
-                      )}`
-                    : ""}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  You Pay
-                  {orderInfo.course.discountPercent > 0 && (
-                    <span className="ml-2 text-xs" style={{ color: "var(--accent-gold)" }}>
-                      ({orderInfo.course.discountPercent}% OFF)
+              {/* Price Breakdown */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Course Price
+                  </span>
+                  <span
+                    className="text-lg sm:text-xl font-bold"
+                    style={{ color: "var(--brand)" }}
+                  >
+                    {display.price}
+                  </span>
+                </div>
+
+                {/* Coin Discount Display */}
+                {coinPreview.discountValue > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Coin Discount ({coinPreview.usableCoins} coins)
                     </span>
-                  )}
-                </span>
-                <span
-                  className="text-lg sm:text-xl font-bold"
-                  style={{ color: "var(--brand)" }}
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: "var(--accent-emerald)" }}
+                    >
+                      -₹{coinPreview.discountValue.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                )}
+
+                {/* Final Price Display */}
+                <div
+                  className="border-t pt-2 mt-2"
+                  style={{ borderColor: "var(--border)" }}
                 >
-                  ₹{Number(orderInfo.course.price).toLocaleString("en-IN")}
-                </span>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-base font-semibold"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Total Amount
+                    </span>
+                    <span
+                      className="text-xl font-bold"
+                      style={{
+                        color:
+                          coinPreview.finalPricePreview &&
+                          coinPreview.finalPricePreview < Number(course.price)
+                            ? "var(--accent-emerald)"
+                            : "var(--brand)",
+                      }}
+                    >
+                      ₹
+                      {(
+                        coinPreview.finalPricePreview || Number(course.price)
+                      ).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  {coinPreview.finalPricePreview &&
+                    coinPreview.finalPricePreview < Number(course.price) && (
+                      <div
+                        className="text-xs mt-1"
+                        style={{ color: "var(--accent-emerald)" }}
+                      >
+                        You save ₹
+                        {(
+                          Number(course.price) - coinPreview.finalPricePreview
+                        ).toLocaleString("en-IN")}
+                        !
+                      </div>
+                    )}
+                </div>
               </div>
             </div>
 

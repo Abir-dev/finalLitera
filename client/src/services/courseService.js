@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // API base URL - adjust according to your server configuration
-const API_URL = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
 
 // Create axios instance with default configuration
 const api = axios.create({
@@ -32,19 +33,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle different types of errors
-    if (error.code === 'ECONNABORTED') {
-      console.warn('Request timeout - server may be slow');
-    } else if (error.code === 'ERR_NETWORK') {
-      console.warn('Network error - check your connection');
+    if (error.code === "ECONNABORTED") {
+      console.warn("Request timeout - server may be slow");
+    } else if (error.code === "ERR_NETWORK") {
+      console.warn("Network error - check your connection");
     } else if (error.response?.status === 401) {
       // Token expired or invalid
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
     } else if (error.response?.status >= 500) {
-      console.warn('Server error - please try again later');
+      console.warn("Server error - please try again later");
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -207,7 +208,10 @@ export const courseService = {
   // Payments
   createOrder: async (courseId, promoCode) => {
     try {
-      const response = await api.post("/payments/create-order", { courseId, promoCode });
+      const response = await api.post("/payments/create-order", {
+        courseId,
+        promoCode,
+      });
       return response.data; // { status, data: { order, course } }
     } catch (error) {
       console.error("Error creating order:", error);
@@ -217,10 +221,23 @@ export const courseService = {
   // Coupons
   validateCoupon: async (code, courseId) => {
     try {
-      const response = await api.get(`/coupons/validate`, { params: { code, courseId } });
+      const response = await api.get(`/coupons/validate`, {
+        params: { code, courseId },
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: "Invalid coupon" };
+    }
+  },
+
+  // Verify payment and create enrollment
+  verifyPayment: async (paymentData) => {
+    try {
+      const response = await api.post("/payments/verify-payment", paymentData);
+      return response.data;
+    } catch (error) {
+      console.error("Error verifying payment:", error);
+      throw error.response?.data || { message: "Failed to verify payment" };
     }
   },
 };

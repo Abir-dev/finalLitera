@@ -75,7 +75,14 @@ router.post("/create-order", protect, async (req, res) => {
 
     let price = Number(course.price);
     let appliedDiscount = 0;
-    let couponNotes = {};
+
+    // Prepare base order options early so promo code block can safely attach notes
+    let orderOptions = {
+      amount: undefined, // set after discounts
+      currency: course.currency || "INR",
+      receipt: undefined, // set below
+      notes: { courseId: String(course._id), userId: String(req.user.id) },
+    };
 
     // Apply promo code if provided
     if (promoCode) {
@@ -83,14 +90,14 @@ router.post("/create-order", protect, async (req, res) => {
         const { default: Coupon } = await import("../models/Coupon.js");
         const coupon = await Coupon.findOne({
           code: String(promoCode).trim().toUpperCase(),
+          course: courseId,
           isActive: true,
-          $or: [
-            { course: null },
-            { course: courseId },
-          ],
         });
-        if (coupon && !coupon.isExpired() && !coupon.isExhausted()) {
-          appliedDiscount = Math.min(100, Math.max(0, Number(coupon.percentOff)));
+        if (coupon && !coupon.isExpired()) {
+          appliedDiscount = Math.min(
+            100,
+            Math.max(0, Number(coupon.percentOff))
+          );
           const discounted = price * (1 - appliedDiscount / 100);
           price = Math.max(0, Math.round(discounted));
           // Increment usage count asynchronously
@@ -103,8 +110,9 @@ router.post("/create-order", protect, async (req, res) => {
           } catch (incErr) {
             console.warn("Failed to increment coupon usage:", incErr?.message);
           }
-          // Prepare coupon notes (attach later when orderOptions is created)
-          couponNotes = {
+          // Attach coupon to notes (orderOptions initialized earlier)
+          orderOptions.notes = {
+            ...orderOptions.notes,
             couponCode: coupon.code,
             discountPercent: appliedDiscount,
           };
@@ -117,65 +125,14 @@ router.post("/create-order", protect, async (req, res) => {
     const amountInPaise = Math.round(price * 100);
     console.log("Creating Razorpay order with amount:", amountInPaise);
 
-    const orderOptions = {
-      amount: amountInPaise,
-      currency: course.currency || "INR",
-      receipt: `c_${String(course._id).slice(-12)}_${Date.now()
-        .toString()
-        .slice(-8)}`,
-      notes: { courseId: String(course._id), userId: String(req.user.id), ...couponNotes },
-    };
+    orderOptions.amount = amountInPaise;
+    orderOptions.receipt = `c_${String(course._id).slice(-12)}_${Date.now()
+      .toString()
+      .slice(-8)}`;
     console.log("Order options:", orderOptions);
 
     const order = await razorInstance.orders.create(orderOptions);
     console.log("Razorpay order created successfully:", order.id);
-
-    // Check if user is already enrolled in this course
-    const user = await User.findById(req.user.id);
-    if (user.isEnrolledInCourse(courseId)) {
-      return res.status(400).json({
-        status: "error",
-        message: "Already enrolled in this course"
-      });
-    }
-
-    // Create enrollment record in Enrollment collection
-    const enrollment = await Enrollment.findOneAndUpdate(
-      { user: req.user.id, course: courseId },
-      {
-        user: req.user.id,
-        course: courseId,
-        status: "active",
-        payment: {
-          amount: course.price,
-          currency: course.currency || "INR",
-          paymentMethod: "razorpay",
-          transactionId: order.id,
-          paidAt: null, // Will be updated when payment is captured
-        },
-      },
-      { upsert: true, new: true }
-    );
-
-    // Add enrollment to User model's enrolledCourses array for backward compatibility
-    if (!user.isEnrolledInCourse(courseId)) {
-      await user.enrollInCourse(courseId);
-      console.log("Added enrollment to User model for user:", req.user.id);
-    }
-
-    // Increment course enrollment count
-    await course.incrementEnrollment();
-
-    // Create notification
-    await Notification.create({
-      user: req.user.id,
-      type: 'course_enrollment',
-      title: 'Course Enrollment Confirmed',
-      message: `You have successfully enrolled in "${course.title}"`,
-      data: { courseId: course._id, enrollmentId: enrollment._id }
-    });
-
-    console.log("Enrollment created successfully:", enrollment._id);
 
     res.status(200).json({
       status: "success",
@@ -187,11 +144,9 @@ router.post("/create-order", protect, async (req, res) => {
           originalPrice: course.originalPrice,
           currency: course.currency || "INR",
           discountPercent: appliedDiscount,
-          appliedCoupon: promoCode ? String(promoCode).trim().toUpperCase() : undefined,
-        },
-        enrollment: {
-          id: enrollment._id,
-          status: enrollment.status,
+          appliedCoupon: promoCode
+            ? String(promoCode).trim().toUpperCase()
+            : undefined,
         },
       },
     });
@@ -203,13 +158,178 @@ router.post("/create-order", protect, async (req, res) => {
       statusCode: error.statusCode,
       description: error.description,
     });
-    res
-      .status(500)
-      .json({
+    res.status(500).json({
+      status: "error",
+      message: "Failed to create order",
+      details: error.message,
+    });
+  }
+});
+
+// Verify payment and create order
+router.post("/verify-payment", protect, async (req, res) => {
+  try {
+    const {
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+      courseId,
+      couponCode,
+      coinsUsed,
+    } = req.body;
+
+    if (!razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({
         status: "error",
-        message: "Failed to create order",
-        details: error.message,
+        message: "Missing payment verification data",
       });
+    }
+
+    // Verify the payment signature (only if order_id is provided)
+    if (razorpay_order_id) {
+      const razorpaySecret = process.env.RAZORPAY_KEY_SECRET;
+      const body = razorpay_order_id + "|" + razorpay_payment_id;
+      const expectedSignature = crypto
+        .createHmac("sha256", razorpaySecret)
+        .update(body)
+        .digest("hex");
+
+      if (expectedSignature !== razorpay_signature) {
+        return res.status(400).json({
+          status: "error",
+          message: "Invalid payment signature",
+        });
+      }
+    }
+
+    // Get payment details from Razorpay
+    const payment = await razorInstance.payments.fetch(razorpay_payment_id);
+
+    if (payment.status !== "captured") {
+      return res.status(400).json({
+        status: "error",
+        message: "Payment not captured",
+      });
+    }
+
+    // Find the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        status: "error",
+        message: "Course not found",
+      });
+    }
+
+    // Process coin deduction if coins were used
+    if (coinsUsed && coinsUsed > 0) {
+      try {
+        const Wallet = (await import("../models/Wallet.js")).default;
+        const WalletTransaction = (
+          await import("../models/WalletTransaction.js")
+        ).default;
+
+        const wallet = await Wallet.findOne({ user: req.user.id });
+        if (!wallet) {
+          return res.status(400).json({
+            status: "error",
+            message: "User wallet not found",
+          });
+        }
+
+        if (wallet.balance < coinsUsed) {
+          return res.status(400).json({
+            status: "error",
+            message: "Insufficient coin balance",
+          });
+        }
+
+        // Deduct coins from wallet
+        const balanceBefore = wallet.balance;
+        wallet.balance -= coinsUsed;
+        wallet.totalRevoked += coinsUsed;
+        await wallet.save();
+
+        // Create wallet transaction record
+        await WalletTransaction.create({
+          user: req.user.id,
+          type: "purchase",
+          amount: coinsUsed,
+          balanceBefore,
+          balanceAfter: wallet.balance,
+          course: courseId,
+          metadata: {
+            reason: "Course purchase",
+            orderId: payment.id,
+            referenceId: razorpay_payment_id,
+          },
+          status: "completed",
+        });
+
+        console.log(
+          `Deducted ${coinsUsed} coins from user ${req.user.id} for course ${courseId}`
+        );
+      } catch (coinError) {
+        console.error("Error processing coin deduction:", coinError);
+        return res.status(500).json({
+          status: "error",
+          message: "Failed to process coin deduction",
+        });
+      }
+    }
+
+    // Create enrollment
+    const enrollment = await Enrollment.findOneAndUpdate(
+      { user: req.user.id, course: courseId },
+      {
+        user: req.user.id,
+        course: courseId,
+        status: "active",
+        payment: {
+          amount: payment.amount / 100,
+          currency: payment.currency || "INR",
+          paymentMethod: payment.method,
+          transactionId: payment.id,
+          paidAt: new Date(payment.created_at * 1000),
+          coinsUsed: coinsUsed || 0,
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    // Add to User model's enrolledCourses array
+    const user = await User.findById(req.user.id);
+    if (user && !user.isEnrolledInCourse(courseId)) {
+      await user.enrollInCourse(courseId);
+    }
+
+    // Create notification
+    await Notification.create({
+      user: req.user.id,
+      type: "enrollment",
+      title: "Course Enrollment Successful",
+      message: `You have successfully enrolled in ${course.title}`,
+      data: { courseId, enrollmentId: enrollment._id },
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Payment verified and enrollment created",
+      data: {
+        enrollment,
+        course: {
+          id: course._id,
+          title: course.title,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Payment verification error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Payment verification failed",
+      details: error.message,
+    });
   }
 });
 
@@ -235,18 +355,41 @@ router.post(
       }
 
       const event = JSON.parse(req.body.toString());
-      if (event.event === "payment.captured" || event.event === "order.paid") {
-        const notes =
-          event.payload?.payment?.entity?.notes ||
-          event.payload?.order?.entity?.notes ||
-          {};
+
+      // Only proceed for actual captured payments
+      if (event.event === "payment.captured") {
+        console.log("Payment captured webhook received:", event);
+        const paymentEntity = event.payload?.payment?.entity || {};
+        const notes = paymentEntity.notes || {};
         const courseId = notes.courseId;
         const userId = notes.userId;
-        const paymentEntity = event.payload?.payment?.entity || {};
 
-        if (courseId && userId) {
+        console.log("Webhook data:", { courseId, userId, paymentEntity });
+
+        // Hard guards: require captured status and positive amount
+        const isCaptured =
+          Boolean(paymentEntity.captured) ||
+          paymentEntity.status === "captured";
+        const amountPaise = Number(paymentEntity.amount || 0);
+
+        if (!isCaptured || amountPaise <= 0) {
+          console.warn(
+            "Ignoring webhook: payment not captured or zero amount",
+            {
+              isCaptured,
+              amountPaise,
+              paymentId: paymentEntity.id,
+            }
+          );
+        } else if (courseId && userId) {
+          console.log(
+            "Processing enrollment for user:",
+            userId,
+            "course:",
+            courseId
+          );
           try {
-            // Create enrollment in Enrollment collection
+            // Create or update enrollment as paid
             const enrollment = await Enrollment.findOneAndUpdate(
               { user: userId, course: courseId },
               {
@@ -254,7 +397,7 @@ router.post(
                 course: courseId,
                 status: "active",
                 payment: {
-                  amount: paymentEntity.amount / 100,
+                  amount: amountPaise / 100,
                   currency: paymentEntity.currency || "INR",
                   paymentMethod: paymentEntity.method,
                   transactionId: paymentEntity.id,

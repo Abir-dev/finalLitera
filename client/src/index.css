@@ -1064,11 +1064,65 @@ section {
 
 /* Dashboard Sidebar Fixes */
 .dashboard-sidebar {
-  height: calc(100vh - 2rem);
-  max-height: calc(100vh - 2rem);
-  overflow: hidden;
+  /* Use box-sizing so padding is included in height calculations */
+  box-sizing: border-box;
+  /* remove external margins that can push the sidebar beyond viewport */
+  margin: 0 !important;
+  /* provide internal spacing instead of margins (matches original m-4) */
+  padding: 1rem;
+  /* ensure sidebar fits exactly the viewport height and doesn't exceed it */
+  height: 100vh;
+  max-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  /* Round only the RIGHT side of the sidebar; left edge stays square against viewport edge */
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: var(--radius-lg) !important;
+  border-bottom-right-radius: var(--radius-lg) !important;
+}
+
+/* Ensure the menu area can shrink/grow correctly and be the scrollable region */
+.dashboard-sidebar .sidebar-menu {
+  flex: 1 1 auto;
+  min-height: 0; /* allow flex child to be scrollable */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Keep bottom actions pinned visually within the sidebar */
+.dashboard-sidebar .p-4.border-t {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* Remove hover transform & shadow effects inside dashboard sidebar */
+.dashboard-sidebar .sidebar-menu a,
+.dashboard-sidebar .sidebar-menu a * {
+  transition: none !important;
+}
+
+.dashboard-sidebar .sidebar-menu a:hover,
+.dashboard-sidebar .sidebar-menu a:focus,
+.dashboard-sidebar .sidebar-menu .group:hover,
+.dashboard-sidebar .sidebar-menu .group:focus {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* For smaller screens where sidebar may be used as a panel, keep full rounding */
+@media (max-width: 767px) {
+  .dashboard-sidebar {
+    border-radius: var(--radius-lg) !important;
+    height: calc(100vh - 1rem);
+    max-height: calc(100vh - 1rem);
+    margin: 0.5rem;
+  }
 }
 
 /* Mobile Navigation Enhancements */

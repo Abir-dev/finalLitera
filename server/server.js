@@ -24,7 +24,9 @@ import couponRoutes from "./routes/coupons.js";
 import examRoutes from "./routes/exams.js";
 import liveClassRoutes from "./routes/liveClasses.js";
 import notificationRoutes from "./routes/notification.js";
+import walletRoutes from "./routes/wallet.js";
 import internshipRoutes from "./routes/internships.js";
+import debugRoutes from "./routes/debug.js";
 import connectCloudinary from "./utils/cloudinary.js";
 
 // Import Admin model
@@ -44,18 +46,18 @@ const io = new Server(httpServer, {
       "http://127.0.0.1:3000",
       "https://litera.in",
       "https://www.litera.in",
-      process.env.CLIENT_URL
+      process.env.CLIENT_URL,
     ].filter(Boolean),
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 // Attach io for controllers to use
-app.set('io', io);
+app.set("io", io);
 
-io.on('connection', (socket) => {
+io.on("connection", (socket) => {
   // Optional: client can authenticate and join their room
-  socket.on('register_user', (userId) => {
+  socket.on("register_user", (userId) => {
     if (userId) {
       socket.join(`user_${userId}`);
     }
@@ -196,6 +198,8 @@ app.use("/api/exams", examRoutes); // Exams routes
 app.use("/api/live-classes", liveClassRoutes); // Live classes routes
 app.use("/api/notifications", notificationRoutes); // Notifications routes
 app.use("/api/internships", internshipRoutes); // Internships routes
+app.use("/api/wallet", walletRoutes); // Wallet and coin settings routes
+app.use("/api/debug", debugRoutes); // Debug routes (for testing only)
 
 // --- HEALTH CHECK ---
 app.get("/api/health", (req, res) => {

@@ -5,6 +5,12 @@ import EditStudentModal from "../components/EditStudentModal.jsx";
 import CourseAssignmentModal from "../components/CourseAssignmentModal.jsx";
 import StudentViewModal from "../components/StudentViewModal.jsx";
 import {
+  adminAssignCoins,
+  adminRevokeCoins,
+  adminGetStudentWallet,
+} from "../services/walletService.js";
+import { listCoinSettings } from "../services/walletService.js";
+import {
   Users,
   UserCheck,
   GraduationCap,
@@ -37,6 +43,16 @@ export default function AdminStudents() {
   const [expandedStudent, setExpandedStudent] = useState(null);
   const [showStudentView, setShowStudentView] = useState(false);
   const [viewingStudent, setViewingStudent] = useState(null);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [walletTarget, setWalletTarget] = useState(null);
+  const [coinForm, setCoinForm] = useState({
+    amount: "",
+    reason: "",
+    notes: "",
+    coinId: "",
+  });
+  const [coinBusy, setCoinBusy] = useState(false);
+  const [coinOptions, setCoinOptions] = useState([]);
 
   // Add Student Form State
   const [newStudent, setNewStudent] = useState({
@@ -380,6 +396,66 @@ export default function AdminStudents() {
   const handleCloseStudentView = () => {
     setShowStudentView(false);
     setViewingStudent(null);
+  };
+
+  const openWalletModal = (student) => {
+    setWalletTarget(student);
+    setCoinForm({ amount: "", reason: "", notes: "", coinId: "" });
+    setShowWalletModal(true);
+  };
+
+  const closeWalletModal = () => {
+    setShowWalletModal(false);
+    setWalletTarget(null);
+  };
+
+  const handleAssignCoins = async () => {
+    if (!walletTarget?.id) return;
+    const amountNum = Number(coinForm.amount);
+    if (!amountNum || amountNum <= 0) {
+      alert("Enter a valid positive amount");
+      return;
+    }
+    try {
+      setCoinBusy(true);
+      await adminAssignCoins(walletTarget.id, {
+        amount: amountNum,
+        reason: coinForm.reason,
+        notes: coinForm.notes,
+        coinId: coinForm.coinId || undefined,
+      });
+      alert("Coins assigned successfully");
+      closeWalletModal();
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || "Failed to assign coins");
+    } finally {
+      setCoinBusy(false);
+    }
+  };
+
+  const handleRevokeCoins = async () => {
+    if (!walletTarget?.id) return;
+    const amountNum = Number(coinForm.amount);
+    if (!amountNum || amountNum <= 0) {
+      alert("Enter a valid positive amount");
+      return;
+    }
+    try {
+      setCoinBusy(true);
+      await adminRevokeCoins(walletTarget.id, {
+        amount: amountNum,
+        reason: coinForm.reason,
+        notes: coinForm.notes,
+      });
+      alert("Coins revoked successfully");
+      closeWalletModal();
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || "Failed to revoke coins");
+    } finally {
+      setCoinBusy(false);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -827,6 +903,15 @@ export default function AdminStudents() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  openWalletModal(student);
+                                }}
+                                className="btn-outline-premium px-3 py-2 flex items-center gap-2 justify-center text-xs"
+                              >
+                                💰 Coins
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   handleDeleteStudent(student.id);
                                 }}
                                 className="px-3 py-2 flex items-center gap-2 justify-center text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-all duration-300"
@@ -1198,6 +1283,258 @@ export default function AdminStudents() {
         onClose={handleCloseStudentView}
         onCourseAssigned={handleCourseAssigned}
       />
+
+      {/* Assign/Revoke Coins Modal */}
+      {showWalletModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={closeWalletModal}
+          ></div>
+          <div
+            className="relative w-full max-w-lg rounded-2xl overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <div
+              className="p-5 border-b"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Manage Coins
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {walletTarget?.name} • {walletTarget?.email}
+              </p>
+            </div>
+            <div className="p-5 space-y-4">
+              <CoinSelect
+                coinOptions={coinOptions}
+                value={coinForm.coinId}
+                onChange={(v) => setCoinForm({ ...coinForm, coinId: v })}
+                onOpen={async () => {
+                  try {
+                    const list = await listCoinSettings();
+                    setCoinOptions(Array.isArray(list) ? list : []);
+                  } catch (e) {
+                    console.error(e);
+                    setCoinOptions([]);
+                  }
+                }}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <span
+                    className="block text-xs mb-1"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Current Balance
+                  </span>
+                  <StudentWalletBalance userId={walletTarget?.id} />
+                </div>
+              </div>
+              <div>
+                <label
+                  className="block text-sm mb-1"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  Amount
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={coinForm.amount}
+                  onChange={(e) =>
+                    setCoinForm({ ...coinForm, amount: e.target.value })
+                  }
+                  className="w-full rounded-md px-3 py-2 border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    borderColor: "var(--border)",
+                    color: "var(--text-primary)",
+                  }}
+                  placeholder="e.g. 100"
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-sm mb-1"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  Reason (optional)
+                </label>
+                <input
+                  value={coinForm.reason}
+                  onChange={(e) =>
+                    setCoinForm({ ...coinForm, reason: e.target.value })
+                  }
+                  className="w-full rounded-md px-3 py-2 border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    borderColor: "var(--border)",
+                    color: "var(--text-primary)",
+                  }}
+                  placeholder="Scholarship, reward, etc."
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-sm mb-1"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  Notes (optional)
+                </label>
+                <textarea
+                  value={coinForm.notes}
+                  onChange={(e) =>
+                    setCoinForm({ ...coinForm, notes: e.target.value })
+                  }
+                  rows="3"
+                  className="w-full rounded-md px-3 py-2 border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    borderColor: "var(--border)",
+                    color: "var(--text-primary)",
+                  }}
+                  placeholder="Any additional context"
+                />
+              </div>
+            </div>
+            <div
+              className="p-5 pt-0 flex items-center justify-end gap-3 border-t"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <button
+                onClick={closeWalletModal}
+                className="px-4 py-2 rounded-md border"
+                style={{
+                  background: "var(--bg-primary)",
+                  borderColor: "var(--border)",
+                  color: "var(--text-primary)",
+                }}
+                disabled={coinBusy}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRevokeCoins}
+                className="px-4 py-2 rounded-md border"
+                style={{
+                  background: "#2b1a1a",
+                  borderColor: "var(--border)",
+                  color: "#fca5a5",
+                }}
+                disabled={coinBusy}
+              >
+                Revoke
+              </button>
+              <button
+                onClick={handleAssignCoins}
+                className="px-4 py-2 rounded-md border"
+                style={{
+                  background: "var(--brand)",
+                  borderColor: "var(--brand)",
+                  color: "white",
+                }}
+                disabled={coinBusy}
+              >
+                {coinBusy ? "Processing..." : "Assign"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CoinSelect({ coinOptions, value, onChange, onOpen }) {
+  return (
+    <div>
+      <label
+        className="block text-sm mb-1"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        Select Coin
+      </label>
+      <div className="flex items-center gap-2">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={onOpen}
+          className="flex-1 rounded-md px-3 py-2 border"
+          style={{
+            background: "var(--bg-primary)",
+            borderColor: "var(--border)",
+            color: "var(--text-primary)",
+          }}
+        >
+          <option value="">Default (active coin)</option>
+          {coinOptions.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name} ({c.symbol})
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={onOpen}
+          className="px-3 py-2 rounded-md border"
+          style={{
+            background: "var(--bg-primary)",
+            borderColor: "var(--border)",
+            color: "var(--text-primary)",
+          }}
+        >
+          Refresh
+        </button>
+      </div>
+      <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+        If left empty, the assignment is recorded without an explicit coin
+        reference.
+      </p>
+    </div>
+  );
+}
+function StudentWalletBalance({ userId }) {
+  const [value, setValue] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+  React.useEffect(() => {
+    let ignore = false;
+    async function load() {
+      if (!userId) return;
+      setLoading(true);
+      try {
+        const data = await adminGetStudentWallet(userId);
+        if (!ignore) setValue(data?.wallet?.balance ?? 0);
+      } catch (e) {
+        if (!ignore) setValue(null);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [userId]);
+  return (
+    <div
+      className="rounded-md px-3 py-2 border"
+      style={{
+        background: "var(--bg-primary)",
+        borderColor: "var(--border)",
+        color: "var(--text-primary)",
+      }}
+    >
+      {loading ? "Loading..." : value ?? "-"}
     </div>
   );
 }
