@@ -374,11 +374,21 @@ export const deleteCourse = async (req, res) => {
   }
 };
 
-// @desc    Enroll in course
+// @desc    Enroll in course (DISABLED - Use payment verification instead)
 // @route   POST /api/courses/:id/enroll
 // @access  Private
 export const enrollInCourse = async (req, res) => {
   try {
+    // SECURITY: Disable direct enrollment to prevent bypassing payment
+    return res.status(403).json({
+      status: "error",
+      message: "Direct enrollment is disabled. Please complete payment to enroll in courses.",
+    });
+
+    // The following code is commented out for security reasons
+    // Direct enrollment bypasses payment verification and should not be allowed
+    
+    /*
     const course = await Course.findById(req.params.id);
 
     if (!course) {
@@ -424,6 +434,7 @@ export const enrollInCourse = async (req, res) => {
       status: "success",
       message: "Successfully enrolled in course",
     });
+    */
   } catch (error) {
     console.error("Enroll in course error:", error);
     res.status(500).json({

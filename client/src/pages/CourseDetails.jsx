@@ -27,7 +27,7 @@ export default function CourseDetails() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -145,13 +145,14 @@ export default function CourseDetails() {
     setCoinPreview({ usableCoins, discountValue, finalPricePreview });
   }, [coinsToUse, walletInfo, coinSetting, course]);
 
-  if (!user && !isLoginModalOpen) {
+  // Only show login modal if authentication check is complete and user is not logged in
+  if (!authLoading && !user && !isLoginModalOpen) {
     // If user is not logged in and landed directly here, prompt login first
     // After login, stay on the same course details
     setIsLoginModalOpen(true);
   }
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
@@ -171,7 +172,9 @@ export default function CourseDetails() {
               style={{ borderColor: "var(--brand)" }}
             ></div>
           </div>
-          <p style={{ color: "var(--text-secondary)" }}>Loading course...</p>
+          <p style={{ color: "var(--text-secondary)" }}>
+            {authLoading ? "Checking authentication..." : "Loading course..."}
+          </p>
         </div>
       </div>
     );
@@ -373,6 +376,12 @@ export default function CourseDetails() {
               );
               // Close modal and redirect
               setShowCheckout(false);
+              setTermsAccepted(false);
+              setRefundAccepted(false);
+              setPrivacyAccepted(false);
+              setCouponCode("");
+              setAppliedCoupon("");
+              setCoinsToUse(0);
               navigate("/dashboard/subscription");
             } else {
               throw new Error("Payment verification failed");
@@ -383,12 +392,25 @@ export default function CourseDetails() {
               "Payment successful but enrollment failed. Please contact support."
             );
             setShowCheckout(false);
+            setTermsAccepted(false);
+            setRefundAccepted(false);
+            setPrivacyAccepted(false);
+            setCouponCode("");
+            setAppliedCoupon("");
+            setCoinsToUse(0);
           }
         },
         modal: {
           ondismiss: function () {
             // When user closes the modal, reset state
+            console.log("Payment modal dismissed by user");
             setShowCheckout(false);
+            setTermsAccepted(false);
+            setRefundAccepted(false);
+            setPrivacyAccepted(false);
+            setCouponCode("");
+            setAppliedCoupon("");
+            setCoinsToUse(0);
           },
         },
         prefill: {},
@@ -404,6 +426,36 @@ export default function CourseDetails() {
       console.log("Razorpay options:", options);
       const rzp = new window.Razorpay(options);
       console.log("Razorpay instance created:", rzp);
+      
+      // Add timeout to prevent hanging payments
+      const paymentTimeout = setTimeout(() => {
+        console.log("Payment timeout - closing modal");
+        setShowCheckout(false);
+        setTermsAccepted(false);
+        setRefundAccepted(false);
+        setPrivacyAccepted(false);
+        setCouponCode("");
+        setAppliedCoupon("");
+        setCoinsToUse(0);
+      }, 300000); // 5 minutes timeout
+      
+      // Clear timeout when payment is successful or dismissed
+      rzp.on('payment.success', () => {
+        clearTimeout(paymentTimeout);
+      });
+      
+      rzp.on('payment.failed', () => {
+        clearTimeout(paymentTimeout);
+        console.log("Payment failed");
+        setShowCheckout(false);
+        setTermsAccepted(false);
+        setRefundAccepted(false);
+        setPrivacyAccepted(false);
+        setCouponCode("");
+        setAppliedCoupon("");
+        setCoinsToUse(0);
+      });
+      
       rzp.open();
       console.log("Razorpay opened");
     } catch (error) {

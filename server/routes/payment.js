@@ -205,10 +205,19 @@ router.post("/verify-payment", protect, async (req, res) => {
     // Get payment details from Razorpay
     const payment = await razorInstance.payments.fetch(razorpay_payment_id);
 
-    if (payment.status !== "captured") {
+    // CRITICAL: Only proceed if payment is actually captured and successful
+    if (payment.status !== "captured" || !payment.captured) {
       return res.status(400).json({
         status: "error",
-        message: "Payment not captured",
+        message: "Payment not captured or failed",
+      });
+    }
+
+    // Additional verification: Check if payment amount is valid
+    if (!payment.amount || payment.amount <= 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid payment amount",
       });
     }
 
@@ -218,6 +227,20 @@ router.post("/verify-payment", protect, async (req, res) => {
       return res.status(404).json({
         status: "error",
         message: "Course not found",
+      });
+    }
+
+    // CRITICAL: Check if user is already enrolled to prevent duplicate enrollments
+    const existingEnrollment = await Enrollment.findOne({
+      user: req.user.id,
+      course: courseId,
+      status: "active"
+    });
+
+    if (existingEnrollment) {
+      return res.status(400).json({
+        status: "error",
+        message: "User is already enrolled in this course",
       });
     }
 
@@ -389,6 +412,18 @@ router.post(
             courseId
           );
           try {
+            // CRITICAL: Check if user is already enrolled to prevent duplicate enrollments
+            const existingEnrollment = await Enrollment.findOne({
+              user: userId,
+              course: courseId,
+              status: "active"
+            });
+
+            if (existingEnrollment) {
+              console.log("User already enrolled, skipping webhook enrollment:", userId);
+              return;
+            }
+
             // Create or update enrollment as paid
             const enrollment = await Enrollment.findOneAndUpdate(
               { user: userId, course: courseId },
