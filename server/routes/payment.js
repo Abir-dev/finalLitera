@@ -55,6 +55,14 @@ router.post("/create-order", protect, async (req, res) => {
         .json({ status: "error", message: "Course ID is required" });
     }
 
+    // Enforce a single promo code per purchase
+    if (Array.isArray(promoCode)) {
+      return res.status(400).json({ status: "error", message: "Only one promo code can be applied" });
+    }
+    if (typeof promoCode === "string" && promoCode.includes(",")) {
+      return res.status(400).json({ status: "error", message: "Only one promo code can be applied" });
+    }
+
     console.log("Finding course with ID:", courseId);
     const course = await Course.findById(courseId);
     console.log("Course found:", course ? "Yes" : "No");
@@ -67,26 +75,36 @@ router.post("/create-order", protect, async (req, res) => {
 
     let price = Number(course.price);
     let appliedDiscount = 0;
+    let couponNotes = {};
 
     // Apply promo code if provided
     if (promoCode) {
       try {
         const { default: Coupon } = await import("../models/Coupon.js");
-        const coupon = await Coupon.findOne({ code: String(promoCode).trim().toUpperCase(), course: courseId, isActive: true });
-        if (coupon && !coupon.isExpired()) {
+        const coupon = await Coupon.findOne({
+          code: String(promoCode).trim().toUpperCase(),
+          isActive: true,
+          $or: [
+            { course: null },
+            { course: courseId },
+          ],
+        });
+        if (coupon && !coupon.isExpired() && !coupon.isExhausted()) {
           appliedDiscount = Math.min(100, Math.max(0, Number(coupon.percentOff)));
           const discounted = price * (1 - appliedDiscount / 100);
           price = Math.max(0, Math.round(discounted));
           // Increment usage count asynchronously
           try {
             coupon.usageCount = (coupon.usageCount || 0) + 1;
+            if (coupon.usageLimit != null && coupon.usageCount >= coupon.usageLimit) {
+              coupon.isActive = false; // auto-expire on reaching limit
+            }
             await coupon.save();
           } catch (incErr) {
             console.warn("Failed to increment coupon usage:", incErr?.message);
           }
-          // Attach coupon to notes
-          orderOptions.notes = {
-            ...orderOptions.notes,
+          // Prepare coupon notes (attach later when orderOptions is created)
+          couponNotes = {
             couponCode: coupon.code,
             discountPercent: appliedDiscount,
           };
@@ -105,7 +123,7 @@ router.post("/create-order", protect, async (req, res) => {
       receipt: `c_${String(course._id).slice(-12)}_${Date.now()
         .toString()
         .slice(-8)}`,
-      notes: { courseId: String(course._id), userId: String(req.user.id) },
+      notes: { courseId: String(course._id), userId: String(req.user.id), ...couponNotes },
     };
     console.log("Order options:", orderOptions);
 

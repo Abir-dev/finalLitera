@@ -6,6 +6,8 @@ import {
   listCoupons,
   toggleCoupon,
   deleteCoupon,
+  setCouponActive,
+  generateCoupons,
 } from "../controllers/couponController.js";
 
 const router = express.Router();
@@ -15,8 +17,10 @@ router.get("/validate", validateCoupon);
 
 // Admin
 router.post("/", adminAuth, createCoupon);
+router.post("/generate", adminAuth, generateCoupons);
 router.get("/", adminAuth, listCoupons);
 router.patch("/:id/toggle", adminAuth, toggleCoupon);
+router.patch("/:id/active", adminAuth, setCouponActive);
 router.delete("/:id", adminAuth, deleteCoupon);
 
 export default router;

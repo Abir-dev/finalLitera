@@ -5,7 +5,7 @@ import { courseService } from "../services/courseService.js";
 export default function AdminCoupons() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
-  const [form, setForm] = useState({ code: "", percentOff: "", courseId: "", expiresAt: "" });
+  const [form, setForm] = useState({ code: "", percentOff: "", courseId: "", expiresAt: "", usageLimit: "" });
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -33,7 +33,7 @@ export default function AdminCoupons() {
     setMessage("");
     setCreating(true);
     try {
-      const API = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+      const API = "http://localhost:5001/api";
       const adminToken = localStorage.getItem("adminToken");
       const resp = await fetch(`${API}/coupons`, {
         method: "POST",
@@ -76,14 +76,31 @@ export default function AdminCoupons() {
           <input name="percentOff" type="number" min="1" max="100" value={form.percentOff} onChange={handleChange} className="w-full p-2 rounded bg-white/5 border border-white/10" placeholder="e.g. 20" required />
         </div>
         <div>
+          <label className="block text-sm mb-1">Usage Limit (optional)</label>
+          <input name="usageLimit" type="number" min="1" value={form.usageLimit} onChange={handleChange} className="w-full p-2 rounded bg-white/5 border border-white/10" placeholder="e.g. 100 (number of students)" />
+        </div>
+        <div>
           <label className="block text-sm mb-1">Course</label>
-          <select name="courseId" value={form.courseId} onChange={handleChange} className="w-full p-2 rounded bg-white/5 border border-white/10" required>
+          <select
+            name="courseId"
+            value={form.courseId}
+            onChange={handleChange}
+            className="w-full p-2 rounded bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
+          >
             <option value="">Select a course</option>
-            {courses.map((c) => (
-              <option key={c._id || c.id} value={c._id || c.id}>
-                {c.title}
-              </option>
-            ))}
+            <option value="ALL">All courses</option>
+            {courses.map((c) => {
+              const id = c._id || c.id;
+              const label = c?.shortDescription
+                ? `${c.title} | ${c.shortDescription}`
+                : c.title;
+              return (
+                <option key={id} value={id} className="text-gray-900">
+                  {label}
+                </option>
+              );
+            })}
           </select>
         </div>
         <div>
