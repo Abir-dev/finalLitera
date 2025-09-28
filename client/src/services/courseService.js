@@ -230,6 +230,69 @@ export const courseService = {
     }
   },
 
+  // Admin Coupon Management
+  getCoupons: async (params = {}) => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await api.get("/coupons", {
+        headers: { Authorization: `Bearer ${adminToken}` },
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to fetch coupons" };
+    }
+  },
+
+  createCoupon: async (couponData) => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await api.post("/coupons", couponData, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to create coupon" };
+    }
+  },
+
+  updateCoupon: async (couponId, updateData) => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await api.put(`/coupons/${couponId}`, updateData, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to update coupon" };
+    }
+  },
+
+  deleteCoupon: async (couponId) => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await api.delete(`/coupons/${couponId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to delete coupon" };
+    }
+  },
+
+  toggleCouponStatus: async (couponId, isActive) => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await api.patch(`/coupons/${couponId}/toggle`, 
+        { isActive },
+        { headers: { Authorization: `Bearer ${adminToken}` } }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: "Failed to toggle coupon status" };
+    }
+  },
+
   // Verify payment and create enrollment
   verifyPayment: async (paymentData) => {
     try {

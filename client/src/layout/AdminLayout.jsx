@@ -13,6 +13,7 @@ import {
   X,
   Briefcase,
   Coins,
+  Ticket,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -47,6 +48,7 @@ export default function AdminLayout() {
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Exams", href: "/admin/exams", icon: FileText },
     { name: "Internships", href: "/admin/internships", icon: Briefcase },
+    { name: "Coupons", href: "/admin/coupons", icon: Ticket },
     { name: "Coins", href: "/admin/coins", icon: Coins },
     // { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },
     { name: "Settings", href: "/admin/settings", icon: Settings },
@@ -75,7 +77,7 @@ export default function AdminLayout() {
         } lg:translate-x-0`}
       >
         <div
-          className="h-full flex flex-col"
+          className="h-full flex flex-col overflow-hidden"
           style={{
             background:
               "linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-secondary) 100%)",
@@ -155,7 +157,7 @@ export default function AdminLayout() {
           </div>
 
           {/* Premium Navigation */}
-          <nav className="flex-1 px-2 sm:px-4 py-4 sm:py-6 space-y-1 sm:space-y-2">
+          <nav className="flex-1 px-2 sm:px-4 py-4 sm:py-6 space-y-1 sm:space-y-2 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               const IconComponent = item.icon;

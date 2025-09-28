@@ -244,6 +244,34 @@ router.post("/verify-payment", protect, async (req, res) => {
       });
     }
 
+    // Process coupon usage if coupon was applied
+    if (couponCode) {
+      try {
+        const Coupon = (await import("../models/Coupon.js")).default;
+        const coupon = await Coupon.findOne({
+          code: String(couponCode).trim().toUpperCase(),
+          $or: [
+            { course: null }, // global coupon
+            { course: courseId }, // course-specific coupon
+          ],
+          isActive: true,
+        });
+
+        if (coupon && !coupon.isExpired() && !coupon.isExhausted()) {
+          // Increment usage count
+          coupon.usageCount = (coupon.usageCount || 0) + 1;
+          if (coupon.usageLimit != null && coupon.usageCount >= coupon.usageLimit) {
+            coupon.isActive = false; // auto-expire on reaching limit
+          }
+          await coupon.save();
+          console.log(`Applied coupon ${couponCode} for course ${courseId}`);
+        }
+      } catch (couponError) {
+        console.error("Error processing coupon usage:", couponError);
+        // Don't fail the payment if coupon processing fails
+      }
+    }
+
     // Process coin deduction if coins were used
     if (coinsUsed && coinsUsed > 0) {
       try {
@@ -285,6 +313,7 @@ router.post("/verify-payment", protect, async (req, res) => {
             reason: "Course purchase",
             orderId: payment.id,
             referenceId: razorpay_payment_id,
+            couponCode: couponCode || null,
           },
           status: "completed",
         });
@@ -315,6 +344,7 @@ router.post("/verify-payment", protect, async (req, res) => {
           transactionId: payment.id,
           paidAt: new Date(payment.created_at * 1000),
           coinsUsed: coinsUsed || 0,
+          couponCode: couponCode || null,
         },
       },
       { upsert: true, new: true }

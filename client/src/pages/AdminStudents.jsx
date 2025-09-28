@@ -1088,19 +1088,57 @@ export default function AdminStudents() {
 
       {/* Add Student Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Add New Student
-                </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={handleCloseModal}
+          ></div>
+          <div
+            className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
+              border: "1px solid var(--border)",
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              className="p-6 border-b"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--brand), var(--brand-strong))",
+                    }}
+                  >
+                    <Plus size={20} className="text-white" />
+                  </div>
+                  <div>
+                    <h2
+                      className="text-xl font-bold"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Add New Student
+                    </h2>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Create a new student account
+                    </p>
+                  </div>
+                </div>
                 <button
                   onClick={handleCloseModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   <svg
-                    className="w-6 h-6"
+                    className="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1114,12 +1152,17 @@ export default function AdminStudents() {
                   </svg>
                 </button>
               </div>
+            </div>
 
-              <form onSubmit={handleSubmitStudent} className="space-y-4">
+            {/* Modal Body */}
+            <div className="p-6">
+              <form onSubmit={handleSubmitStudent} className="space-y-5">
+                {/* First Name */}
                 <div>
                   <label
                     htmlFor="firstName"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: "var(--text-primary)" }}
                   >
                     First Name *
                   </label>
@@ -1130,15 +1173,22 @@ export default function AdminStudents() {
                     value={newStudent.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    className="input-premium w-full px-4 py-3 text-sm"
                     placeholder="Enter first name"
+                    style={{
+                      background: "var(--bg-primary)",
+                      borderColor: "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
                   />
                 </div>
 
+                {/* Last Name */}
                 <div>
                   <label
                     htmlFor="lastName"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: "var(--text-primary)" }}
                   >
                     Last Name *
                   </label>
@@ -1149,17 +1199,24 @@ export default function AdminStudents() {
                     value={newStudent.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    className="input-premium w-full px-4 py-3 text-sm"
                     placeholder="Enter last name"
+                    style={{
+                      background: "var(--bg-primary)",
+                      borderColor: "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
                   />
                 </div>
 
+                {/* Email */}
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: "var(--text-primary)" }}
                   >
-                    Email *
+                    Email Address *
                   </label>
                   <input
                     type="email"
@@ -1168,15 +1225,22 @@ export default function AdminStudents() {
                     value={newStudent.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    className="input-premium w-full px-4 py-3 text-sm"
                     placeholder="Enter email address"
+                    style={{
+                      background: "var(--bg-primary)",
+                      borderColor: "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
                   />
                 </div>
 
+                {/* Password */}
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: "var(--text-primary)" }}
                   >
                     Password *
                   </label>
@@ -1188,28 +1252,103 @@ export default function AdminStudents() {
                     onChange={handleInputChange}
                     required
                     minLength={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-400"
+                    className="input-premium w-full px-4 py-3 text-sm"
                     placeholder="Enter password (min 6 characters)"
+                    style={{
+                      background: "var(--bg-primary)",
+                      borderColor: "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
                   />
+                  <p
+                    className="text-xs mt-1"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Password must be at least 6 characters long
+                  </p>
                 </div>
 
+                {/* Error Message */}
                 {submitError && (
-                  <div className="p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
-                    {submitError}
+                  <div
+                    className="p-4 rounded-lg border flex items-center gap-3"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)",
+                      borderColor: "var(--accent-rose)30",
+                    }}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "var(--accent-rose)" }}
+                    >
+                      <svg
+                        className="w-3 h-3 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {submitError}
+                    </span>
                   </div>
                 )}
 
+                {/* Success Message */}
                 {submitSuccess && (
-                  <div className="p-3 bg-green-50 text-green-700 rounded-md border border-green-200">
-                    {submitSuccess}
+                  <div
+                    className="p-4 rounded-lg border flex items-center gap-3"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--accent-emerald)10, var(--accent-emerald)5)",
+                      borderColor: "var(--accent-emerald)30",
+                    }}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "var(--accent-emerald)" }}
+                    >
+                      <svg
+                        className="w-3 h-3 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {submitSuccess}
+                    </span>
                   </div>
                 )}
 
+                {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-4 py-3 rounded-lg border font-semibold text-sm transition-all duration-300 hover:scale-105"
+                    style={{
+                      background: "var(--bg-primary)",
+                      borderColor: "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
                     disabled={isSubmitting}
                   >
                     Cancel
@@ -1217,33 +1356,18 @@ export default function AdminStudents() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg hover:from-red-700 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-premium flex-1 px-4 py-3 font-semibold text-sm transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     {isSubmitting ? (
-                      <span className="flex items-center justify-center">
-                        <svg
-                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         Creating...
                       </span>
                     ) : (
-                      "Create Student"
+                      <span className="flex items-center justify-center gap-2">
+                        <Plus size={16} />
+                        Create Student
+                      </span>
                     )}
                   </button>
                 </div>

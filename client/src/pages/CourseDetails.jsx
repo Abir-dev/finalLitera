@@ -41,6 +41,7 @@ export default function CourseDetails() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const [couponError, setCouponError] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
   const [walletInfo, setWalletInfo] = useState(null);
   const [coinSetting, setCoinSetting] = useState(null);
   const [coinsToUse, setCoinsToUse] = useState(0);
@@ -131,7 +132,12 @@ export default function CourseDetails() {
     const balance = Number(walletInfo?.wallet?.balance || 0);
     const rate = Number(coinSetting.coinToCurrencyRate || 0);
     const maxPct = Number(coinSetting.maxDiscountPercentPerPurchase || 0);
-    const maxDiscountAllowed = price * (maxPct / 100);
+    
+    // Apply coupon discount first
+    const couponDiscountAmount = (price * couponDiscount) / 100;
+    const priceAfterCoupon = Math.max(0, price - couponDiscountAmount);
+    
+    const maxDiscountAllowed = priceAfterCoupon * (maxPct / 100);
     const requestedCoins = Math.max(0, Math.floor(Number(coinsToUse) || 0));
     const maxCoinsByBalance = balance;
     const maxCoinsByPct = rate > 0 ? Math.floor(maxDiscountAllowed / rate) : 0;
@@ -141,9 +147,9 @@ export default function CourseDetails() {
       maxCoinsByPct
     );
     const discountValue = usableCoins * rate;
-    const finalPricePreview = Math.max(0, price - discountValue);
+    const finalPricePreview = Math.max(0, priceAfterCoupon - discountValue);
     setCoinPreview({ usableCoins, discountValue, finalPricePreview });
-  }, [coinsToUse, walletInfo, coinSetting, course]);
+  }, [coinsToUse, walletInfo, coinSetting, course, couponDiscount]);
 
   // Only show login modal if authentication check is complete and user is not logged in
   if (!authLoading && !user && !isLoginModalOpen) {
@@ -290,6 +296,7 @@ export default function CourseDetails() {
     setTermsAccepted(false);
     setRefundAccepted(false);
     setPrivacyAccepted(false);
+    setCouponDiscount(0);
 
     if (!user) {
       setIsLoginModalOpen(true);
@@ -305,9 +312,11 @@ export default function CourseDetails() {
     setCouponError("");
     try {
       if (!couponCode) return;
-      await courseService.validateCoupon(couponCode, display.id);
+      const response = await courseService.validateCoupon(couponCode, display.id);
+      const { percentOff } = response.data;
       setAppliedCoupon(couponCode);
-      alert("Coupon applied. Proceed to pay to see updated amount.");
+      setCouponDiscount(percentOff);
+      alert(`Coupon applied! You get ${percentOff}% off. Proceed to pay to see updated amount.`);
     } catch (err) {
       setCouponError(err.message || "Invalid coupon");
     }
@@ -338,8 +347,14 @@ export default function CourseDetails() {
     try {
       // Calculate payment amount (no order creation yet)
       const coursePrice = Number(course.price) || 0;
+      
+      // Apply coupon discount first
+      const couponDiscountAmount = (coursePrice * couponDiscount) / 100;
+      const priceAfterCoupon = Math.max(0, coursePrice - couponDiscountAmount);
+      
+      // Then apply coin discount
       const discountAmount = coinPreview.discountValue || 0;
-      const finalAmount = Math.max(0, coursePrice - discountAmount);
+      const finalAmount = Math.max(0, priceAfterCoupon - discountAmount);
       const amountInPaise = Math.round(finalAmount * 100); // Convert to paise
 
       const options = {
@@ -381,6 +396,7 @@ export default function CourseDetails() {
               setPrivacyAccepted(false);
               setCouponCode("");
               setAppliedCoupon("");
+              setCouponDiscount(0);
               setCoinsToUse(0);
               navigate("/dashboard/subscription");
             } else {
@@ -397,6 +413,7 @@ export default function CourseDetails() {
             setPrivacyAccepted(false);
             setCouponCode("");
             setAppliedCoupon("");
+            setCouponDiscount(0);
             setCoinsToUse(0);
           }
         },
@@ -410,6 +427,7 @@ export default function CourseDetails() {
             setPrivacyAccepted(false);
             setCouponCode("");
             setAppliedCoupon("");
+            setCouponDiscount(0);
             setCoinsToUse(0);
           },
         },
@@ -436,6 +454,7 @@ export default function CourseDetails() {
         setPrivacyAccepted(false);
         setCouponCode("");
         setAppliedCoupon("");
+        setCouponDiscount(0);
         setCoinsToUse(0);
       }, 300000); // 5 minutes timeout
       
@@ -453,6 +472,7 @@ export default function CourseDetails() {
         setPrivacyAccepted(false);
         setCouponCode("");
         setAppliedCoupon("");
+        setCouponDiscount(0);
         setCoinsToUse(0);
       });
       
@@ -971,423 +991,702 @@ export default function CourseDetails() {
 
       {/* Checkout Modal */}
       {showCheckout && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-3 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="rounded-xl shadow-xl w-full max-w-sm sm:max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setShowCheckout(false);
+              setTermsAccepted(false);
+              setRefundAccepted(false);
+              setPrivacyAccepted(false);
+            }}
+          ></div>
+          <div
+            className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
             style={{
-              background: "var(--surface)",
+              background:
+                "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
               border: "1px solid var(--border)",
             }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3
-                className="text-base sm:text-lg font-semibold"
-                style={{ color: "var(--text-primary)" }}
-              >
-                Confirm Purchase
-              </h3>
-              <button
-                onClick={() => {
-                  setShowCheckout(false);
-                  setTermsAccepted(false);
-                  setRefundAccepted(false);
-                  setPrivacyAccepted(false);
-                }}
-                className="text-gray-500 hover:text-gray-700 text-lg sm:text-xl"
-                style={{ color: "var(--text-muted)" }}
-              >
-                ✖
-              </button>
-            </div>
-            <div className="space-y-3">
-              {/* Coupon Input */}
-              <div className="flex gap-2 items-start">
-                <input
-                  type="text"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="Enter coupon code"
-                  className="flex-1 p-2 rounded border"
-                  style={{
-                    background: "var(--bg-secondary)",
-                    border: "1px solid var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                />
+            {/* Modal Header */}
+            <div
+              className="p-6 border-b"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--brand), var(--brand-strong))",
+                    }}
+                  >
+                    <svg
+                      className="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3
+                      className="text-xl font-bold"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Confirm Purchase
+                    </h3>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      Complete your course enrollment
+                    </p>
+                  </div>
+                </div>
                 <button
-                  type="button"
-                  onClick={applyCoupon}
-                  className="px-4 py-2 rounded font-semibold"
-                  style={{
-                    background: "var(--brand)",
-                    color: "var(--text-accent)",
+                  onClick={() => {
+                    setShowCheckout(false);
+                    setTermsAccepted(false);
+                    setRefundAccepted(false);
+                    setPrivacyAccepted(false);
                   }}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  style={{ color: "var(--text-muted)" }}
                 >
-                  Apply
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
                 </button>
               </div>
-              {appliedCoupon && (
-                <p
-                  className="text-xs"
-                  style={{ color: "var(--accent-emerald)" }}
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Coupon Input Section */}
+              <div>
+                <h4
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: "var(--text-primary)" }}
                 >
-                  Applied: {appliedCoupon}
-                </p>
-              )}
-              {/* Coins usage */}
-              <div
-                className="mt-2 p-3 rounded border"
-                style={{
-                  background: "var(--bg-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
+                  Coupon Code
+                </h4>
+                <div className="flex gap-2 items-start">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Enter coupon code"
+                    className="input-premium flex-1 px-4 py-3 text-sm"
+                    style={{
+                      background: "var(--bg-primary)",
+                      borderColor: "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={applyCoupon}
+                    className="btn-premium px-4 py-3 font-semibold text-sm"
                   >
-                    💰 Use Coins
-                  </span>
-                  <div className="flex items-center gap-2">
+                    Apply
+                  </button>
+                </div>
+                {appliedCoupon && (
+                  <div
+                    className="mt-2 p-3 rounded-lg border flex items-center gap-2"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--accent-emerald)10, var(--accent-emerald)5)",
+                      borderColor: "var(--accent-emerald)30",
+                    }}
+                  >
+                    <div
+                      className="w-4 h-4 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "var(--accent-emerald)" }}
+                    >
+                      <svg
+                        className="w-2 h-2 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
                     <span
-                      className="text-xs px-2 py-1 rounded"
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Applied: {appliedCoupon}
+                    </span>
+                  </div>
+                )}
+                {couponError && (
+                  <div
+                    className="mt-2 p-3 rounded-lg border flex items-center gap-2"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)",
+                      borderColor: "var(--accent-rose)30",
+                    }}
+                  >
+                    <div
+                      className="w-4 h-4 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "var(--accent-rose)" }}
+                    >
+                      <svg
+                        className="w-2 h-2 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {couponError}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {/* Coins Usage Section */}
+              <div>
+                <h4
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  💰 Use Coins
+                </h4>
+                <div
+                  className="p-4 rounded-lg border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Available Balance
+                    </span>
+                    <span
+                      className="text-sm font-bold px-3 py-1 rounded-lg"
+                      style={{
+                        background: "var(--surface)",
+                        color: "var(--brand)",
+                      }}
+                    >
+                      {walletInfo?.wallet?.balance ?? 0} coins
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={coinsToUse}
+                      onChange={(e) => setCoinsToUse(e.target.value)}
+                      className="input-premium flex-1 px-4 py-3 text-sm"
+                      style={{
+                        background: "var(--bg-secondary)",
+                        borderColor: "var(--border)",
+                        color: "var(--text-primary)",
+                      }}
+                      placeholder="Coins to use"
+                    />
+                    <button
+                      type="button"
+                      className="btn-premium px-4 py-3 font-semibold text-sm"
+                      onClick={() => {
+                        if (!coinSetting) return;
+                        const price = Number(course?.price || 0);
+                        const balance = Number(walletInfo?.wallet?.balance || 0);
+                        const rate = Number(coinSetting.coinToCurrencyRate || 0);
+                        const maxPct = Number(
+                          coinSetting.maxDiscountPercentPerPurchase || 0
+                        );
+                        const maxDiscountAllowed = price * (maxPct / 100);
+                        const maxCoinsByPct =
+                          rate > 0 ? Math.floor(maxDiscountAllowed / rate) : 0;
+                        setCoinsToUse(String(Math.min(balance, maxCoinsByPct)));
+                      }}
+                    >
+                      Max
+                    </button>
+                  </div>
+
+                  {coinSetting && (
+                    <div
+                      className="mt-3 p-3 rounded-lg"
                       style={{
                         background: "var(--surface)",
                         color: "var(--text-secondary)",
                       }}
                     >
-                      Balance: {walletInfo?.wallet?.balance ?? 0}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={coinsToUse}
-                    onChange={(e) => setCoinsToUse(e.target.value)}
-                    className="flex-1 p-2 rounded border"
-                    style={{
-                      background: "var(--bg-primary)",
-                      border: "1px solid var(--border)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="Coins to use"
-                  />
-                  <button
-                    type="button"
-                    className="px-3 py-2 rounded font-semibold text-xs"
-                    style={{
-                      background: "var(--brand)",
-                      color: "var(--text-accent)",
-                    }}
-                    onClick={() => {
-                      if (!coinSetting) return;
-                      const price = Number(course?.price || 0);
-                      const balance = Number(walletInfo?.wallet?.balance || 0);
-                      const rate = Number(coinSetting.coinToCurrencyRate || 0);
-                      const maxPct = Number(
-                        coinSetting.maxDiscountPercentPerPurchase || 0
-                      );
-                      const maxDiscountAllowed = price * (maxPct / 100);
-                      const maxCoinsByPct =
-                        rate > 0 ? Math.floor(maxDiscountAllowed / rate) : 0;
-                      setCoinsToUse(String(Math.min(balance, maxCoinsByPct)));
-                    }}
-                  >
-                    Max
-                  </button>
-                </div>
-
-                {coinSetting && (
-                  <div
-                    className="mt-2 text-xs p-2 rounded"
-                    style={{
-                      background: "var(--surface)",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    💡 Rate: 1 coin = ₹{coinSetting.coinToCurrencyRate} | Max{" "}
-                    {coinSetting.maxDiscountPercentPerPurchase}% of course price
-                  </div>
-                )}
-
-                {/* Coin Preview */}
-                {coinPreview.usableCoins > 0 && (
-                  <div
-                    className="mt-3 p-2 rounded"
-                    style={{ background: "var(--surface)" }}
-                  >
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="text-center">
-                        <div style={{ color: "var(--text-muted)" }}>
-                          Coins Applied
-                        </div>
+                      <div className="flex items-center gap-2 mb-2">
                         <div
-                          className="font-semibold"
-                          style={{ color: "var(--text-primary)" }}
+                          className="w-4 h-4 rounded-full flex items-center justify-center"
+                          style={{ backgroundColor: "var(--accent-gold)" }}
                         >
-                          {coinPreview.usableCoins}
+                          <svg
+                            className="w-2 h-2 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
                         </div>
+                        <span className="text-xs font-medium">
+                          Rate: 1 coin = ₹{coinSetting.coinToCurrencyRate} | Max{" "}
+                          {coinSetting.maxDiscountPercentPerPurchase}% of course price
+                        </span>
                       </div>
-                      <div className="text-center">
-                        <div style={{ color: "var(--text-muted)" }}>
-                          Discount Value
-                        </div>
-                        <div
-                          className="font-semibold"
-                          style={{ color: "var(--accent-emerald)" }}
-                        >
-                          ₹{coinPreview.discountValue.toLocaleString("en-IN")}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Validation Messages */}
-                {Number(coinsToUse) >
-                  Number(walletInfo?.wallet?.balance || 0) && (
-                  <div
-                    className="mt-2 text-xs"
-                    style={{ color: "var(--accent-rose)" }}
-                  >
-                    ⚠️ You don't have enough coins
-                  </div>
-                )}
-                {Number(coinsToUse) > 0 &&
-                  coinPreview.usableCoins < Number(coinsToUse) && (
-                    <div
-                      className="mt-2 text-xs"
-                      style={{ color: "var(--accent-rose)" }}
-                    >
-                      ⚠️ Maximum coins allowed: {coinPreview.usableCoins}
                     </div>
                   )}
-              </div>
-              {couponError && (
-                <p className="text-xs" style={{ color: "var(--accent-rose)" }}>
-                  {couponError}
-                </p>
-              )}
-              {/* Price Breakdown */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Course Price
-                  </span>
-                  <span
-                    className="text-lg sm:text-xl font-bold"
-                    style={{ color: "var(--brand)" }}
-                  >
-                    {display.price}
-                  </span>
-                </div>
 
-                {/* Coin Discount Display */}
-                {coinPreview.discountValue > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-sm"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      Coin Discount ({coinPreview.usableCoins} coins)
-                    </span>
-                    <span
-                      className="text-sm font-semibold"
-                      style={{ color: "var(--accent-emerald)" }}
-                    >
-                      -₹{coinPreview.discountValue.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                )}
-
-                {/* Final Price Display */}
-                <div
-                  className="border-t pt-2 mt-2"
-                  style={{ borderColor: "var(--border)" }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-base font-semibold"
-                      style={{ color: "var(--text-primary)" }}
-                    >
-                      Total Amount
-                    </span>
-                    <span
-                      className="text-xl font-bold"
+                  {/* Coin Preview */}
+                  {coinPreview.usableCoins > 0 && (
+                    <div
+                      className="mt-3 p-4 rounded-lg border"
                       style={{
-                        color:
-                          coinPreview.finalPricePreview &&
-                          coinPreview.finalPricePreview < Number(course.price)
-                            ? "var(--accent-emerald)"
-                            : "var(--brand)",
+                        background:
+                          "linear-gradient(135deg, var(--accent-emerald)10, var(--accent-emerald)5)",
+                        borderColor: "var(--accent-emerald)30",
                       }}
                     >
-                      ₹
-                      {(
-                        coinPreview.finalPricePreview || Number(course.price)
-                      ).toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  {coinPreview.finalPricePreview &&
-                    coinPreview.finalPricePreview < Number(course.price) && (
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="text-center">
+                          <div
+                            className="text-xs mb-1"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            Coins Applied
+                          </div>
+                          <div
+                            className="font-bold text-lg"
+                            style={{ color: "var(--text-primary)" }}
+                          >
+                            {coinPreview.usableCoins}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div
+                            className="text-xs mb-1"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            Discount Value
+                          </div>
+                          <div
+                            className="font-bold text-lg"
+                            style={{ color: "var(--accent-emerald)" }}
+                          >
+                            ₹{coinPreview.discountValue.toLocaleString("en-IN")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Validation Messages */}
+                  {Number(coinsToUse) >
+                    Number(walletInfo?.wallet?.balance || 0) && (
+                    <div
+                      className="mt-3 p-3 rounded-lg border flex items-center gap-2"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)",
+                        borderColor: "var(--accent-rose)30",
+                      }}
+                    >
                       <div
-                        className="text-xs mt-1"
-                        style={{ color: "var(--accent-emerald)" }}
+                        className="w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: "var(--accent-rose)" }}
                       >
-                        You save ₹
-                        {(
-                          Number(course.price) - coinPreview.finalPricePreview
-                        ).toLocaleString("en-IN")}
-                        !
+                        <svg
+                          className="w-2 h-2 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        You don't have enough coins
+                      </span>
+                    </div>
+                  )}
+                  {Number(coinsToUse) > 0 &&
+                    coinPreview.usableCoins < Number(coinsToUse) && (
+                      <div
+                        className="mt-3 p-3 rounded-lg border flex items-center gap-2"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)",
+                          borderColor: "var(--accent-rose)30",
+                        }}
+                      >
+                        <div
+                          className="w-4 h-4 rounded-full flex items-center justify-center"
+                          style={{ backgroundColor: "var(--accent-rose)" }}
+                        >
+                          <svg
+                            className="w-2 h-2 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span
+                          className="text-sm font-medium"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          Maximum coins allowed: {coinPreview.usableCoins}
+                        </span>
                       </div>
                     )}
                 </div>
               </div>
+              {/* Price Breakdown Section */}
+              <div>
+                <h4
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Price Breakdown
+                </h4>
+                <div
+                  className="p-4 rounded-lg border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        Course Price
+                      </span>
+                      <span
+                        className="text-lg font-bold"
+                        style={{ color: "var(--brand)" }}
+                      >
+                        {display.price}
+                      </span>
+                    </div>
+
+                    {/* Coupon Discount Display */}
+                    {couponDiscount > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span
+                          className="text-sm"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Coupon Discount ({couponDiscount}% off)
+                        </span>
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: "var(--accent-emerald)" }}
+                        >
+                          -₹{((Number(course.price) * couponDiscount) / 100).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Coin Discount Display */}
+                    {coinPreview.discountValue > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span
+                          className="text-sm"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Coin Discount ({coinPreview.usableCoins} coins)
+                        </span>
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: "var(--accent-emerald)" }}
+                        >
+                          -₹{coinPreview.discountValue.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Final Price Display */}
+                    <div
+                      className="border-t pt-3 mt-3"
+                      style={{ borderColor: "var(--border)" }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span
+                          className="text-base font-semibold"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          Total Amount
+                        </span>
+                        <span
+                          className="text-xl font-bold"
+                          style={{
+                            color:
+                              (coinPreview.finalPricePreview && coinPreview.finalPricePreview < Number(course.price)) ||
+                              couponDiscount > 0
+                                ? "var(--accent-emerald)"
+                                : "var(--brand)",
+                          }}
+                        >
+                          ₹
+                          {(
+                            coinPreview.finalPricePreview || 
+                            (couponDiscount > 0 ? Number(course.price) * (1 - couponDiscount / 100) : Number(course.price))
+                          ).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      {(coinPreview.finalPricePreview && coinPreview.finalPricePreview < Number(course.price)) ||
+                        couponDiscount > 0 ? (
+                          <div
+                            className="text-sm mt-2 p-2 rounded-lg"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, var(--accent-emerald)10, var(--accent-emerald)5)",
+                              color: "var(--accent-emerald)",
+                            }}
+                          >
+                            🎉 You save ₹
+                            {(
+                              Number(course.price) - (coinPreview.finalPricePreview || 
+                                (couponDiscount > 0 ? Number(course.price) * (1 - couponDiscount / 100) : Number(course.price)))
+                            ).toLocaleString("en-IN")}
+                            !
+                          </div>
+                        ) : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Terms and Conditions Checkboxes */}
-            <div className="mt-4 space-y-2 sm:space-y-3">
-              {/* Terms & Conditions Checkbox */}
-              <div
-                className="p-2 sm:p-3 rounded-lg border"
-                style={{
-                  background: "var(--bg-secondary)",
-                  border: "1px solid var(--border)",
-                }}
+            {/* Terms and Conditions Section */}
+            <div>
+              <h4
+                className="text-sm font-semibold mb-3"
+                style={{ color: "var(--text-primary)" }}
               >
-                <label className="flex items-start space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-0.5 sm:mt-1 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded focus:ring-2"
-                    style={{
-                      accentColor: "var(--brand)",
-                      borderColor: "var(--border)",
-                    }}
-                  />
-                  <span
-                    className="text-xs leading-relaxed"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    I agree to the{" "}
-                    <Link
-                      to="/terms-conditions"
-                      className="hover:opacity-80 transition-opacity font-medium"
-                      style={{ color: "var(--brand)" }}
+                Terms & Agreements
+              </h4>
+              <div className="space-y-3">
+                {/* Terms & Conditions Checkbox */}
+                <div
+                  className="p-4 rounded-lg border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded focus:ring-2"
+                      style={{
+                        accentColor: "var(--brand)",
+                        borderColor: "var(--border)",
+                      }}
+                    />
+                    <span
+                      className="text-sm leading-relaxed"
+                      style={{ color: "var(--text-secondary)" }}
                     >
-                      Terms & Conditions
-                    </Link>
-                  </span>
-                </label>
-              </div>
+                      I agree to the{" "}
+                      <Link
+                        to="/terms-conditions"
+                        className="hover:opacity-80 transition-opacity font-medium"
+                        style={{ color: "var(--brand)" }}
+                      >
+                        Terms & Conditions
+                      </Link>
+                    </span>
+                  </label>
+                </div>
 
-              {/* Refund Policy Checkbox */}
-              <div
-                className="p-2 sm:p-3 rounded-lg border"
-                style={{
-                  background: "var(--bg-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <label className="flex items-start space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={refundAccepted}
-                    onChange={(e) => setRefundAccepted(e.target.checked)}
-                    className="mt-0.5 sm:mt-1 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded focus:ring-2"
-                    style={{
-                      accentColor: "var(--brand)",
-                      borderColor: "var(--border)",
-                    }}
-                  />
-                  <span
-                    className="text-xs leading-relaxed"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    I agree to the{" "}
-                    <Link
-                      to="/refund-policy"
-                      className="hover:opacity-80 transition-opacity font-medium"
-                      style={{ color: "var(--brand)" }}
+                {/* Refund Policy Checkbox */}
+                <div
+                  className="p-4 rounded-lg border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={refundAccepted}
+                      onChange={(e) => setRefundAccepted(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded focus:ring-2"
+                      style={{
+                        accentColor: "var(--brand)",
+                        borderColor: "var(--border)",
+                      }}
+                    />
+                    <span
+                      className="text-sm leading-relaxed"
+                      style={{ color: "var(--text-secondary)" }}
                     >
-                      Refund Policy
-                    </Link>
-                  </span>
-                </label>
-              </div>
+                      I agree to the{" "}
+                      <Link
+                        to="/refund-policy"
+                        className="hover:opacity-80 transition-opacity font-medium"
+                        style={{ color: "var(--brand)" }}
+                      >
+                        Refund Policy
+                      </Link>
+                    </span>
+                  </label>
+                </div>
 
-              {/* Privacy Policy Checkbox */}
-              <div
-                className="p-2 sm:p-3 rounded-lg border"
-                style={{
-                  background: "var(--bg-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <label className="flex items-start space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={privacyAccepted}
-                    onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                    className="mt-0.5 sm:mt-1 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded focus:ring-2"
-                    style={{
-                      accentColor: "var(--brand)",
-                      borderColor: "var(--border)",
-                    }}
-                  />
-                  <span
-                    className="text-xs leading-relaxed"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    I agree to the{" "}
-                    <Link
-                      to="/privacy-policy"
-                      className="hover:opacity-80 transition-opacity font-medium"
-                      style={{ color: "var(--brand)" }}
+                {/* Privacy Policy Checkbox */}
+                <div
+                  className="p-4 rounded-lg border"
+                  style={{
+                    background: "var(--bg-primary)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={privacyAccepted}
+                      onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded focus:ring-2"
+                      style={{
+                        accentColor: "var(--brand)",
+                        borderColor: "var(--border)",
+                      }}
+                    />
+                    <span
+                      className="text-sm leading-relaxed"
+                      style={{ color: "var(--text-secondary)" }}
                     >
-                      Privacy Policy
-                    </Link>
-                  </span>
-                </label>
+                      I agree to the{" "}
+                      <Link
+                        to="/privacy-policy"
+                        className="hover:opacity-80 transition-opacity font-medium"
+                        style={{ color: "var(--brand)" }}
+                      >
+                        Privacy Policy
+                      </Link>
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
 
-            <button
-              onClick={launchRazorpay}
-              disabled={!termsAccepted || !refundAccepted || !privacyAccepted}
-              className={`mt-4 sm:mt-6 w-full font-semibold py-2.5 sm:py-3 px-4 rounded-lg transition-colors text-sm sm:text-base ${
-                termsAccepted && refundAccepted && privacyAccepted
-                  ? "hover:opacity-90"
-                  : "cursor-not-allowed opacity-50"
-              }`}
-              style={{
-                background:
+            {/* Payment Button */}
+            <div className="pt-4">
+              <button
+                onClick={launchRazorpay}
+                disabled={!termsAccepted || !refundAccepted || !privacyAccepted}
+                className={`w-full font-semibold py-4 px-6 rounded-xl transition-all duration-300 text-base ${
                   termsAccepted && refundAccepted && privacyAccepted
-                    ? "var(--brand)"
-                    : "var(--bg-secondary)",
-                color:
-                  termsAccepted && refundAccepted && privacyAccepted
-                    ? "var(--text-accent)"
-                    : "var(--text-muted)",
-              }}
-            >
-              Pay Now
-            </button>
-            <p
-              className="text-xs text-center mt-2 sm:mt-3"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Secure payments by Razorpay
-            </p>
+                    ? "btn-premium hover:scale-105"
+                    : "cursor-not-allowed opacity-50"
+                }`}
+                style={{
+                  background:
+                    termsAccepted && refundAccepted && privacyAccepted
+                      ? "linear-gradient(135deg, var(--brand), var(--brand-strong))"
+                      : "var(--bg-secondary)",
+                  color:
+                    termsAccepted && refundAccepted && privacyAccepted
+                      ? "var(--text-accent)"
+                      : "var(--text-muted)",
+                }}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                    />
+                  </svg>
+                  Pay Now
+                </span>
+              </button>
+              <p
+                className="text-xs text-center mt-3 flex items-center justify-center gap-2"
+                style={{ color: "var(--text-muted)" }}
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+                Secure payments by Razorpay
+              </p>
+            </div>
           </div>
         </div>
       )}

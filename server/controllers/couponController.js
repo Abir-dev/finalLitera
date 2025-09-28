@@ -155,6 +155,48 @@ export const setCouponActive = async (req, res) => {
   }
 };
 
+// Update coupon (Admin)
+export const updateCoupon = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { code, percentOff, courseId, expiresAt, usageLimit } = req.body || {};
+
+    const coupon = await Coupon.findById(id);
+    if (!coupon) return res.status(404).json({ status: "error", message: "Coupon not found" });
+
+    // Check if code is being changed and if it already exists
+    if (code && code !== coupon.code) {
+      const normalizedCode = String(code).trim().toUpperCase();
+      const existing = await Coupon.findOne({ code: normalizedCode, _id: { $ne: id } });
+      if (existing) return res.status(409).json({ status: "error", message: "Coupon code already exists" });
+    }
+
+    let resolvedCourseId = coupon.course;
+    if (courseId !== undefined) {
+      if (courseId && courseId !== "ALL") {
+        const course = await Course.findById(courseId);
+        if (!course) return res.status(404).json({ status: "error", message: "Course not found" });
+        resolvedCourseId = courseId;
+      } else if (courseId === "ALL") {
+        resolvedCourseId = null;
+      }
+    }
+
+    const updateData = {};
+    if (code !== undefined) updateData.code = String(code).trim().toUpperCase();
+    if (percentOff !== undefined) updateData.percentOff = Number(percentOff);
+    if (courseId !== undefined) updateData.course = resolvedCourseId;
+    if (expiresAt !== undefined) updateData.expiresAt = expiresAt ? new Date(expiresAt) : null;
+    if (usageLimit !== undefined) updateData.usageLimit = usageLimit ? Number(usageLimit) : null;
+
+    const updatedCoupon = await Coupon.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json({ status: "success", data: { coupon: updatedCoupon } });
+  } catch (error) {
+    console.error("Update coupon error:", error);
+    res.status(500).json({ status: "error", message: "Failed to update coupon" });
+  }
+};
+
 // Generate one or more coupons (Admin)
 export const generateCoupons = async (req, res) => {
   try {
