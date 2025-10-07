@@ -1,10 +1,23 @@
 // src/pages/Signup.jsx
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Signup() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [form, setForm] = useState({ name: "", email: "", password: "", referralCode: "" });
   const [loading, setLoading] = useState(false);
+
+  // Capture ?ref= from querystring
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      setForm((f) => ({ ...f, referralCode: ref }));
+    }
+  }, [location.search]);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -12,12 +25,16 @@ export default function Signup() {
     e.preventDefault(); // prevent page reload
     setLoading(true);
     try {
-      // TODO: replace with API call to create user
-      // Example:
-      // await api.post("/signup", form)
-      console.log("Sign up payload:", form);
-      // On success, navigate to login or dashboard
-      // navigate("/login");
+      const [firstName, ...rest] = String(form.name || "").trim().split(" ");
+      const payload = {
+        firstName: firstName || form.name,
+        lastName: rest.join(" ") || "",
+        email: form.email,
+        password: form.password,
+        referralCode: form.referralCode || undefined,
+      };
+      await signup(payload);
+      navigate("/dashboard");
     } finally {
       setLoading(false);
     }
@@ -65,6 +82,26 @@ export default function Signup() {
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <span className="text-gray-400">👤</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Optional Referral Code (prefilled if present) */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Referral Code (optional)
+              </label>
+              <div className="relative">
+                <input
+                  className="w-full rounded-xl border-2 border-gray-200 bg-white/50 backdrop-blur-sm px-4 py-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-400 transition-all duration-300"
+                  placeholder="Enter referral code if you have one"
+                  type="text"
+                  name="referralCode"
+                  value={form.referralCode}
+                  onChange={onChange}
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="text-gray-400">🎟️</span>
                 </div>
               </div>
             </div>

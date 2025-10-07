@@ -42,6 +42,7 @@ export default function CourseDetails() {
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const [couponError, setCouponError] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
+  const [useReferralDiscount, setUseReferralDiscount] = useState(false);
   const [walletInfo, setWalletInfo] = useState(null);
   const [coinSetting, setCoinSetting] = useState(null);
   const [coinsToUse, setCoinsToUse] = useState(0);
@@ -350,11 +351,14 @@ export default function CourseDetails() {
       
       // Apply coupon discount first
       const couponDiscountAmount = (coursePrice * couponDiscount) / 100;
-      const priceAfterCoupon = Math.max(0, coursePrice - couponDiscountAmount);
+      const afterCoupon = Math.max(0, coursePrice - couponDiscountAmount);
+      // Apply optional referral discount (10%) if toggled
+      const referralDiscountAmount = useReferralDiscount ? afterCoupon * 0.10 : 0;
+      const priceAfterReferral = Math.max(0, afterCoupon - referralDiscountAmount);
       
       // Then apply coin discount
       const discountAmount = coinPreview.discountValue || 0;
-      const finalAmount = Math.max(0, priceAfterCoupon - discountAmount);
+      const finalAmount = Math.max(0, priceAfterReferral - discountAmount);
       const amountInPaise = Math.round(finalAmount * 100); // Convert to paise
 
       const options = {
@@ -367,6 +371,7 @@ export default function CourseDetails() {
           courseId: display.id,
           couponCode: couponCode || appliedCoupon,
           coinsUsed: coinPreview.usableCoins,
+          referralDiscount: useReferralDiscount ? 10 : 0,
         },
         handler: async function (response) {
           console.log("Payment successful:", response);
@@ -1393,6 +1398,25 @@ export default function CourseDetails() {
                     )}
                 </div>
               </div>
+              {/* Referral Discount Toggle */}
+              <div
+                className="mt-3 p-3 rounded-lg border"
+                style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+              >
+                <label className="flex items-start space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={useReferralDiscount}
+                    onChange={(e) => setUseReferralDiscount(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded focus:ring-2"
+                    style={{ accentColor: "var(--brand)", borderColor: "var(--border)" }}
+                  />
+                  <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    Apply 10% referral discount (if eligible)
+                  </span>
+                </label>
+              </div>
+
               {/* Price Breakdown Section */}
               <div>
                 <h4

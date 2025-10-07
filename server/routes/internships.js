@@ -1,5 +1,7 @@
 import express from "express";
 import { adminAuth } from "../middleware/adminAuth.js";
+import { protect } from "../middleware/auth.js";
+import { requirePaidEnrollment } from "../middleware/paidAccess.js";
 import {
   listInternships,
   createInternship,
@@ -16,11 +18,11 @@ router.get("/test", (req, res) => {
   res.json({ status: "ok", message: "Internships API is working" });
 });
 
-// Public: list internships
-router.get("/", listInternships);
+// Restricted: list internships (only for users with a paid enrollment)
+router.get("/", protect, requirePaidEnrollment, listInternships);
 
-// Public: track apply (optional auth).
-router.post("/:id/apply", applyInternship);
+// Restricted: track apply (must be paid student)
+router.post("/:id/apply", protect, requirePaidEnrollment, applyInternship);
 
 // Admin: create/update/delete
 router.post("/", adminAuth, createInternship);

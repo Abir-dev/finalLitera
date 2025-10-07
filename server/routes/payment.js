@@ -48,7 +48,7 @@ router.post("/create-order", protect, async (req, res) => {
       body: req.body,
     });
 
-    const { courseId, promoCode } = req.body;
+    const { courseId, promoCode, referralDiscount } = req.body;
     if (!courseId) {
       return res
         .status(400)
@@ -119,6 +119,27 @@ router.post("/create-order", protect, async (req, res) => {
         }
       } catch (e) {
         console.warn("Promo code apply failed:", e?.message);
+      }
+    }
+
+    // Optional referral discount (10%) for users who signed up with a referral
+    // Apply after coupons, but before coins usage (coins are handled at verify)
+    if (referralDiscount === true) {
+      try {
+        const currentUser = await User.findById(req.user.id);
+        if (currentUser?.referredBy && !currentUser?.referralDiscountUsed) {
+          const referralPercent = 10; // fixed as per requirement
+          appliedDiscount += referralPercent;
+          const discounted = price * (1 - referralPercent / 100);
+          price = Math.max(0, Math.round(discounted));
+          orderOptions.notes = {
+            ...orderOptions.notes,
+            referralDiscountPercent: referralPercent,
+            referredBy: String(currentUser.referredBy),
+          };
+        }
+      } catch (refErr) {
+        console.warn("Referral discount check failed:", refErr?.message);
       }
     }
 
@@ -364,6 +385,45 @@ router.post("/verify-payment", protect, async (req, res) => {
       message: `You have successfully enrolled in ${course.title}`,
       data: { courseId, enrollmentId: enrollment._id },
     });
+
+    // Referral reward logic: On first successful purchase of a referred user, credit 50 coins to referrer
+    try {
+      const buyer = await User.findById(req.user.id);
+      if (buyer?.referredBy && !buyer?.referralRewardGiven) {
+        const referrer = await User.findById(buyer.referredBy);
+        if (referrer) {
+          // Credit 50 coins
+          const Wallet = (await import("../models/Wallet.js")).default;
+          const WalletTransaction = (await import("../models/WalletTransaction.js")).default;
+          let wallet = await Wallet.findOne({ user: referrer._id });
+          if (!wallet) wallet = await Wallet.create({ user: referrer._id, balance: 0 });
+          const balanceBefore = wallet.balance;
+          wallet.balance += 50;
+          wallet.totalAssigned += 50;
+          await wallet.save();
+          await WalletTransaction.create({
+            user: referrer._id,
+            type: "assign",
+            amount: 50,
+            balanceBefore,
+            balanceAfter: wallet.balance,
+            metadata: { reason: "Referral reward", referredUser: String(buyer._id), course: String(courseId) },
+            status: "completed",
+          });
+          // Update referral stats
+          referrer.referral = referrer.referral || {};
+          referrer.referral.successfulPurchases = (referrer.referral.successfulPurchases || 0) + 1;
+          referrer.referral.totalCoinsEarned = (referrer.referral.totalCoinsEarned || 0) + 50;
+          await referrer.save();
+          // Mark buyer flags to prevent multiple rewards and mark discount usage if applicable
+          buyer.referralRewardGiven = true;
+          if (!buyer.referralDiscountUsed) buyer.referralDiscountUsed = true;
+          await buyer.save();
+        }
+      }
+    } catch (refRewardErr) {
+      console.warn("Referral reward processing failed:", refRewardErr?.message);
+    }
 
     res.status(200).json({
       status: "success",

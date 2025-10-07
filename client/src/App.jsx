@@ -20,6 +20,7 @@ import Notifications from "./pages/Notifications.jsx";
 import Profile from "./pages/Profile.jsx";
 import Billing from "./pages/Billing.jsx";
 import DashboardWallet from "./pages/DashboardWallet.jsx";
+import ReferAndEarn from "./pages/ReferAndEarn.jsx";
 import Logout from "./pages/Logout.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Internships from "./pages/Internships.jsx";
@@ -78,6 +79,7 @@ export default function App() {
         <Route path="exam/:id" element={<ExamDetails />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="wallet" element={<DashboardWallet />} />
+        <Route path="refer" element={<ReferAndEarn />} />
         <Route path="profile" element={<Profile />} />
         <Route path="billing" element={<Billing />} />
         <Route path="logout" element={<Logout />} />

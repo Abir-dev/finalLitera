@@ -7,9 +7,16 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 // @access  Private
 export const adminAuth = async (req, res, next) => {
   try {
+    console.log('AdminAuth middleware called:', {
+      url: req.url,
+      method: req.method,
+      authHeader: req.headers.authorization ? 'Present' : 'Missing'
+    });
+
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('No auth header or invalid format');
       return res.status(401).json({
         status: 'error',
         message: 'Access denied. No token provided.'
@@ -19,6 +26,7 @@ export const adminAuth = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     
     if (!token) {
+      console.log('No token found in header');
       return res.status(401).json({
         status: 'error',
         message: 'Access denied. No token provided.'
@@ -27,11 +35,13 @@ export const adminAuth = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('Token decoded:', { id: decoded.id, iat: decoded.iat });
     
     // Check if admin exists and is active
     const admin = await Admin.findById(decoded.id).select('-password');
     
     if (!admin) {
+      console.log('Admin not found:', decoded.id);
       return res.status(401).json({
         status: 'error',
         message: 'Invalid token. Admin not found.'
@@ -39,6 +49,7 @@ export const adminAuth = async (req, res, next) => {
     }
 
     if (!admin.isActive) {
+      console.log('Admin account deactivated:', admin.email);
       return res.status(401).json({
         status: 'error',
         message: 'Admin account is deactivated.'
@@ -53,6 +64,7 @@ export const adminAuth = async (req, res, next) => {
       permissions: admin.permissions
     };
 
+    console.log('Admin auth successful:', req.admin.email);
     next();
   } catch (error) {
     console.error('Admin auth middleware error:', error);

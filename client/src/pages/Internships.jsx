@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import { Briefcase, ArrowRight, Eye } from "lucide-react";
 import { listInternships, applyToInternship } from "../services/internshipService.js";
 import InternshipPreviewModal from "../components/InternshipPreviewModal.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Internships() {
   const [internships, setInternships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedInternship, setSelectedInternship] = useState(null);
+  const [locked, setLocked] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const { user } = useAuth();
 
   useEffect(() => {
     (async () => {
@@ -15,8 +19,18 @@ export default function Internships() {
         setLoading(true);
         const res = await listInternships();
         setInternships(res?.data?.internships || []);
+        setLocked(false);
+        setErrorMsg("");
       } catch (e) {
         console.error("Failed to load internships", e);
+        if (e?.status === 401 || e?.status === 403) {
+          setLocked(true);
+          setErrorMsg(
+            "Internships are available only after purchasing any paid course."
+          );
+        } else {
+          setErrorMsg("Failed to load internships. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
@@ -67,6 +81,13 @@ export default function Internships() {
           {loading ? (
             <div className="card-premium p-8 text-center" style={{ color: 'var(--text-secondary)' }}>
               Loading internships...
+            </div>
+          ) : locked ? (
+            <div className="card-premium p-8 text-center space-y-4">
+              <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                {errorMsg}
+              </div>
+              <a href="/courses" className="btn-premium inline-block">Browse paid courses</a>
             </div>
           ) : internships.length === 0 ? (
             <div className="card-premium p-8 text-center" style={{ color: 'var(--text-secondary)' }}>

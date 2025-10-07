@@ -31,6 +31,7 @@ import {
   removeCourseFromStudent,
   getStudentProgress,
 } from "../controllers/adminUsersController.js";
+import { deleteUser } from "../controllers/userController.js";
 import {
   getDashboardStats,
   getRecentActivities,
@@ -188,6 +189,11 @@ router.post("/students", adminAuth, createStudent);
 // @route   PUT /api/admin/students/:id
 // @access  Private/Admin
 router.put("/students/:id", adminAuth, updateStudent);
+
+// @desc    Delete student (No auth) - WARNING: public delete
+// @route   DELETE /api/admin/students/:id
+// @access  Public
+router.delete("/students/:id", deleteUser);
 
 // @desc    Assign course to student (Admin)
 // @route   POST /api/admin/students/:id/assign-course

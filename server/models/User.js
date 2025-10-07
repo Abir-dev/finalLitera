@@ -232,10 +232,33 @@ userSchema.methods.issueCertificate = async function (courseId, certificateUrl) 
   return this.save();
 };
 
+// --- Referral fields and helpers ---
+userSchema.add({
+  referralCode: { type: String, unique: true, sparse: true },
+  referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  referral: {
+    totalInvites: { type: Number, default: 0 },
+    successfulPurchases: { type: Number, default: 0 },
+    totalCoinsEarned: { type: Number, default: 0 },
+  },
+  referralDiscountUsed: { type: Boolean, default: false }, // whether 10% referral discount was used by referred user
+  referralRewardGiven: { type: Boolean, default: false }, // first-purchase reward credited to referrer
+});
+
+// Generate a short referral code from user id if missing
+userSchema.pre('save', function(next) {
+  if (!this.referralCode) {
+    const idPart = this._id ? String(this._id).slice(-6) : Math.random().toString(36).slice(2, 8);
+    this.referralCode = `LIT${idPart}`.toUpperCase();
+  }
+  next();
+});
+
 // Indexes for better query performance
 userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ 'enrolledCourses.course': 1 });
 userSchema.index({ 'subscription.plan': 1 });
+userSchema.index({ referralCode: 1 });
 
 export default mongoose.model("User", userSchema);

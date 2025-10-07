@@ -13,6 +13,7 @@ import {
   getCoursesByInstructor,
 } from "../controllers/courseController.js";
 import { protect, authorize, optionalAuth } from "../middleware/auth.js";
+import { adminAuth } from "../middleware/adminAuth.js";
 import {
   validateCourseCreation,
   validateCourseUpdate,
@@ -49,8 +50,7 @@ router.get("/launchpad", getLaunchPadCourses);
 // @access  Private/Admin
 router.get(
   "/instructor/:instructorId",
-  protect,
-  authorize("admin"),
+  adminAuth,
   validateObjectId("instructorId"),
   getCoursesByInstructor
 );

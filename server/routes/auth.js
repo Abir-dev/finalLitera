@@ -18,7 +18,7 @@ const JWT_EXPIRE = process.env.JWT_EXPIRE || "7d";
 // --- SIGNUP ---
 router.post("/signup", async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, referralCode } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser)
@@ -27,10 +27,27 @@ router.post("/signup", async (req, res) => {
     const user = new User({ firstName, lastName, email, password });
     await user.save();
 
+    // Link referral if referralCode is provided
+    if (referralCode) {
+      try {
+        const referrer = await User.findOne({ referralCode: String(referralCode).trim().toUpperCase() });
+        if (referrer && String(referrer._id) !== String(user._id)) {
+          user.referredBy = referrer._id;
+          await user.save();
+          // Increment referrer invite count
+          referrer.referral = referrer.referral || {};
+          referrer.referral.totalInvites = (referrer.referral.totalInvites || 0) + 1;
+          await referrer.save();
+        }
+      } catch (refErr) {
+        console.warn("Failed to link referral on signup:", refErr?.message);
+      }
+    }
+
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
 
     res.status(201).json({
-      user: { id: user._id, firstName, lastName, email, role: user.role },
+      user: { id: user._id, firstName, lastName, email, role: user.role, referralCode: user.referralCode },
       token,
     });
   } catch (err) {

@@ -191,15 +191,23 @@ export const updateUser = async (req, res) => {
 // @access  Private/Admin
 export const deleteUser = async (req, res) => {
   try {
+    console.log('Delete user request:', {
+      userId: req.params.id,
+      admin: req.admin,
+      headers: req.headers
+    });
+
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
+      console.log('User not found:', req.params.id);
       return res.status(404).json({
         status: 'error',
         message: 'User not found'
       });
     }
 
+    console.log('User deleted successfully:', user._id);
     res.status(200).json({
       status: 'success',
       message: 'User deleted successfully'

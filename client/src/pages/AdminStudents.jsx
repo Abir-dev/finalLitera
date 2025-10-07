@@ -171,9 +171,59 @@ export default function AdminStudents() {
     (s) => s.course && s.course !== "-"
   );
 
-  const handleDeleteStudent = (id) => {
+  const handleDeleteStudent = async (id) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
-      setStudents(students.filter((student) => student.id !== id));
+      try {
+        setLoading(true);
+        const API_BASE =
+          import.meta.env.VITE_API_URL ||
+          "https://finallitera.onrender.com/api";
+        const token = localStorage.getItem("adminToken");
+
+        // if (!token) {
+        //   setError("No admin token found. Please login again.");
+        //   setTimeout(() => navigate("/admin/login"), 2000);
+        //   return;
+        // }
+
+        const response = await fetch(`${API_BASE}/users/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Delete error response:", errorText);
+          
+          if (response.status === 401) {
+            setError("Authentication failed. Please login again.");
+            localStorage.removeItem("adminToken");
+            setTimeout(() => navigate("/admin/login"), 2000);
+            return;
+          }
+          
+          throw new Error(`Failed to delete student: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log("Delete response:", result);
+        
+        // Remove student from local state
+        setStudents(students.filter((student) => student.id !== id));
+        
+        // Show success message
+        alert("Student deleted successfully!");
+        
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        setError(error.message || "Failed to delete student");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

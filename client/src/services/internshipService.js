@@ -88,10 +88,6 @@ export async function listInternships() {
     console.log("Raw response status:", res.status);
     console.log("Raw response ok:", res.ok);
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    }
-
     const result = await handleResponse(res);
     console.log("List internships success:", result);
 
@@ -111,7 +107,12 @@ export async function listInternships() {
       data: e.data,
     });
 
-    // fallback to local storage
+    // If access is forbidden/unauthorized, bubble up so UI can lock
+    if (e.status === 401 || e.status === 403) {
+      throw e;
+    }
+
+    // fallback to local storage for other failures (e.g., network)
     const data = readLocal();
     return { status: "ok", data: { internships: data } };
   }
