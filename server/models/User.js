@@ -107,7 +107,17 @@ const userSchema = new mongoose.Schema(
       },
       certificateUrl: String,
       verificationCode: String
-    }]
+    }],
+    // Referral system fields
+    referralCode: { type: String, unique: true, sparse: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    referral: {
+      totalInvites: { type: Number, default: 0 },
+      successfulPurchases: { type: Number, default: 0 },
+      totalCoinsEarned: { type: Number, default: 0 },
+    },
+    referralDiscountUsed: { type: Boolean, default: false }, // whether 10% referral discount was used by referred user
+    referralRewardGiven: { type: Boolean, default: false }, // first-purchase reward credited to referrer
   },
   { timestamps: true }
 );
@@ -232,24 +242,81 @@ userSchema.methods.issueCertificate = async function (courseId, certificateUrl) 
   return this.save();
 };
 
-// --- Referral fields and helpers ---
-userSchema.add({
-  referralCode: { type: String, unique: true, sparse: true },
-  referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  referral: {
-    totalInvites: { type: Number, default: 0 },
-    successfulPurchases: { type: Number, default: 0 },
-    totalCoinsEarned: { type: Number, default: 0 },
-  },
-  referralDiscountUsed: { type: Boolean, default: false }, // whether 10% referral discount was used by referred user
-  referralRewardGiven: { type: Boolean, default: false }, // first-purchase reward credited to referrer
-});
+// Generate referral code if missing
+userSchema.methods.generateReferralCode = async function () {
+  if (this.referralCode) {
+    return this.referralCode;
+  }
+  
+  let referralCode;
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  do {
+    let idPart;
+    if (this._id) {
+      // Use the last 6 characters of the ObjectId
+      idPart = String(this._id).slice(-6).toUpperCase();
+    } else {
+      // Generate a random 6-character string if no _id yet
+      idPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+    referralCode = `LIT${idPart}`;
+    
+    // Check if this referral code already exists
+    const existingUser = await this.constructor.findOne({ referralCode });
+    if (!existingUser) {
+      this.referralCode = referralCode;
+      await this.save();
+      return referralCode;
+    }
+    
+    attempts++;
+    if (attempts >= maxAttempts) {
+      // Fallback to timestamp-based code if we can't find a unique one
+      this.referralCode = `LIT${Date.now().toString().slice(-6)}`;
+      await this.save();
+      return this.referralCode;
+    }
+  } while (attempts < maxAttempts);
+  
+  return this.referralCode;
+};
+
+// --- Referral fields are now defined in the main schema above ---
 
 // Generate a short referral code from user id if missing
-userSchema.pre('save', function(next) {
+userSchema.pre('save', async function(next) {
   if (!this.referralCode) {
-    const idPart = this._id ? String(this._id).slice(-6) : Math.random().toString(36).slice(2, 8);
-    this.referralCode = `LIT${idPart}`.toUpperCase();
+    let referralCode;
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    do {
+      let idPart;
+      if (this._id) {
+        // Use the last 6 characters of the ObjectId
+        idPart = String(this._id).slice(-6).toUpperCase();
+      } else {
+        // Generate a random 6-character string if no _id yet
+        idPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+      }
+      referralCode = `LIT${idPart}`;
+      
+      // Check if this referral code already exists
+      const existingUser = await this.constructor.findOne({ referralCode });
+      if (!existingUser) {
+        this.referralCode = referralCode;
+        break;
+      }
+      
+      attempts++;
+      if (attempts >= maxAttempts) {
+        // Fallback to timestamp-based code if we can't find a unique one
+        this.referralCode = `LIT${Date.now().toString().slice(-6)}`;
+        break;
+      }
+    } while (attempts < maxAttempts);
   }
   next();
 });

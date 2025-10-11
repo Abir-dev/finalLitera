@@ -1,6 +1,6 @@
 // src/components/SignupModal.jsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx"; // Auth context
 import axios from "axios"; // for backend requests
@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 
 export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useAuth(); // setUser from AuthContext
   const [formData, setFormData] = useState({
     firstName: "",
@@ -15,14 +16,81 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
     email: "",
     password: "",
     confirmPassword: "",
+    referralCode: "",
   });
   const [loading, setLoading] = useState(false);
+  const [referralValidation, setReferralValidation] = useState({ 
+    isValidating: false, 
+    isValid: null, 
+    referrerInfo: null,
+    message: ""
+  });
+
+  // Capture ?ref= from querystring when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const params = new URLSearchParams(location.search);
+      const ref = params.get("ref");
+      if (ref) {
+        setFormData(prev => ({ ...prev, referralCode: ref }));
+        validateReferralCode(ref);
+      }
+    }
+  }, [isOpen, location.search]);
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    
+    // Validate referral code in real-time
+    if (name === "referralCode") {
+      if (value.trim()) {
+        validateReferralCode(value);
+      } else {
+        setReferralValidation({ isValidating: false, isValid: null, referrerInfo: null, message: "" });
+      }
+    }
+  };
+
+  const validateReferralCode = async (code) => {
+    if (!code.trim()) return;
+    
+    setReferralValidation({ isValidating: true, isValid: null, referrerInfo: null, message: "" });
+    
+    try {
+      const apiEnv = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
+      const response = await axios.post(`${apiEnv}/auth/validate-referral`, 
+        { referralCode: code },
+        { timeout: 10000 }
+      );
+      
+      if (response.data.valid) {
+        setReferralValidation({
+          isValidating: false,
+          isValid: true,
+          referrerInfo: response.data.referrer,
+          message: `Valid! You'll get 10% off your first course!`
+        });
+      } else {
+        setReferralValidation({
+          isValidating: false,
+          isValid: false,
+          referrerInfo: null,
+          message: response.data.message || "Invalid referral code"
+        });
+      }
+    } catch (error) {
+      console.error("Referral validation error:", error);
+      setReferralValidation({
+        isValidating: false,
+        isValid: false,
+        referrerInfo: null,
+        message: "Invalid referral code"
+      });
+    }
   };
 
   const handleSignup = async (e) => {
@@ -42,6 +110,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
           lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
+          referralCode: formData.referralCode || undefined,
         }
       );
 
@@ -53,7 +122,12 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
       // Set user in AuthContext
       setUser(data.user);
 
-      toast.success("Account created successfully! 🎉");
+      // Show success message if referral was linked
+      if (data.referralLinked && data.referrerInfo) {
+        toast.success(`🎉 Welcome! You've been referred by ${data.referrerInfo.name}. You'll get 10% off your first course purchase!`);
+      } else {
+        toast.success("Account created successfully! 🎉");
+      }
 
       onClose(); // Close modal
       navigate("/dashboard"); // redirect to dashboard
@@ -107,6 +181,18 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
               </svg>
             </button>
           </div>
+
+          {/* Referral Benefits Banner */}
+          {formData.referralCode && (
+            <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-green-600">🎉</span>
+                <span className="text-sm font-medium text-green-800">
+                  You're getting 10% off your first course!
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Signup Form */}
           <form onSubmit={handleSignup} className="space-y-4">
@@ -174,6 +260,66 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
                 required
                 className="w-full input-premium"
               />
+            </div>
+
+            {/* Referral Code Section */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold">Referral Code</label>
+                <span className="text-xs text-green-600 font-medium">Get 10% off!</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="referralCode"
+                  value={formData.referralCode}
+                  onChange={handleInputChange}
+                  placeholder="Enter referral code (optional)"
+                  className={`w-full input-premium ${
+                    referralValidation.isValid === true 
+                      ? 'border-green-400 focus:ring-green-500 focus:border-green-400' 
+                      : referralValidation.isValid === false 
+                      ? 'border-red-400 focus:ring-red-500 focus:border-red-400'
+                      : ''
+                  }`}
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  {referralValidation.isValidating ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-purple-600"></div>
+                  ) : referralValidation.isValid === true ? (
+                    <span className="text-green-500 text-sm">✓</span>
+                  ) : referralValidation.isValid === false ? (
+                    <span className="text-red-500 text-sm">✗</span>
+                  ) : (
+                    <span className="text-gray-400 text-sm">🎟️</span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Validation feedback */}
+              {referralValidation.message && (
+                <div className={`text-xs px-2 py-1 rounded-lg ${
+                  referralValidation.isValid === true 
+                    ? 'bg-green-50 text-green-700 border border-green-200' 
+                    : referralValidation.isValid === false 
+                    ? 'bg-red-50 text-red-700 border border-red-200'
+                    : 'bg-gray-50 text-gray-700 border border-gray-200'
+                }`}>
+                  {referralValidation.message}
+                </div>
+              )}
+              
+              {/* Referrer info display */}
+              {referralValidation.isValid && referralValidation.referrerInfo && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-green-600 text-sm">👋</span>
+                    <span className="text-xs text-green-700">
+                      Referred by <strong>{referralValidation.referrerInfo.name}</strong>
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Terms */}

@@ -26,13 +26,37 @@ export default function ReferAndEarn() {
 
   const inviteText = useMemo(() => {
     const link = data?.inviteLink || window.location.origin + "/signup";
-    return `Join Litera with my referral and get 10% off your first course! Use code ${data?.referralCode || ""}. Sign up here: ${link}`;
+    return `🎉 Join Litera and get 10% off your first course! 
+
+Use my referral code: ${data?.referralCode || ""}
+
+Sign up here: ${link}
+
+Start your learning journey with amazing courses! 🚀`;
   }, [data]);
 
   const copyText = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("Copied to clipboard");
+      // Show a better notification
+      const notification = document.createElement('div');
+      notification.textContent = '✅ Copied to clipboard!';
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 3000);
     } catch {
       try {
         const ta = document.createElement('textarea');

@@ -45,6 +45,7 @@ import AdminCoupons from "./pages/AdminCoupons.jsx";
 import AdminCoins from "./pages/AdminCoins.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
+import InviteSignup from "./pages/InviteSignup.jsx";
 
 export default function App() {
   useEffect(() => {
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
+        <Route path="invite" element={<InviteSignup />} />
         <Route path="admin/login" element={<AdminLogin />} />
       </Route>
 
