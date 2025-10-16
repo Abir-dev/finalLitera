@@ -41,6 +41,12 @@ import {
   getStudentProgress as getDashboardProgress,
   getSystemHealth,
 } from "../controllers/dashboardController.js";
+import {
+  listInternships,
+  createInternship,
+  updateInternship,
+  deleteInternship,
+} from "../controllers/internshipController.js";
 
 const router = express.Router();
 
@@ -224,5 +230,25 @@ router.get("/dashboard/trends", adminAuth, getEnrollmentTrends);
 router.get("/dashboard/revenue", adminAuth, getRevenueData);
 router.get("/dashboard/progress", adminAuth, getDashboardProgress);
 router.get("/dashboard/health", adminAuth, getSystemHealth);
+
+// @desc    Internship management routes
+// @route   GET /api/admin/internships
+// @access  Private/Admin
+router.get("/internships", adminAuth, listInternships);
+
+// @desc    Create internship (Admin)
+// @route   POST /api/admin/internships
+// @access  Private/Admin
+router.post("/internships", adminAuth, createInternship);
+
+// @desc    Update internship (Admin)
+// @route   PUT /api/admin/internships/:id
+// @access  Private/Admin
+router.put("/internships/:id", adminAuth, updateInternship);
+
+// @desc    Delete internship (Admin)
+// @route   DELETE /api/admin/internships/:id
+// @access  Private/Admin
+router.delete("/internships/:id", adminAuth, deleteInternship);
 
 export default router;

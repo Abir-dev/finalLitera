@@ -77,12 +77,18 @@ function writeLocal(list) {
 
 export async function listInternships() {
   try {
-    console.log("Fetching internships from:", INTERNSHIPS_URL);
+    // Check if we have an admin token to use admin endpoint
+    const adminToken = getAdminToken();
+    const url = adminToken ? `${BASE_URL}/admin/internships` : INTERNSHIPS_URL;
+    const headers = adminToken ? adminAuthHeaders() : authHeaders();
+    
+    console.log("Fetching internships from:", url);
+    console.log("Using admin endpoint:", !!adminToken);
 
-    const res = await fetch(INTERNSHIPS_URL, {
+    const res = await fetch(url, {
       method: "GET",
       credentials: "include",
-      headers: { ...authHeaders() },
+      headers: { ...headers },
     });
 
     console.log("Raw response status:", res.status);
@@ -123,10 +129,15 @@ export async function createInternship(payload) {
   try {
     console.log("Creating internship with payload:", payload);
 
-    const res = await fetch(INTERNSHIPS_URL, {
+    // Use admin endpoint if admin token is available
+    const adminToken = getAdminToken();
+    const url = adminToken ? `${BASE_URL}/admin/internships` : INTERNSHIPS_URL;
+    const headers = adminToken ? adminAuthHeaders() : authHeaders();
+
+    const res = await fetch(url, {
       method: "POST",
       credentials: "include",
-      headers: { ...adminAuthHeaders(), "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
@@ -177,10 +188,15 @@ export async function createInternship(payload) {
 
 export async function deleteInternship(id) {
   try {
-    const res = await fetch(`${INTERNSHIPS_URL}/${id}`, {
+    // Use admin endpoint if admin token is available
+    const adminToken = getAdminToken();
+    const url = adminToken ? `${BASE_URL}/admin/internships/${id}` : `${INTERNSHIPS_URL}/${id}`;
+    const headers = adminToken ? adminAuthHeaders() : authHeaders();
+
+    const res = await fetch(url, {
       method: "DELETE",
       credentials: "include",
-      headers: { ...adminAuthHeaders() },
+      headers: { ...headers },
     });
     return handleResponse(res); // { status, message }
   } catch (e) {
@@ -201,10 +217,15 @@ export async function deleteInternship(id) {
 
 export async function updateInternship(id, payload) {
   try {
-    const res = await fetch(`${INTERNSHIPS_URL}/${id}`, {
+    // Use admin endpoint if admin token is available
+    const adminToken = getAdminToken();
+    const url = adminToken ? `${BASE_URL}/admin/internships/${id}` : `${INTERNSHIPS_URL}/${id}`;
+    const headers = adminToken ? adminAuthHeaders() : authHeaders();
+
+    const res = await fetch(url, {
       method: "PUT",
       credentials: "include",
-      headers: { ...adminAuthHeaders(), "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     return handleResponse(res); // { status, data: { internship } }
