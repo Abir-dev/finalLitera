@@ -1,7 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { applyToInternship } from "../services/internshipService.js";
 
 export default function InternshipPreviewModal({ internship, isOpen, onClose }) {
+  const [applying, setApplying] = useState(false);
+  
   if (!isOpen || !internship) return null;
+
+  const handleApply = async () => {
+    setApplying(true);
+    try {
+      // Track the application
+      await applyToInternship(internship.id);
+      
+      // Redirect to the apply URL if it exists
+      if (internship.applyUrl) {
+        window.open(internship.applyUrl, "_blank", "noopener");
+        onClose(); // Close the modal after applying
+      } else {
+        alert("No application link available for this internship. Please contact the company directly.");
+      }
+    } catch (error) {
+      console.error("Failed to apply to internship:", error);
+      // Still try to redirect even if tracking fails
+      if (internship.applyUrl) {
+        window.open(internship.applyUrl, "_blank", "noopener");
+        onClose(); // Close the modal after applying
+      } else {
+        alert("Failed to apply. Please try again or contact support.");
+      }
+    } finally {
+      setApplying(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -67,6 +98,16 @@ export default function InternshipPreviewModal({ internship, isOpen, onClose }) 
 
             <div className="flex justify-end gap-3 pt-2">
               <button onClick={onClose} className="px-4 py-2 btn-outline-premium rounded-lg">Close</button>
+              {internship.applyUrl && (
+                <button 
+                  onClick={handleApply} 
+                  disabled={applying}
+                  className="btn-premium inline-flex items-center gap-2 px-4 py-2 rounded-lg disabled:opacity-50"
+                >
+                  {applying ? "Applying..." : "Apply Now"}
+                  <ArrowRight size={16} />
+                </button>
+              )}
             </div>
           </div>
         </div>

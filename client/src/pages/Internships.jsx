@@ -11,6 +11,7 @@ export default function Internships() {
   const [selectedInternship, setSelectedInternship] = useState(null);
   const [locked, setLocked] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [applyingId, setApplyingId] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -38,11 +39,30 @@ export default function Internships() {
   }, []);
 
   const onApply = async (internship) => {
+    setApplyingId(internship.id);
     try {
+      // Track the application
       await applyToInternship(internship.id);
-    } catch {}
-    if (internship.applyUrl) {
-      window.open(internship.applyUrl, "_blank", "noopener");
+      
+      // Redirect to the apply URL if it exists
+      if (internship.applyUrl) {
+        window.open(internship.applyUrl, "_blank", "noopener");
+      } else {
+        // Show error if no apply URL is configured
+        setErrorMsg("No application link available for this internship. Please contact the company directly.");
+        setTimeout(() => setErrorMsg(""), 5000);
+      }
+    } catch (error) {
+      console.error("Failed to apply to internship:", error);
+      // Still try to redirect even if tracking fails
+      if (internship.applyUrl) {
+        window.open(internship.applyUrl, "_blank", "noopener");
+      } else {
+        setErrorMsg("Failed to apply. Please try again or contact support.");
+        setTimeout(() => setErrorMsg(""), 5000);
+      }
+    } finally {
+      setApplyingId(null);
     }
   };
 
@@ -111,10 +131,25 @@ export default function Internships() {
                         <Eye size={16} />
                         Preview
                       </button>
-                      <button onClick={() => onApply(i)} className="btn-premium inline-flex items-center gap-2">
-                        Apply
-                        <ArrowRight size={16} />
-                      </button>
+                      {i.applyUrl ? (
+                        <button 
+                          onClick={() => onApply(i)} 
+                          disabled={applyingId === i.id}
+                          className="btn-premium inline-flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {applyingId === i.id ? "Applying..." : "Apply"}
+                          <ArrowRight size={16} />
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => onApply(i)} 
+                          className="btn-outline-premium inline-flex items-center gap-2 opacity-75"
+                          title="No application link available"
+                        >
+                          Apply
+                          <ArrowRight size={16} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
