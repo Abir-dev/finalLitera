@@ -27,6 +27,7 @@ import {
   listStudents,
   createStudent,
   updateStudent,
+  deleteStudent,
   assignCourseToStudent,
   removeCourseFromStudent,
   getStudentProgress,
@@ -196,10 +197,10 @@ router.post("/students", adminAuth, createStudent);
 // @access  Private/Admin
 router.put("/students/:id", adminAuth, updateStudent);
 
-// @desc    Delete student (No auth) - WARNING: public delete
+// @desc    Delete student (Admin only)
 // @route   DELETE /api/admin/students/:id
-// @access  Public
-router.delete("/students/:id", deleteUser);
+// @access  Private/Admin
+router.delete("/students/:id", adminAuth, deleteStudent);
 
 // @desc    Assign course to student (Admin)
 // @route   POST /api/admin/students/:id/assign-course

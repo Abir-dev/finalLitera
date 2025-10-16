@@ -550,4 +550,165 @@ export const getStudentProgress = async (req, res) => {
   }
 };
 
+// @desc    Delete student (Admin only)
+// @route   DELETE /api/admin/students/:id
+// @access  Private/Admin (adminAuth)
+export const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log('Admin delete student request:', {
+      studentId: id,
+      admin: req.admin,
+      headers: req.headers
+    });
+
+    // Find the student first
+    const student = await User.findById(id);
+    if (!student) {
+      console.log('Student not found:', id);
+      return res.status(404).json({
+        status: "error",
+        message: "Student not found",
+      });
+    }
+
+    // Check if the user is actually a student
+    if (student.role !== 'student') {
+      return res.status(400).json({
+        status: "error",
+        message: "Can only delete students",
+      });
+    }
+
+    console.log('Found student to delete:', {
+      id: student._id,
+      name: `${student.firstName} ${student.lastName}`,
+      email: student.email,
+      role: student.role
+    });
+
+    // Import required models for cleanup
+    const Enrollment = (await import('../models/Enrollment.js')).default;
+    const Review = (await import('../models/Review.js')).default;
+    const Wallet = (await import('../models/Wallet.js')).default;
+    const WalletTransaction = (await import('../models/WalletTransaction.js')).default;
+    const Notification = (await import('../models/Notification.js')).default;
+
+    // Start a transaction to ensure all deletions succeed or fail together
+    const session = await User.startSession();
+    session.startTransaction();
+
+    try {
+      // 1. Delete all enrollments for this student
+      const enrollmentResult = await Enrollment.deleteMany(
+        { user: id },
+        { session }
+      );
+      console.log('Deleted enrollments:', enrollmentResult.deletedCount);
+
+      // 2. Delete all reviews by this student
+      const reviewResult = await Review.deleteMany(
+        { user: id },
+        { session }
+      );
+      console.log('Deleted reviews:', reviewResult.deletedCount);
+
+      // 3. Delete wallet transactions for this student
+      const walletTransactionResult = await WalletTransaction.deleteMany(
+        { user: id },
+        { session }
+      );
+      console.log('Deleted wallet transactions:', walletTransactionResult.deletedCount);
+
+      // 4. Delete the student's wallet
+      const walletResult = await Wallet.deleteOne(
+        { user: id },
+        { session }
+      );
+      console.log('Deleted wallet:', walletResult.deletedCount);
+
+      // 5. Delete all notifications for this student
+      const notificationResult = await Notification.deleteMany(
+        { user: id },
+        { session }
+      );
+      console.log('Deleted notifications:', notificationResult.deletedCount);
+
+      // 6. Update referral relationships - set referredBy to null for users referred by this student
+      const referralUpdateResult = await User.updateMany(
+        { referredBy: id },
+        { $unset: { referredBy: 1 } },
+        { session }
+      );
+      console.log('Updated referral relationships:', referralUpdateResult.modifiedCount);
+
+      // 7. Finally, delete the student user
+      const userResult = await User.findByIdAndDelete(id, { session });
+      console.log('Deleted user:', userResult ? 'success' : 'failed');
+
+      // Commit the transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      console.log('Student deleted successfully:', {
+        studentId: id,
+        studentName: `${student.firstName} ${student.lastName}`,
+        studentEmail: student.email,
+        deletedRecords: {
+          enrollments: enrollmentResult.deletedCount,
+          reviews: reviewResult.deletedCount,
+          walletTransactions: walletTransactionResult.deletedCount,
+          wallet: walletResult.deletedCount,
+          notifications: notificationResult.deletedCount,
+          referralUpdates: referralUpdateResult.modifiedCount
+        }
+      });
+
+      res.status(200).json({
+        status: "success",
+        message: "Student deleted successfully",
+        data: {
+          deletedStudent: {
+            id: student._id,
+            name: `${student.firstName} ${student.lastName}`,
+            email: student.email
+          },
+          cleanupSummary: {
+            enrollments: enrollmentResult.deletedCount,
+            reviews: reviewResult.deletedCount,
+            walletTransactions: walletTransactionResult.deletedCount,
+            wallet: walletResult.deletedCount,
+            notifications: notificationResult.deletedCount,
+            referralUpdates: referralUpdateResult.modifiedCount
+          }
+        }
+      });
+
+    } catch (transactionError) {
+      // If anything fails, rollback the transaction
+      await session.abortTransaction();
+      session.endSession();
+      throw transactionError;
+    }
+
+  } catch (error) {
+    console.error("Admin delete student error:", error);
+    
+    // Handle specific error types
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid student ID format",
+      });
+    }
+
+    res.status(500).json({
+      status: "error",
+      message: "Server error during student deletion",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 

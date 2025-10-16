@@ -172,21 +172,25 @@ export default function AdminStudents() {
   );
 
   const handleDeleteStudent = async (id) => {
-    if (window.confirm("Are you sure you want to delete this student?")) {
+    const student = students.find(s => s.id === id);
+    const studentName = student ? student.name : "this student";
+    
+    if (window.confirm(`Are you sure you want to delete ${studentName}? This action will permanently remove the student and all their data including enrollments, reviews, wallet, and notifications. This action cannot be undone.`)) {
       try {
         setLoading(true);
+        setError("");
         const API_BASE =
           import.meta.env.VITE_API_URL ||
           "https://finallitera.onrender.com/api";
         const token = localStorage.getItem("adminToken");
 
-        // if (!token) {
-        //   setError("No admin token found. Please login again.");
-        //   setTimeout(() => navigate("/admin/login"), 2000);
-        //   return;
-        // }
+        if (!token) {
+          setError("No admin token found. Please login again.");
+          setTimeout(() => navigate("/admin/login"), 2000);
+          return;
+        }
 
-        const response = await fetch(`${API_BASE}/users/${id}`, {
+        const response = await fetch(`${API_BASE}/admin/students/${id}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -196,8 +200,8 @@ export default function AdminStudents() {
         });
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Delete error response:", errorText);
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Delete error response:", errorData);
           
           if (response.status === 401) {
             setError("Authentication failed. Please login again.");
@@ -206,7 +210,17 @@ export default function AdminStudents() {
             return;
           }
           
-          throw new Error(`Failed to delete student: ${response.status} ${response.statusText}`);
+          if (response.status === 404) {
+            setError("Student not found. It may have already been deleted.");
+            return;
+          }
+          
+          if (response.status === 400) {
+            setError(errorData.message || "Invalid request. Cannot delete this student.");
+            return;
+          }
+          
+          throw new Error(errorData.message || `Failed to delete student: ${response.status} ${response.statusText}`);
         }
 
         const result = await response.json();
@@ -215,8 +229,23 @@ export default function AdminStudents() {
         // Remove student from local state
         setStudents(students.filter((student) => student.id !== id));
         
-        // Show success message
-        alert("Student deleted successfully!");
+        // Show success message with cleanup summary
+        const cleanupSummary = result.data?.cleanupSummary;
+        let successMessage = `Student ${studentName} deleted successfully!`;
+        
+        if (cleanupSummary) {
+          const summaryParts = [];
+          if (cleanupSummary.enrollments > 0) summaryParts.push(`${cleanupSummary.enrollments} enrollment(s)`);
+          if (cleanupSummary.reviews > 0) summaryParts.push(`${cleanupSummary.reviews} review(s)`);
+          if (cleanupSummary.walletTransactions > 0) summaryParts.push(`${cleanupSummary.walletTransactions} wallet transaction(s)`);
+          if (cleanupSummary.notifications > 0) summaryParts.push(`${cleanupSummary.notifications} notification(s)`);
+          
+          if (summaryParts.length > 0) {
+            successMessage += `\n\nAlso removed: ${summaryParts.join(", ")}.`;
+          }
+        }
+        
+        alert(successMessage);
         
       } catch (error) {
         console.error("Error deleting student:", error);
