@@ -2,6 +2,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
+import ChatBot from "../components/ChatBot.jsx";
 
 export default function RootLayout() {
   const location = useLocation();
@@ -17,6 +18,7 @@ export default function RootLayout() {
         <Outlet />
       </main>
       {!location.pathname.startsWith('/admin/login') && <Footer />}
+      <ChatBot />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAdminAuth } from "../context/AdminAuthContext.jsx";
+import ChatBot from "../components/ChatBot.jsx";
 import {
   BarChart3,
   Users,
@@ -305,6 +306,7 @@ export default function AdminLayout() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+      <ChatBot />
     </div>
   );
 }

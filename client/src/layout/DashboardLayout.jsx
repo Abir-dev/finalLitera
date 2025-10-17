@@ -1,6 +1,7 @@
 // src/layout/DashboardLayout.jsx
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
+import ChatBot from "../components/ChatBot.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useState, useEffect } from "react";
 import profileService from "../services/profileService.js";
@@ -381,6 +382,7 @@ export default function DashboardLayout() {
           </div>
         </main>
       </div>
+      <ChatBot />
     </div>
   );
 }
