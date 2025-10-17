@@ -125,7 +125,8 @@ export default function CourseDetails() {
 
   // Recalculate coin discount preview when inputs change
   useEffect(() => {
-    if (!course?.price || !coinSetting) {
+    if (!course?.price) {
+      console.log("Coin calculation skipped: No course price");
       setCoinPreview({
         usableCoins: 0,
         discountValue: 0,
@@ -133,13 +134,24 @@ export default function CourseDetails() {
       });
       return;
     }
+    
+    // Use default coin setting if not loaded yet
+    const effectiveCoinSetting = coinSetting || { coinToCurrencyRate: 1 };
     const price = Number(course.price) || 0;
     const balance = Number(walletInfo?.wallet?.balance || 0);
-    const rate = Number(coinSetting.coinToCurrencyRate || 0);
+    const rate = Number(effectiveCoinSetting.coinToCurrencyRate || 1); // Default to 1 if not set
+    
+    if (rate === 0) {
+      console.warn("Coin rate is 0, no discount will be applied");
+    }
     
     // Apply coupon discount first
     const couponDiscountAmount = (price * couponDiscount) / 100;
     const priceAfterCoupon = Math.max(0, price - couponDiscountAmount);
+    
+    // Apply referral discount if enabled
+    const referralDiscountAmount = useReferralDiscount ? priceAfterCoupon * 0.10 : 0;
+    const priceAfterReferral = Math.max(0, priceAfterCoupon - referralDiscountAmount);
     
     const requestedCoins = Math.max(0, Math.floor(Number(coinsToUse) || 0));
     const maxCoinsByBalance = balance;
@@ -148,10 +160,14 @@ export default function CourseDetails() {
     // Students can now use all their coins regardless of course price percentage
     const usableCoins = Math.min(requestedCoins, maxCoinsByBalance);
     const discountValue = usableCoins * rate;
-    const finalPricePreview = Math.max(0, priceAfterCoupon - discountValue);
+    const finalPricePreview = Math.max(0, priceAfterReferral - discountValue);
     
     console.log("Coin calculation:", { // Debug log
       price,
+      couponDiscountAmount,
+      priceAfterCoupon,
+      referralDiscountAmount,
+      priceAfterReferral,
       balance,
       rate,
       requestedCoins,
@@ -162,7 +178,7 @@ export default function CourseDetails() {
     });
     
     setCoinPreview({ usableCoins, discountValue, finalPricePreview });
-  }, [coinsToUse, walletInfo, coinSetting, course, couponDiscount]);
+  }, [coinsToUse, walletInfo, coinSetting, course, couponDiscount, useReferralDiscount]);
 
   // Only show login modal if authentication check is complete and user is not logged in
   if (!authLoading && !user && !isLoginModalOpen) {
@@ -358,20 +374,19 @@ export default function CourseDetails() {
     }
 
     try {
-      // Calculate payment amount (no order creation yet)
-      const coursePrice = Number(course.price) || 0;
-      
-      // Apply coupon discount first
-      const couponDiscountAmount = (coursePrice * couponDiscount) / 100;
-      const afterCoupon = Math.max(0, coursePrice - couponDiscountAmount);
-      // Apply optional referral discount (10%) if toggled
-      const referralDiscountAmount = useReferralDiscount ? afterCoupon * 0.10 : 0;
-      const priceAfterReferral = Math.max(0, afterCoupon - referralDiscountAmount);
-      
-      // Then apply coin discount
-      const discountAmount = coinPreview.discountValue || 0;
-      const finalAmount = Math.max(0, priceAfterReferral - discountAmount);
+      // Use the already calculated final price from coinPreview
+      const finalAmount = coinPreview.finalPricePreview || Number(course.price) || 0;
       const amountInPaise = Math.round(finalAmount * 100); // Convert to paise
+      
+      console.log("Payment calculation:", { // Debug log
+        originalPrice: Number(course.price),
+        finalAmount,
+        amountInPaise,
+        coinsUsed: coinPreview.usableCoins,
+        coinDiscount: coinPreview.discountValue,
+        couponDiscount,
+        useReferralDiscount
+      });
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -1233,7 +1248,10 @@ export default function CourseDetails() {
                       min={0}
                       step={1}
                       value={coinsToUse}
-                      onChange={(e) => setCoinsToUse(e.target.value)}
+                      onChange={(e) => {
+                        console.log("Coin input changed:", e.target.value);
+                        setCoinsToUse(e.target.value);
+                      }}
                       className="input-premium flex-1 px-4 py-3 text-sm"
                       style={{
                         background: "var(--bg-secondary)",
@@ -1248,6 +1266,7 @@ export default function CourseDetails() {
                       onClick={() => {
                         // REMOVED RESTRICTION: Use all available coins
                         const balance = Number(walletInfo?.wallet?.balance || 0);
+                        console.log("Max button clicked, setting coins to:", balance);
                         setCoinsToUse(String(balance));
                       }}
                     >
@@ -1255,7 +1274,7 @@ export default function CourseDetails() {
                     </button>
                   </div>
 
-                  {coinSetting && (
+                  {(coinSetting || true) && (
                     <div
                       className="mt-3 p-3 rounded-lg"
                       style={{
@@ -1281,7 +1300,7 @@ export default function CourseDetails() {
                           </svg>
                         </div>
                         <span className="text-xs font-medium">
-                          Rate: 1 coin = ₹{coinSetting.coinToCurrencyRate} | Use all your coins for maximum savings!
+                          Rate: 1 coin = ₹{coinSetting?.coinToCurrencyRate || 1} | Use all your coins for maximum savings!
                         </span>
                       </div>
                     </div>
@@ -1435,6 +1454,24 @@ export default function CourseDetails() {
                       </div>
                     )}
 
+                    {/* Referral Discount Display */}
+                    {useReferralDiscount && (
+                      <div className="flex items-center justify-between">
+                        <span
+                          className="text-sm"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          Referral Discount (10% off)
+                        </span>
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: "var(--accent-emerald)" }}
+                        >
+                          -₹{((Number(course.price) * (1 - couponDiscount / 100) * 0.10)).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    )}
+
                     {/* Coin Discount Display */}
                     {coinPreview.discountValue > 0 && (
                       <div className="flex items-center justify-between">
@@ -1470,7 +1507,7 @@ export default function CourseDetails() {
                           style={{
                             color:
                               (coinPreview.finalPricePreview && coinPreview.finalPricePreview < Number(course.price)) ||
-                              couponDiscount > 0
+                              couponDiscount > 0 || useReferralDiscount
                                 ? "var(--accent-emerald)"
                                 : "var(--brand)",
                           }}
@@ -1478,12 +1515,21 @@ export default function CourseDetails() {
                           ₹
                           {(
                             coinPreview.finalPricePreview || 
-                            (couponDiscount > 0 ? Number(course.price) * (1 - couponDiscount / 100) : Number(course.price))
+                            (() => {
+                              let finalPrice = Number(course.price);
+                              if (couponDiscount > 0) {
+                                finalPrice = finalPrice * (1 - couponDiscount / 100);
+                              }
+                              if (useReferralDiscount) {
+                                finalPrice = finalPrice * 0.9; // 10% referral discount
+                              }
+                              return finalPrice;
+                            })()
                           ).toLocaleString("en-IN")}
                         </span>
                       </div>
                       {(coinPreview.finalPricePreview && coinPreview.finalPricePreview < Number(course.price)) ||
-                        couponDiscount > 0 ? (
+                        couponDiscount > 0 || useReferralDiscount ? (
                           <div
                             className="text-sm mt-2 p-2 rounded-lg"
                             style={{
@@ -1495,7 +1541,16 @@ export default function CourseDetails() {
                             🎉 You save ₹
                             {(
                               Number(course.price) - (coinPreview.finalPricePreview || 
-                                (couponDiscount > 0 ? Number(course.price) * (1 - couponDiscount / 100) : Number(course.price)))
+                                (() => {
+                                  let finalPrice = Number(course.price);
+                                  if (couponDiscount > 0) {
+                                    finalPrice = finalPrice * (1 - couponDiscount / 100);
+                                  }
+                                  if (useReferralDiscount) {
+                                    finalPrice = finalPrice * 0.9; // 10% referral discount
+                                  }
+                                  return finalPrice;
+                                })())
                             ).toLocaleString("en-IN")}
                             !
                           </div>
