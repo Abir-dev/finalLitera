@@ -104,16 +104,20 @@ export default function CourseDetails() {
       try {
         const uid = user?.id || user?._id;
         const w = await getUserWallet(uid);
+        console.log("Wallet info fetched:", w); // Debug log
         setWalletInfo(w);
-      } catch {
+      } catch (error) {
+        console.error("Error fetching wallet info:", error); // Debug log
         setWalletInfo(null);
       }
       try {
         const settings = await listCoinSettings();
+        console.log("Coin settings fetched:", settings); // Debug log
         setCoinSetting(
           Array.isArray(settings) && settings.length > 0 ? settings[0] : null
         );
-      } catch {
+      } catch (error) {
+        console.error("Error fetching coin settings:", error); // Debug log
         setCoinSetting(null);
       }
     })();
@@ -132,23 +136,31 @@ export default function CourseDetails() {
     const price = Number(course.price) || 0;
     const balance = Number(walletInfo?.wallet?.balance || 0);
     const rate = Number(coinSetting.coinToCurrencyRate || 0);
-    const maxPct = Number(coinSetting.maxDiscountPercentPerPurchase || 0);
     
     // Apply coupon discount first
     const couponDiscountAmount = (price * couponDiscount) / 100;
     const priceAfterCoupon = Math.max(0, price - couponDiscountAmount);
     
-    const maxDiscountAllowed = priceAfterCoupon * (maxPct / 100);
     const requestedCoins = Math.max(0, Math.floor(Number(coinsToUse) || 0));
     const maxCoinsByBalance = balance;
-    const maxCoinsByPct = rate > 0 ? Math.floor(maxDiscountAllowed / rate) : 0;
-    const usableCoins = Math.min(
-      requestedCoins,
-      maxCoinsByBalance,
-      maxCoinsByPct
-    );
+    
+    // REMOVED RESTRICTION: Allow full coin usage without percentage limits
+    // Students can now use all their coins regardless of course price percentage
+    const usableCoins = Math.min(requestedCoins, maxCoinsByBalance);
     const discountValue = usableCoins * rate;
     const finalPricePreview = Math.max(0, priceAfterCoupon - discountValue);
+    
+    console.log("Coin calculation:", { // Debug log
+      price,
+      balance,
+      rate,
+      requestedCoins,
+      maxCoinsByBalance,
+      usableCoins,
+      discountValue,
+      finalPricePreview
+    });
+    
     setCoinPreview({ usableCoins, discountValue, finalPricePreview });
   }, [coinsToUse, walletInfo, coinSetting, course, couponDiscount]);
 
@@ -1234,17 +1246,9 @@ export default function CourseDetails() {
                       type="button"
                       className="btn-premium px-4 py-3 font-semibold text-sm"
                       onClick={() => {
-                        if (!coinSetting) return;
-                        const price = Number(course?.price || 0);
+                        // REMOVED RESTRICTION: Use all available coins
                         const balance = Number(walletInfo?.wallet?.balance || 0);
-                        const rate = Number(coinSetting.coinToCurrencyRate || 0);
-                        const maxPct = Number(
-                          coinSetting.maxDiscountPercentPerPurchase || 0
-                        );
-                        const maxDiscountAllowed = price * (maxPct / 100);
-                        const maxCoinsByPct =
-                          rate > 0 ? Math.floor(maxDiscountAllowed / rate) : 0;
-                        setCoinsToUse(String(Math.min(balance, maxCoinsByPct)));
+                        setCoinsToUse(String(balance));
                       }}
                     >
                       Max
@@ -1277,8 +1281,7 @@ export default function CourseDetails() {
                           </svg>
                         </div>
                         <span className="text-xs font-medium">
-                          Rate: 1 coin = ₹{coinSetting.coinToCurrencyRate} | Max{" "}
-                          {coinSetting.maxDiscountPercentPerPurchase}% of course price
+                          Rate: 1 coin = ₹{coinSetting.coinToCurrencyRate} | Use all your coins for maximum savings!
                         </span>
                       </div>
                     </div>
@@ -1362,40 +1365,6 @@ export default function CourseDetails() {
                       </span>
                     </div>
                   )}
-                  {Number(coinsToUse) > 0 &&
-                    coinPreview.usableCoins < Number(coinsToUse) && (
-                      <div
-                        className="mt-3 p-3 rounded-lg border flex items-center gap-2"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, var(--accent-rose)10, var(--accent-rose)5)",
-                          borderColor: "var(--accent-rose)30",
-                        }}
-                      >
-                        <div
-                          className="w-4 h-4 rounded-full flex items-center justify-center"
-                          style={{ backgroundColor: "var(--accent-rose)" }}
-                        >
-                          <svg
-                            className="w-2 h-2 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <span
-                          className="text-sm font-medium"
-                          style={{ color: "var(--text-primary)" }}
-                        >
-                          Maximum coins allowed: {coinPreview.usableCoins}
-                        </span>
-                      </div>
-                    )}
                 </div>
               </div>
               {/* Referral Discount Toggle */}
