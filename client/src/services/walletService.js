@@ -3,7 +3,7 @@ let defaultBase = origin ? `${origin}/api` : "";
 if (origin === "http://localhost:5173") {
   defaultBase = "http://localhost:5001/api";
 }
-const BASE_URL = import.meta?.env?.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 const WALLET_ADMIN = `${BASE_URL}/wallet/admin`;
 
 function getAdminToken() {
