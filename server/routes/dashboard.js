@@ -4,7 +4,8 @@ import {
   getCourseProgress,
   updateCourseProgress,
   getAdminDashboard,
-  getInstructorDashboard
+  getInstructorDashboard,
+  getRecentActivities
 } from '../controllers/dashboardController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { validatePagination } from '../middleware/validation.js';
@@ -30,6 +31,11 @@ router.put('/courses/:courseId/progress', protect, updateCourseProgress);
 // @route   GET /api/dashboard/admin
 // @access  Private/Admin
 router.get('/admin', protect, authorize('admin'), getAdminDashboard);
+
+//@desc GET admin dashboard recent activities data
+//@route GET /api/admin/dashboard/activities 
+//@access Private/Admin
+router.get('/admin/activities',authorize('admin'),getRecentActivities)
 
 // @desc    Get instructor dashboard data
 // @route   GET /api/dashboard/instructor

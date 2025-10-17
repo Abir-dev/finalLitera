@@ -5,9 +5,11 @@
 The server was crashing because the `dashboard.js` route file was trying to import functions that didn't exist in the dashboard controller.
 
 ## **Root Cause**:
+
 - The existing `server/routes/dashboard.js` file expected these functions:
+
   - `getUserDashboard`
-  - `getCourseProgress` 
+  - `getCourseProgress`
   - `updateCourseProgress`
   - `getAdminDashboard`
   - `getInstructorDashboard`
@@ -29,6 +31,7 @@ I've added all the missing functions to `server/controllers/dashboardController.
 ### ✅ **Maintained New Real-Time Dashboard Functions**
 
 The new real-time dashboard functions are still available:
+
 - `getDashboardStats`
 - `getRecentActivities`
 - `getTopCourses`
@@ -40,6 +43,7 @@ The new real-time dashboard functions are still available:
 ## **API Endpoints Now Available**:
 
 ### **User Dashboard Routes** (`/api/dashboard/`):
+
 - `GET /api/dashboard` - User dashboard data
 - `GET /api/dashboard/courses/:courseId/progress` - Course progress
 - `PUT /api/dashboard/courses/:courseId/progress` - Update progress
@@ -47,8 +51,9 @@ The new real-time dashboard functions are still available:
 - `GET /api/dashboard/instructor` - Instructor dashboard
 
 ### **Admin Dashboard Routes** (`/api/admin/dashboard/`):
+
 - `GET /api/admin/dashboard/stats` - Dashboard statistics
-- `GET /api/admin/dashboard/activities` - Recent activities
+- `GET /api/dashboard/amin/activities` - Recent activities
 - `GET /api/admin/dashboard/courses` - Top courses
 - `GET /api/admin/dashboard/trends` - Enrollment trends
 - `GET /api/admin/dashboard/revenue` - Revenue data
@@ -58,12 +63,14 @@ The new real-time dashboard functions are still available:
 ## **How to Test**:
 
 1. **Start the server**:
+
    ```bash
    cd server
    npm start
    ```
 
 2. **Check server health**:
+
    ```bash
    curl https://finallitera.onrender.com/api/health
    ```
@@ -83,6 +90,7 @@ The new real-time dashboard functions are still available:
 - ✅ Error handling with fallback data
 
 ## **Default Admin Credentials**:
+
 - Email: `rahul12@gmail.com` (from environment variables)
 - Password: Check your `.env` file for `ADMIN_PASSWORD`
 

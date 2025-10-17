@@ -68,7 +68,7 @@ const RealTimeDashboard = () => {
         fetch(`${API_BASE}/admin/dashboard/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE}/admin/dashboard/activities`, {
+        fetch(`${API_BASE}/dashboard/amin/activities`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_BASE}/admin/dashboard/courses`, {

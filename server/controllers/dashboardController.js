@@ -240,7 +240,7 @@ export const getDashboardStats = async (req, res) => {
 };
 
 // @desc    Get recent activities
-// @route   GET /api/admin/dashboard/activities
+// @route   GET /api/dashboard/admin/activities
 // @access  Private/Admin
 export const getRecentActivities = async (req, res) => {
   try {
