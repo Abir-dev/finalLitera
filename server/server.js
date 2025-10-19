@@ -23,6 +23,7 @@ import paymentRoutes from "./routes/payment.js";
 import couponRoutes from "./routes/coupons.js";
 import examRoutes from "./routes/exams.js";
 import liveClassRoutes from "./routes/liveClasses.js";
+import liveClassRecordingRoutes from "./routes/liveClassRecordings.js";
 import notificationRoutes from "./routes/notification.js";
 import walletRoutes from "./routes/wallet.js";
 import internshipRoutes from "./routes/internships.js";
@@ -94,7 +95,7 @@ const corsOptions = {
       "http://127.0.0.1:5173",
       "http://127.0.0.1:3000",
       "https://litera.in",
-      "https://www.litera.in",
+      // "https://www.litera.in",
       process.env.CLIENT_URL,
     ].filter(Boolean);
 
@@ -196,6 +197,7 @@ app.use("/api/payments", paymentRoutes); // Razorpay payment routes
 app.use("/api/coupons", couponRoutes); // Coupon management and validation
 app.use("/api/exams", examRoutes); // Exams routes
 app.use("/api/live-classes", liveClassRoutes); // Live classes routes
+app.use("/api/live-class-recordings", liveClassRecordingRoutes); // Live class recordings routes
 app.use("/api/notifications", notificationRoutes); // Notifications routes
 app.use("/api/internships", internshipRoutes); // Internships routes
 app.use("/api/wallet", walletRoutes); // Wallet and coin settings routes

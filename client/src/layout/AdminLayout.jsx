@@ -15,6 +15,7 @@ import {
   Briefcase,
   Coins,
   Ticket,
+  Video,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -49,6 +50,7 @@ export default function AdminLayout() {
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Exams", href: "/admin/exams", icon: FileText },
     { name: "Internships", href: "/admin/internships", icon: Briefcase },
+    { name: "Live Recordings", href: "/admin/live-recordings", icon: Video },
     { name: "Coupons", href: "/admin/coupons", icon: Ticket },
     { name: "Coins", href: "/admin/coins", icon: Coins },
     // { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },

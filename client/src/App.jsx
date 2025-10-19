@@ -43,6 +43,7 @@ import AdminSettings from "./pages/AdminSettings.jsx";
 import AdminInternships from "./pages/AdminInternships.jsx";
 import AdminCoupons from "./pages/AdminCoupons.jsx";
 import AdminCoins from "./pages/AdminCoins.jsx";
+import AdminLiveRecordings from "./pages/AdminLiveRecordings.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
 import InviteSignup from "./pages/InviteSignup.jsx";
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="settings" element={<AdminSettings />} />
         <Route path="coupons" element={<AdminCoupons />} />
         <Route path="coins" element={<AdminCoins />} />
+        <Route path="live-recordings" element={<AdminLiveRecordings />} />
       </Route>
 
       <Route path="/unauthorized" element={<Unauthorized />} />
