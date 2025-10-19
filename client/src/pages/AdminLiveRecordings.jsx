@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useToast } from "../hooks/useToast.js";
 import { courseService } from "../services/courseService.js";
 import {
@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 export default function AdminLiveRecordings() {
-  const { toasts, success, error, addToast, removeToast } = useToast();
+  const { toasts, success, error, removeToast } = useToast();
   const [courses, setCourses] = useState([]);
   const [recordings, setRecordings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -46,16 +46,11 @@ export default function AdminLiveRecordings() {
 
   const [uploadedFile, setUploadedFile] = useState(null);
 
-  // Fetch courses for dropdown
-  useEffect(() => {
-    fetchCourses();
-    fetchRecordings();
-  }, []);
-
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await courseService.getCourses();
+      // Fetch all courses without pagination for dropdown
+      const response = await courseService.getAllCourses();
       setCourses(response.data?.courses || []);
     } catch (err) {
       console.error("Error fetching courses:", err);
@@ -63,9 +58,9 @@ export default function AdminLiveRecordings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
 
-  const fetchRecordings = async () => {
+  const fetchRecordings = useCallback(async () => {
     try {
       setLoading(true);
       const response = await liveClassRecordingService.getRecordings();
@@ -76,7 +71,13 @@ export default function AdminLiveRecordings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
+
+  // Fetch courses for dropdown
+  useEffect(() => {
+    fetchCourses();
+    fetchRecordings();
+  }, [fetchCourses, fetchRecordings]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -128,9 +129,7 @@ export default function AdminLiveRecordings() {
       };
 
       // Create recording using the service
-      const response = await liveClassRecordingService.createRecording(
-        recordingData
-      );
+      await liveClassRecordingService.createRecording(recordingData);
 
       // Refresh recordings list
       await fetchRecordings();

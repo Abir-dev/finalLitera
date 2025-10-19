@@ -63,6 +63,17 @@ export const courseService = {
     }
   },
 
+  // Get all courses without pagination (for dropdowns, etc.)
+  getAllCourses: async () => {
+    try {
+      const response = await api.get("/courses", { params: { limit: 1000 } });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching all courses:", error);
+      throw error.response?.data || { message: "Failed to fetch all courses" };
+    }
+  },
+
   // Get featured courses
   getFeaturedCourses: async () => {
     try {
@@ -283,13 +294,16 @@ export const courseService = {
   toggleCouponStatus: async (couponId, isActive) => {
     try {
       const adminToken = localStorage.getItem("adminToken");
-      const response = await api.patch(`/coupons/${couponId}/toggle`, 
+      const response = await api.patch(
+        `/coupons/${couponId}/toggle`,
         { isActive },
         { headers: { Authorization: `Bearer ${adminToken}` } }
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: "Failed to toggle coupon status" };
+      throw (
+        error.response?.data || { message: "Failed to toggle coupon status" }
+      );
     }
   },
 

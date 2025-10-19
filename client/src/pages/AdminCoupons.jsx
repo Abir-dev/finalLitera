@@ -60,7 +60,8 @@ export default function AdminCoupons() {
 
   const loadCourses = async () => {
     try {
-      const response = await courseService.getCourses();
+      // Fetch all courses without pagination for dropdown
+      const response = await courseService.getAllCourses();
       setCourses(response.data?.courses || []);
     } catch (error) {
       console.error("Error loading courses:", error);
@@ -80,7 +81,13 @@ export default function AdminCoupons() {
       setMessage("Coupon created successfully");
       setMessageType("success");
       setShowCreateModal(false);
-      setForm({ code: "", percentOff: "", courseId: "", expiresAt: "", usageLimit: "" });
+      setForm({
+        code: "",
+        percentOff: "",
+        courseId: "",
+        expiresAt: "",
+        usageLimit: "",
+      });
       loadCoupons();
     } catch (error) {
       setMessage(error.message || "Failed to create coupon");
@@ -97,7 +104,13 @@ export default function AdminCoupons() {
       setMessageType("success");
       setShowEditModal(false);
       setEditingCoupon(null);
-      setForm({ code: "", percentOff: "", courseId: "", expiresAt: "", usageLimit: "" });
+      setForm({
+        code: "",
+        percentOff: "",
+        courseId: "",
+        expiresAt: "",
+        usageLimit: "",
+      });
       loadCoupons();
     } catch (error) {
       setMessage(error.message || "Failed to update coupon");
@@ -107,7 +120,7 @@ export default function AdminCoupons() {
 
   const handleDelete = async (couponId) => {
     if (!window.confirm("Are you sure you want to delete this coupon?")) return;
-    
+
     try {
       setMessage("");
       await courseService.deleteCoupon(couponId);
@@ -124,7 +137,9 @@ export default function AdminCoupons() {
     try {
       setMessage("");
       await courseService.toggleCouponStatus(couponId, !currentStatus);
-      setMessage(`Coupon ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+      setMessage(
+        `Coupon ${!currentStatus ? "activated" : "deactivated"} successfully`
+      );
       setMessageType("success");
       loadCoupons();
     } catch (error) {
@@ -139,7 +154,9 @@ export default function AdminCoupons() {
       code: coupon.code,
       percentOff: coupon.percentOff,
       courseId: coupon.course?._id || coupon.course || "",
-      expiresAt: coupon.expiresAt ? new Date(coupon.expiresAt).toISOString().slice(0, 16) : "",
+      expiresAt: coupon.expiresAt
+        ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
+        : "",
       usageLimit: coupon.usageLimit || "",
     });
     setShowEditModal(true);
@@ -148,35 +165,59 @@ export default function AdminCoupons() {
   const getStatusInfo = (coupon) => {
     const now = new Date();
     const expiresAt = coupon.expiresAt ? new Date(coupon.expiresAt) : null;
-    
+
     if (!coupon.isActive) {
-      return { status: "inactive", color: "text-gray-500", bgColor: "bg-gray-100", icon: XCircle };
+      return {
+        status: "inactive",
+        color: "text-gray-500",
+        bgColor: "bg-gray-100",
+        icon: XCircle,
+      };
     }
-    
+
     if (expiresAt && expiresAt < now) {
-      return { status: "expired", color: "text-red-500", bgColor: "bg-red-100", icon: AlertCircle };
+      return {
+        status: "expired",
+        color: "text-red-500",
+        bgColor: "bg-red-100",
+        icon: AlertCircle,
+      };
     }
-    
+
     if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return { status: "exhausted", color: "text-orange-500", bgColor: "bg-orange-100", icon: AlertCircle };
+      return {
+        status: "exhausted",
+        color: "text-orange-500",
+        bgColor: "bg-orange-100",
+        icon: AlertCircle,
+      };
     }
-    
-    return { status: "active", color: "text-green-500", bgColor: "bg-green-100", icon: CheckCircle };
+
+    return {
+      status: "active",
+      color: "text-green-500",
+      bgColor: "bg-green-100",
+      icon: CheckCircle,
+    };
   };
 
   const filteredCoupons = coupons.filter((coupon) => {
-    const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        (coupon.course?.title || "All Courses").toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch =
+      coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (coupon.course?.title || "All Courses")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
     const statusInfo = getStatusInfo(coupon);
-    const matchesFilter = filterStatus === "all" || statusInfo.status === filterStatus;
-    
+    const matchesFilter =
+      filterStatus === "all" || statusInfo.status === filterStatus;
+
     return matchesSearch && matchesFilter;
   });
 
   const getCourseName = (courseId) => {
     if (!courseId || courseId === "ALL") return "All Courses";
-    const course = courses.find(c => c._id === courseId);
+    const course = courses.find((c) => c._id === courseId);
     return course?.title || "Unknown Course";
   };
 
@@ -189,7 +230,10 @@ export default function AdminCoupons() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: "var(--brand)" }}></div>
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+            style={{ borderColor: "var(--brand)" }}
+          ></div>
           <p style={{ color: "var(--text-secondary)" }}>Loading coupons...</p>
         </div>
       </div>
@@ -202,7 +246,10 @@ export default function AdminCoupons() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+            <h1
+              className="text-2xl sm:text-3xl font-bold mb-2"
+              style={{ color: "var(--text-primary)" }}
+            >
               Coupon Management
             </h1>
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -230,10 +277,16 @@ export default function AdminCoupons() {
         {message && (
           <div
             className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
-              messageType === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              messageType === "success"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
             }`}
           >
-            {messageType === "success" ? <CheckCircle size={20} /> : <XCircle size={20} />}
+            {messageType === "success" ? (
+              <CheckCircle size={20} />
+            ) : (
+              <XCircle size={20} />
+            )}
             {message}
           </div>
         )}
@@ -242,7 +295,11 @@ export default function AdminCoupons() {
         <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: "var(--text-secondary)" }} />
+              <Search
+                size={20}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                style={{ color: "var(--text-secondary)" }}
+              />
               <input
                 type="text"
                 placeholder="Search coupons..."
@@ -290,38 +347,82 @@ export default function AdminCoupons() {
         </div>
 
         {/* Coupons Table */}
-        <div 
+        <div
           className="rounded-xl shadow-lg overflow-hidden border"
           style={{
-            background: "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
+            background:
+              "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
             borderColor: "var(--border)",
           }}
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead 
+              <thead
                 className="bg-gradient-to-r"
                 style={{
-                  background: "linear-gradient(135deg, var(--bg-secondary), var(--bg-elevated))",
+                  background:
+                    "linear-gradient(135deg, var(--bg-secondary), var(--bg-elevated))",
                 }}
               >
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Coupon</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Course</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Discount</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Usage</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Expiry</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>Actions</th>
+                  <th
+                    className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Coupon
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Course
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Discount
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Usage
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Expiry
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Status
+                  </th>
+                  <th
+                    className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y" style={{ borderColor: "var(--border)" }}>
+              <tbody
+                className="divide-y"
+                style={{ borderColor: "var(--border)" }}
+              >
                 {filteredCoupons.map((coupon) => {
                   const statusInfo = getStatusInfo(coupon);
                   const StatusIcon = statusInfo.icon;
-                  
+
                   return (
-                    <tr key={coupon._id} className="hover:opacity-80 transition-all duration-200" style={{ background: "var(--bg-primary)" }}>
+                    <tr
+                      key={coupon._id}
+                      className="hover:opacity-80 transition-all duration-200"
+                      style={{ background: "var(--bg-primary)" }}
+                    >
                       <td className="px-6 py-5 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-12 w-12">
@@ -330,31 +431,67 @@ export default function AdminCoupons() {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{coupon.code}</div>
-                            <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                              Created {new Date(coupon.createdAt).toLocaleDateString()}
+                            <div
+                              className="text-sm font-semibold"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {coupon.code}
+                            </div>
+                            <div
+                              className="text-xs"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
+                              Created{" "}
+                              {new Date(coupon.createdAt).toLocaleDateString()}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{getCourseName(coupon.course)}</div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm font-bold" style={{ color: "var(--brand)" }}>{coupon.percentOff}% off</div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm" style={{ color: "var(--text-primary)" }}>
-                          <span className="font-medium">{coupon.usageCount || 0}</span>
-                          <span style={{ color: "var(--text-secondary)" }}> / </span>
-                          <span style={{ color: "var(--text-secondary)" }}>{coupon.usageLimit || "∞"}</span>
+                        <div
+                          className="text-sm font-medium"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {getCourseName(coupon.course)}
                         </div>
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="text-sm" style={{ color: "var(--text-primary)" }}>{formatDate(coupon.expiresAt)}</div>
+                        <div
+                          className="text-sm font-bold"
+                          style={{ color: "var(--brand)" }}
+                        >
+                          {coupon.percentOff}% off
+                        </div>
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.bgColor} ${statusInfo.color}`}>
+                        <div
+                          className="text-sm"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          <span className="font-medium">
+                            {coupon.usageCount || 0}
+                          </span>
+                          <span style={{ color: "var(--text-secondary)" }}>
+                            {" "}
+                            /{" "}
+                          </span>
+                          <span style={{ color: "var(--text-secondary)" }}>
+                            {coupon.usageLimit || "∞"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div
+                          className="text-sm"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {formatDate(coupon.expiresAt)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.bgColor} ${statusInfo.color}`}
+                        >
                           <StatusIcon size={12} className="mr-1.5" />
                           {statusInfo.status}
                         </span>
@@ -373,15 +510,27 @@ export default function AdminCoupons() {
                             <Edit size={16} />
                           </button>
                           <button
-                            onClick={() => handleToggleStatus(coupon._id, coupon.isActive)}
+                            onClick={() =>
+                              handleToggleStatus(coupon._id, coupon.isActive)
+                            }
                             className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
                             style={{
-                              color: coupon.isActive ? "var(--accent-orange)" : "var(--accent-emerald)",
+                              color: coupon.isActive
+                                ? "var(--accent-orange)"
+                                : "var(--accent-emerald)",
                               background: "var(--bg-secondary)",
                             }}
-                            title={coupon.isActive ? 'Deactivate coupon' : 'Activate coupon'}
+                            title={
+                              coupon.isActive
+                                ? "Deactivate coupon"
+                                : "Activate coupon"
+                            }
                           >
-                            {coupon.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                            {coupon.isActive ? (
+                              <EyeOff size={16} />
+                            ) : (
+                              <Eye size={16} />
+                            )}
                           </button>
                           <button
                             onClick={() => handleDelete(coupon._id)}
@@ -402,20 +551,27 @@ export default function AdminCoupons() {
               </tbody>
             </table>
           </div>
-          
+
           {filteredCoupons.length === 0 && (
             <div className="text-center py-16">
               <div className="mb-6" style={{ color: "var(--text-secondary)" }}>
                 <Ticket size={64} className="mx-auto" />
               </div>
-              <h3 className="text-xl font-semibold mb-3" style={{ color: "var(--text-primary)" }}>No coupons found</h3>
-              <p className="mb-6 max-w-md mx-auto" style={{ color: "var(--text-secondary)" }}>
-                {searchTerm || filterStatus !== "all" 
+              <h3
+                className="text-xl font-semibold mb-3"
+                style={{ color: "var(--text-primary)" }}
+              >
+                No coupons found
+              </h3>
+              <p
+                className="mb-6 max-w-md mx-auto"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {searchTerm || filterStatus !== "all"
                   ? "Try adjusting your search or filter criteria to find the coupons you're looking for."
-                  : "Start building your discount strategy by creating your first coupon code."
-                }
+                  : "Start building your discount strategy by creating your first coupon code."}
               </p>
-              {(!searchTerm && filterStatus === "all") && (
+              {!searchTerm && filterStatus === "all" && (
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="btn-premium px-6 py-3 font-semibold text-sm flex items-center gap-2 mx-auto"
@@ -431,11 +587,15 @@ export default function AdminCoupons() {
         {/* Create Coupon Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCreateModal(false)}></div>
-            <div 
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowCreateModal(false)}
+            ></div>
+            <div
               className="relative w-full max-w-md rounded-xl shadow-2xl border"
               style={{
-                background: "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
+                background:
+                  "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
                 borderColor: "var(--border)",
               }}
             >
@@ -444,11 +604,21 @@ export default function AdminCoupons() {
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     <Plus size={20} className="text-white" />
                   </div>
-                  <h3 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Create New Coupon</h3>
+                  <h3
+                    className="text-xl font-bold"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Create New Coupon
+                  </h3>
                 </div>
                 <form onSubmit={handleCreate} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Coupon Code</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Coupon Code
+                    </label>
                     <input
                       name="code"
                       value={form.code}
@@ -464,7 +634,12 @@ export default function AdminCoupons() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Discount Percentage</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Discount Percentage
+                    </label>
                     <input
                       name="percentOff"
                       type="number"
@@ -483,7 +658,12 @@ export default function AdminCoupons() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Course</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Course
+                    </label>
                     <select
                       name="courseId"
                       value={form.courseId}
@@ -506,7 +686,12 @@ export default function AdminCoupons() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Usage Limit (optional)</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Usage Limit (optional)
+                    </label>
                     <input
                       name="usageLimit"
                       type="number"
@@ -523,7 +708,12 @@ export default function AdminCoupons() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Expiry Date (optional)</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Expiry Date (optional)
+                    </label>
                     <input
                       name="expiresAt"
                       type="datetime-local"
@@ -566,11 +756,15 @@ export default function AdminCoupons() {
         {/* Edit Coupon Modal */}
         {showEditModal && editingCoupon && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
-            <div 
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowEditModal(false)}
+            ></div>
+            <div
               className="relative w-full max-w-md rounded-xl shadow-2xl border"
               style={{
-                background: "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
+                background:
+                  "linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary))",
                 borderColor: "var(--border)",
               }}
             >
@@ -579,11 +773,21 @@ export default function AdminCoupons() {
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     <Edit size={20} className="text-white" />
                   </div>
-                  <h3 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>Edit Coupon</h3>
+                  <h3
+                    className="text-xl font-bold"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Edit Coupon
+                  </h3>
                 </div>
                 <form onSubmit={handleEdit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Coupon Code</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Coupon Code
+                    </label>
                     <input
                       name="code"
                       value={form.code}
@@ -598,7 +802,12 @@ export default function AdminCoupons() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Discount Percentage</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Discount Percentage
+                    </label>
                     <input
                       name="percentOff"
                       type="number"
@@ -616,7 +825,12 @@ export default function AdminCoupons() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Course</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Course
+                    </label>
                     <select
                       name="courseId"
                       value={form.courseId}
@@ -639,7 +853,12 @@ export default function AdminCoupons() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Usage Limit (optional)</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Usage Limit (optional)
+                    </label>
                     <input
                       name="usageLimit"
                       type="number"
@@ -656,7 +875,12 @@ export default function AdminCoupons() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>Expiry Date (optional)</label>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      Expiry Date (optional)
+                    </label>
                     <input
                       name="expiresAt"
                       type="datetime-local"
