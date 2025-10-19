@@ -415,7 +415,7 @@ const ChatBot = () => {
       </div>
 
       {/* Mobile Responsive Styles */}
-      <style jsx>{`
+      <style jsx="true">{`
         @media (max-width: 640px) {
           .w-\[380px\] {
             width: calc(100vw - 2rem);

@@ -13,13 +13,13 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://finallitera.onrender.com',
+        target: 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
       }
     }
   },
   define: {
-    'import.meta.env.VITE_API_URL': JSON.stringify('https://finallitera.onrender.com/api')
+    'import.meta.env.VITE_API_URL': JSON.stringify('http://localhost:5001/api')
   }
 })

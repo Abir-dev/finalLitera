@@ -16,7 +16,7 @@ dotenv.config();
 // Configure R2 (S3-compatible) client
 const r2Client = new S3Client({
   region: process.env.R2_REGION || "auto",
-  endpoint: process.env.R2_ENDPOINT,
+  endpoint: process.env.R2_PUBLIC_URL,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
