@@ -1,5 +1,6 @@
 import LiveClassRecording from "../models/LiveClassRecording.js";
 import Course from "../models/Course.js";
+import Enrollment from "../models/Enrollment.js";
 import { uploadToR2 } from "../utils/r2.js";
 
 // @desc    Get all live class recordings
@@ -355,6 +356,161 @@ export const getRecordingsByCourse = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching recordings by course:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
+// @desc    Get recordings for student's enrolled courses
+// @route   GET /api/live-class-recordings/student
+// @access  Private
+export const getStudentRecordings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get user's enrolled courses
+    const enrollments = await Enrollment.find({ user: userId })
+      .populate("course", "title thumbnail description category instructor")
+      .sort({ enrolledAt: -1 });
+
+    if (enrollments.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        data: {
+          courses: [],
+          message: "No enrolled courses found",
+        },
+      });
+    }
+
+    // Get course IDs
+    const courseIds = enrollments.map((enrollment) => enrollment.course._id);
+
+    // Get recordings for enrolled courses grouped by course
+    const coursesWithRecordings = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const recordings = await LiveClassRecording.find({
+          course: enrollment.course._id,
+          status: "ready",
+        })
+          .sort({ date: -1 })
+          .limit(10); // Limit to recent 10 recordings per course
+
+        return {
+          course: {
+            _id: enrollment.course._id,
+            title: enrollment.course.title,
+            thumbnail: enrollment.course.thumbnail,
+            description: enrollment.course.description,
+            category: enrollment.course.category,
+            instructor: enrollment.course.instructor,
+          },
+          recordings: recordings.map((recording) => ({
+            _id: recording._id,
+            lectureNumber: recording.lectureNumber,
+            date: recording.date,
+            duration: recording.duration,
+            hostedBy: recording.hostedBy,
+            description: recording.description,
+            recordingUrl: recording.recordingUrl,
+            views: recording.views,
+            status: recording.status,
+          })),
+          totalRecordings: recordings.length,
+        };
+      })
+    );
+
+    // Filter out courses with no recordings
+    const coursesWithRecordingsOnly = coursesWithRecordings.filter(
+      (course) => course.recordings.length > 0
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        courses: coursesWithRecordingsOnly,
+        totalCourses: coursesWithRecordingsOnly.length,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching student recordings:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
+// @desc    Get recordings for a specific course (for enrolled students)
+// @route   GET /api/live-class-recordings/student/course/:courseId
+// @access  Private
+export const getStudentCourseRecordings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { courseId } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+
+    // Check if user is enrolled in this course
+    const enrollment = await Enrollment.findOne({
+      user: userId,
+      course: courseId,
+    }).populate("course", "title thumbnail description category instructor");
+
+    if (!enrollment) {
+      return res.status(403).json({
+        status: "error",
+        message: "You are not enrolled in this course",
+      });
+    }
+
+    // Get recordings for this course
+    const recordings = await LiveClassRecording.find({
+      course: courseId,
+      status: "ready",
+    })
+      .sort({ date: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await LiveClassRecording.countDocuments({
+      course: courseId,
+      status: "ready",
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        course: {
+          _id: enrollment.course._id,
+          title: enrollment.course.title,
+          thumbnail: enrollment.course.thumbnail,
+          description: enrollment.course.description,
+          category: enrollment.course.category,
+          instructor: enrollment.course.instructor,
+        },
+        recordings: recordings.map((recording) => ({
+          _id: recording._id,
+          lectureNumber: recording.lectureNumber,
+          date: recording.date,
+          duration: recording.duration,
+          hostedBy: recording.hostedBy,
+          description: recording.description,
+          recordingUrl: recording.recordingUrl,
+          views: recording.views,
+          status: recording.status,
+        })),
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching student course recordings:", error);
     res.status(500).json({
       status: "error",
       message: "Server error",

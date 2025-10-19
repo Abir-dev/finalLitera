@@ -7,8 +7,11 @@ import {
   deleteLiveClassRecording,
   getRecordingsByCourse,
   getRecordingStatistics,
+  getStudentRecordings,
+  getStudentCourseRecordings,
 } from "../controllers/liveClassRecordingController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
+import { protect } from "../middleware/auth.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
@@ -17,6 +20,16 @@ const router = express.Router();
 // @route   GET /api/live-class-recordings
 // @access  Private/Admin
 router.get("/", adminAuth, getLiveClassRecordings);
+
+// @desc    Get recordings for student's enrolled courses
+// @route   GET /api/live-class-recordings/student
+// @access  Private
+router.get("/student", protect, getStudentRecordings);
+
+// @desc    Get recordings for a specific course (for enrolled students)
+// @route   GET /api/live-class-recordings/student/course/:courseId
+// @access  Private
+router.get("/student/course/:courseId", protect, getStudentCourseRecordings);
 
 // @desc    Get recording statistics
 // @route   GET /api/live-class-recordings/stats
