@@ -319,20 +319,44 @@ export default function AdminLiveRecordings() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Select Course *
                 </label>
-                <select
-                  name="courseId"
-                  value={formData.courseId}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select a course</option>
-                  {courses.map((course) => (
-                    <option key={course._id} value={course._id}>
-                      {course.title}
+                <div className="relative">
+                  <select
+                    name="courseId"
+                    value={formData.courseId}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                    required
+                  >
+                    <option value="" className="bg-gray-800 text-white">
+                      Select a course
                     </option>
-                  ))}
-                </select>
+                    {courses.map((course) => (
+                      <option
+                        key={course._id}
+                        value={course._id}
+                        className="bg-gray-800 text-white"
+                      >
+                        {course.title}
+                      </option>
+                    ))}
+                  </select>
+                  {/* Custom dropdown arrow */}
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               {/* Description */}
