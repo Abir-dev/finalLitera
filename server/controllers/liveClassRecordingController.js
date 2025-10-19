@@ -1,6 +1,6 @@
 import LiveClassRecording from "../models/LiveClassRecording.js";
 import Course from "../models/Course.js";
-import { uploadService } from "../services/uploadService.js";
+import { uploadToR2 } from "../utils/r2.js";
 
 // @desc    Get all live class recordings
 // @route   GET /api/live-class-recordings
@@ -162,8 +162,24 @@ export const createLiveClassRecording = async (req, res) => {
     // Handle file upload if file is provided
     if (req.file) {
       try {
-        const uploadResult = await uploadService.uploadVideo(req.file);
-        finalRecordingUrl = uploadResult.url;
+        const uploadResult = await uploadToR2(req.file, "lms-king/videos", {
+          metadata: {
+            originalName: req.file.originalname,
+            fieldname: req.file.fieldname,
+            type: "video",
+          },
+        });
+
+        if (!uploadResult.success) {
+          console.error("Error uploading video:", uploadResult.error);
+          return res.status(500).json({
+            status: "error",
+            message: "Failed to upload video file",
+            error: uploadResult.error,
+          });
+        }
+
+        finalRecordingUrl = uploadResult.data.secure_url;
         finalFileSize = req.file.size;
       } catch (uploadError) {
         console.error("Error uploading video:", uploadError);
@@ -295,7 +311,7 @@ export const deleteLiveClassRecording = async (req, res) => {
     }
 
     // TODO: Delete the actual video file from storage
-    // await uploadService.deleteFile(recording.recordingUrl);
+    // await deleteFromR2(recording.recordingUrl);
 
     await LiveClassRecording.findByIdAndDelete(req.params.id);
 
