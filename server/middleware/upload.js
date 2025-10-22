@@ -99,6 +99,11 @@ const upload = multer({
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 * 1024, // 5GB default for videos
     files: 5, // Maximum 5 files per request
   },
+  // Add timeout for large file uploads
+  onError: (err, next) => {
+    console.error("Multer error:", err);
+    next(err);
+  },
 });
 
 // Specific upload middlewares for different file types

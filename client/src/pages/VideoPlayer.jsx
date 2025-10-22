@@ -478,7 +478,7 @@ export default function VideoPlayerPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="card-premium p-6">
+            {/* <div className="card-premium p-6">
               <h3
                 className="text-lg font-bold mb-4"
                 style={{ color: "var(--text-primary)" }}
@@ -528,7 +528,7 @@ export default function VideoPlayerPage() {
                   </button>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

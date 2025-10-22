@@ -57,12 +57,24 @@ export const uploadToR2 = async (file, folder = "lms-king", options = {}) => {
       uploadParams.ContentDisposition = options.contentDisposition;
 
     const command = new PutObjectCommand(uploadParams);
+
+    console.log(`Uploading file to R2: ${key}`);
+    console.log(`File size: ${file.size} bytes`);
+    console.log(`Content type: ${file.mimetype}`);
+
     const result = await r2Client.send(command);
 
     // Generate public URL
     const publicUrl = `${
       process.env.R2_PUBLIC_URL || process.env.R2_ENDPOINT
     }/${BUCKET_NAME}/${key}`;
+
+    console.log("R2 Upload successful:");
+    console.log("- Key:", key);
+    console.log("- Public URL:", publicUrl);
+    console.log("- R2_PUBLIC_URL:", process.env.R2_PUBLIC_URL);
+    console.log("- R2_ENDPOINT:", process.env.R2_ENDPOINT);
+    console.log("- Bucket:", BUCKET_NAME);
 
     return {
       success: true,

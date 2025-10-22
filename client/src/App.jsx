@@ -16,6 +16,7 @@ import Subscription from "./pages/Subscription.jsx";
 import Live from "./pages/Live.jsx";
 import Recordings from "./pages/Recordings.jsx";
 import CourseRecordings from "./pages/CourseRecordings.jsx";
+import EnrollmentRecordings from "./pages/EnrollmentRecordings.jsx";
 import VideoPlayer from "./pages/VideoPlayer.jsx";
 import AlgoBridge from "./pages/AlgoBridge.jsx";
 import Notifications from "./pages/Notifications.jsx";
@@ -82,6 +83,10 @@ export default function App() {
         <Route
           path="recordings/course/:courseId"
           element={<CourseRecordings />}
+        />
+        <Route
+          path="recordings/enrollment/:enrollmentId"
+          element={<EnrollmentRecordings />}
         />
         <Route path="recordings/watch/:recordingId" element={<VideoPlayer />} />
         <Route path="algobridge" element={<AlgoBridge />} />

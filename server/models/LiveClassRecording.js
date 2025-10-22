@@ -111,6 +111,20 @@ liveClassRecordingSchema.virtual("formattedDuration").get(function () {
   return duration;
 });
 
+// Virtual to get enrolled users for this course
+liveClassRecordingSchema.virtual("enrolledUsers", {
+  ref: "Enrollment",
+  localField: "course",
+  foreignField: "course",
+  justOne: false,
+  options: {
+    populate: {
+      path: "user",
+      select: "firstName lastName email profilePicture",
+    },
+  },
+});
+
 // Method to increment views
 liveClassRecordingSchema.methods.incrementViews = function () {
   this.views += 1;
@@ -154,6 +168,36 @@ liveClassRecordingSchema.statics.getStatistics = function () {
       },
     },
   ]);
+};
+
+// Static method to get enrolled users for a specific recording
+liveClassRecordingSchema.statics.getEnrolledUsers = async function (
+  recordingId
+) {
+  const recording = await this.findById(recordingId).populate({
+    path: "enrolledUsers",
+    populate: {
+      path: "user",
+      select: "firstName lastName email profilePicture",
+    },
+  });
+
+  if (!recording) {
+    throw new Error("Recording not found");
+  }
+
+  return recording.enrolledUsers;
+};
+
+// Static method to get enrolled users for a course (by course ID)
+liveClassRecordingSchema.statics.getEnrolledUsersByCourse = async function (
+  courseId
+) {
+  const Enrollment = mongoose.model("Enrollment");
+
+  return await Enrollment.find({ course: courseId })
+    .populate("user", "firstName lastName email profilePicture")
+    .select("user enrolledAt progress status");
 };
 
 // Indexes for better query performance

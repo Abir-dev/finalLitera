@@ -123,8 +123,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // --- BODY PARSING ---
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // --- LOGGING ---
 if (process.env.NODE_ENV === "development") {
@@ -234,8 +234,15 @@ app.use((err, req, res, next) => {
 
 // --- SERVER START ---
 const PORT = process.env.PORT || 5001;
+
+// Set server timeouts for large file uploads
+httpServer.timeout = 300000; // 5 minutes
+httpServer.keepAliveTimeout = 300000; // 5 minutes
+httpServer.headersTimeout = 300000; // 5 minutes
+
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📚 LMS-kinG Backend API ready!`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`⏱️  Server timeout: 5 minutes for large uploads`);
 });
