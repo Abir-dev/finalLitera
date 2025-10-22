@@ -36,10 +36,13 @@ export default function AdminLiveRecordings() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [recordingToDelete, setRecordingToDelete] = useState(null);
   const [recordingToEdit, setRecordingToEdit] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredRecordings, setFilteredRecordings] = useState([]);
 
   const [formData, setFormData] = useState({
     lectureNumber: "",
@@ -72,7 +75,9 @@ export default function AdminLiveRecordings() {
     try {
       setLoading(true);
       const response = await liveClassRecordingService.getRecordings();
-      setRecordings(response.data?.recordings || []);
+      const recordingsData = response.data?.recordings || [];
+      setRecordings(recordingsData);
+      setFilteredRecordings(recordingsData);
     } catch (err) {
       console.error("Error fetching recordings:", err);
       error("Failed to fetch recordings");
@@ -297,6 +302,31 @@ export default function AdminLiveRecordings() {
     setUploadedFile(null);
   };
 
+  // Search functionality
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+
+    const filtered = recordings.filter(
+      (recording) =>
+        recording.lectureNumber?.toLowerCase().includes(term) ||
+        recording.course?.title?.toLowerCase().includes(term) ||
+        recording.hostedBy?.toLowerCase().includes(term) ||
+        recording.date?.toLowerCase().includes(term)
+    );
+    setFilteredRecordings(filtered);
+  };
+
+  // Upload modal handlers
+  const handleOpenUploadModal = () => {
+    setShowUploadModal(true);
+  };
+
+  const handleCloseUploadModal = () => {
+    setShowUploadModal(false);
+    resetForm();
+  };
+
   const formatFileSize = recordingUtils.formatFileSize;
   const formatDate = recordingUtils.formatDate;
 
@@ -331,268 +361,91 @@ export default function AdminLiveRecordings() {
       </div>
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mt-6">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-            Upload Live Classes Recording
+            Live Class Recordings
           </h1>
           <p className="text-gray-300 mt-1 text-xs sm:text-sm lg:text-base">
-            Upload and manage live class recordings
+            Manage and organize live class recordings
           </p>
+        </div>
+        <button
+          onClick={handleOpenUploadModal}
+          className="btn-premium px-4 py-2 flex items-center gap-2"
+        >
+          <Plus size={20} />
+          Upload Recording
+        </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="card-premium">
+        <div className="p-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search recordings by lecture number, course, host, or date..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="w-full px-4 py-3 pl-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upload Form */}
-        <div className="card-premium">
-          <div className="p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Upload size={20} />
-              Upload New Recording
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Lecture Number */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Lecture Number *
-                </label>
-                <input
-                  type="text"
-                  name="lectureNumber"
-                  value={formData.lectureNumber}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Lecture 1, Week 2, Session 3"
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              {/* Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Date *
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              {/* Duration */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Duration *
-                </label>
-                <input
-                  type="text"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 2:30:00 (hours:minutes:seconds)"
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              {/* Start Time and End Time */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Start Time *
-                  </label>
-                  <input
-                    type="time"
-                    name="startTime"
-                    value={formData.startTime}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    End Time *
-                  </label>
-                  <input
-                    type="time"
-                    name="endTime"
-                    value={formData.endTime}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Hosted By */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Hosted By *
-                </label>
-                <input
-                  type="text"
-                  name="hostedBy"
-                  value={formData.hostedBy}
-                  onChange={handleInputChange}
-                  placeholder="Instructor name"
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              {/* Course Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Select Course *
-                </label>
-                <div className="relative">
-                  <select
-                    name="courseId"
-                    value={formData.courseId}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
-                    required
-                  >
-                    <option value="" className="bg-gray-800 text-white">
-                      Select a course
-                    </option>
-                    {courses.map((course) => (
-                      <option
-                        key={course._id}
-                        value={course._id}
-                        className="bg-gray-800 text-white"
-                      >
-                        {course.title}
-                      </option>
-                    ))}
-                  </select>
-                  {/* Custom dropdown arrow */}
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Optional description of the recording"
-                  rows={3}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
-              </div>
-
-              {/* Video Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Upload Recording *
-                </label>
-                <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
-                  <input
-                    type="file"
-                    id="videoFile"
-                    accept="video/mp4,video/avi,video/mov,video/wmv"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    required
-                  />
-                  <label
-                    htmlFor="videoFile"
-                    className="cursor-pointer flex flex-col items-center gap-2"
-                  >
-                    <FileVideo size={48} className="text-gray-400" />
-                    <span className="text-white font-medium">
-                      {uploadedFile
-                        ? uploadedFile.name
-                        : "Click to upload video"}
-                    </span>
-                    <span className="text-gray-400 text-sm">
-                      MP4, AVI, MOV, WMV (Max 5GB)
-                    </span>
-                    {uploadedFile && (
-                      <span className="text-green-400 text-sm">
-                        {formatFileSize(uploadedFile.size)}
-                      </span>
-                    )}
-                  </label>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full btn-premium px-4 py-3 text-sm font-semibold flex items-center justify-center gap-2 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} />
-                    Upload Recording
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-
+      <div className="space-y-6">
         {/* Recordings List */}
         <div className="card-premium">
           <div className="p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <Video size={20} />
-              Previously Uploaded Recordings
+              Recorded Classes ({filteredRecordings.length})
             </h2>
 
-            <div className="space-y-3">
-              {loading ? (
-                <div className="text-center py-8 text-gray-400">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                  <p>Loading recordings...</p>
-                </div>
-              ) : recordings.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
-                  <Video size={48} className="mx-auto mb-2 opacity-50" />
-                  <p>No recordings uploaded yet</p>
-                  <p className="text-sm mt-1">
-                    Upload your first recording using the form on the left
-                  </p>
-                </div>
-              ) : (
-                recordings.map((recording) => (
+            {loading ? (
+              <div className="text-center py-8 text-gray-400">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                <p>Loading recordings...</p>
+              </div>
+            ) : filteredRecordings.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <Video size={48} className="mx-auto mb-2 opacity-50" />
+                <p>
+                  {searchTerm
+                    ? "No recordings found matching your search"
+                    : "No recordings uploaded yet"}
+                </p>
+                <p className="text-sm mt-1">
+                  {searchTerm
+                    ? "Try adjusting your search terms"
+                    : "Upload your first recording using the Upload button above"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredRecordings.map((recording) => (
                   <div
                     key={recording._id || recording.id}
                     className="p-4 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-200 cursor-pointer group"
                     onClick={() => handleViewRecording(recording)}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-white mb-1 truncate">
                           {recording.lectureNumber}
@@ -662,9 +515,9 @@ export default function AdminLiveRecordings() {
                       )}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -941,9 +794,9 @@ export default function AdminLiveRecordings() {
       {/* Edit Recording Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="card-premium max-w-4xl w-full max-h-[95vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+          <div className="card-premium max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-white flex items-center gap-2">
                   <Edit size={24} />
                   Edit Recording
@@ -960,7 +813,10 @@ export default function AdminLiveRecordings() {
                 </button>
               </div>
 
-              <form onSubmit={handleUpdateRecording} className="space-y-4">
+              <form
+                onSubmit={handleUpdateRecording}
+                className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 scrollbar-hide"
+              >
                 {/* Lecture Number */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -1142,6 +998,251 @@ export default function AdminLiveRecordings() {
                       <>
                         <Edit size={16} />
                         Update Recording
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Recording Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="card-premium max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                  <Upload size={24} />
+                  Upload New Recording
+                </h2>
+                <button
+                  onClick={handleCloseUploadModal}
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white hover:text-gray-300 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 scrollbar-hide"
+              >
+                {/* Lecture Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Lecture Number *
+                  </label>
+                  <input
+                    type="text"
+                    name="lectureNumber"
+                    value={formData.lectureNumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Lecture 1, Week 2, Session 3"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Duration */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Duration *
+                  </label>
+                  <input
+                    type="text"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2:30:00 (hours:minutes:seconds)"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Start Time and End Time */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Start Time *
+                    </label>
+                    <input
+                      type="time"
+                      name="startTime"
+                      value={formData.startTime}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      End Time *
+                    </label>
+                    <input
+                      type="time"
+                      name="endTime"
+                      value={formData.endTime}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Hosted By */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Hosted By *
+                  </label>
+                  <input
+                    type="text"
+                    name="hostedBy"
+                    value={formData.hostedBy}
+                    onChange={handleInputChange}
+                    placeholder="Instructor name"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Course Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Select Course *
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="courseId"
+                      value={formData.courseId}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                      required
+                    >
+                      <option value="" className="bg-gray-800 text-white">
+                        Select a course
+                      </option>
+                      {courses.map((course) => (
+                        <option
+                          key={course._id}
+                          value={course._id}
+                          className="bg-gray-800 text-white"
+                        >
+                          {course.title}
+                        </option>
+                      ))}
+                    </select>
+                    {/* Custom dropdown arrow */}
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Optional description of the recording"
+                    rows={3}
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                </div>
+
+                {/* Video Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Upload Recording *
+                  </label>
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                    <input
+                      type="file"
+                      id="videoFile"
+                      accept="video/mp4,video/avi,video/mov,video/wmv"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      required
+                    />
+                    <label
+                      htmlFor="videoFile"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <FileVideo size={48} className="text-gray-400" />
+                      <span className="text-white font-medium">
+                        {uploadedFile
+                          ? uploadedFile.name
+                          : "Click to upload video"}
+                      </span>
+                      <span className="text-gray-400 text-sm">
+                        MP4, AVI, MOV, WMV (Max 5GB)
+                      </span>
+                      {uploadedFile && (
+                        <span className="text-green-400 text-sm">
+                          {formatFileSize(uploadedFile.size)}
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 justify-end pt-4">
+                  <button
+                    type="button"
+                    onClick={handleCloseUploadModal}
+                    className="px-4 py-2 text-gray-300 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20"
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn-premium px-4 py-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={16} />
+                        Upload Recording
                       </>
                     )}
                   </button>
