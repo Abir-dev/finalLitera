@@ -210,9 +210,14 @@ liveClassRecordingSchema.index({ createdAt: -1 });
 
 // Pre-save middleware to validate date
 liveClassRecordingSchema.pre("save", function (next) {
-  // Validate that date is not in the future
-  if (this.date > new Date()) {
-    return next(new Error("Recording date cannot be in the future"));
+  // Validate that date is not too far in the past (more than 1 year ago)
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+  if (this.date < oneYearAgo) {
+    return next(
+      new Error("Recording date cannot be more than 1 year in the past")
+    );
   }
 
   // Validate start and end time format
