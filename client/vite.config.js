@@ -18,8 +18,5 @@ export default defineConfig({
         secure: false,
       }
     }
-  },
-  define: {
-    'import.meta.env.VITE_API_URL': JSON.stringify('http://localhost:5001/api')
   }
 })
