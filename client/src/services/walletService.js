@@ -1,9 +1,4 @@
-const origin = typeof window !== "undefined" ? window.location.origin : "";
-let defaultBase = origin ? `${origin}/api` : "";
-if (origin === "http://localhost:5173") {
-  defaultBase = "http://localhost:5001/api";
-}
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
 const WALLET_ADMIN = `${BASE_URL}/wallet/admin`;
 
 function getAdminToken() {
