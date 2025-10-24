@@ -10,10 +10,9 @@ export const AdminAuthProvider = ({ children }) => {
   // Prefer env if provided; accept VITE_API_URL with or without /api suffix
   const apiEnv = import.meta.env.VITE_API_URL || "https://finallitera.onrender.com/api";
   const normalizedApi = apiEnv.endsWith("/api")
-  //   ? apiEnv
-  //   : `${apiEnv.replace(/\/$/, "")}/api`;
-  // const backendURL = normalizedApi.replace(/\/api$/, "");
-  const backendURL = apiEnv
+    ? apiEnv
+    : `${apiEnv.replace(/\/$/, "")}/api`;
+  const backendURL = normalizedApi.replace(/\/api$/, "");
 
   const http = axios.create({
     baseURL: backendURL,
