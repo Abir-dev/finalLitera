@@ -20,10 +20,11 @@ import {
   getEnrolledUsersForCourse,
   debugUserRecordings,
   debugCourseRecordings,
+  downloadNotesPdf,
 } from "../controllers/liveClassRecordingController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { protect } from "../middleware/auth.js";
-import upload from "../middleware/upload.js";
+import upload, { uploadMultiple } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -139,7 +140,7 @@ router.post(
   "/",
   adminAuth,
   uploadTimeout,
-  upload.single("video"),
+  uploadMultiple,
   createLiveClassRecording
 );
 
@@ -147,6 +148,11 @@ router.post(
 // @route   PUT /api/live-class-recordings/:id
 // @access  Private/Admin
 router.put("/:id", adminAuth, updateLiveClassRecording);
+
+// @desc    Download PDF notes for a recording
+// @route   GET /api/live-class-recordings/:id/notes-pdf
+// @access  Private (for enrolled students)
+router.get("/:id/notes-pdf", protect, downloadNotesPdf);
 
 // @desc    Delete live class recording
 // @route   DELETE /api/live-class-recordings/:id

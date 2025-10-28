@@ -106,17 +106,35 @@ const upload = multer({
   },
 });
 
+// PDF upload with 250MB limit
+const uploadPdf = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF files are allowed for notes"), false);
+    }
+  },
+  limits: {
+    fileSize: 250 * 1024 * 1024, // 250MB limit for PDFs
+    files: 1,
+  },
+});
+
 // Specific upload middlewares for different file types
 export const uploadAvatar = upload.single("avatar");
 export const uploadThumbnail = upload.single("thumbnail");
 export const uploadVideo = upload.single("video");
 export const uploadDocument = upload.single("document");
+export const uploadPdfNotes = uploadPdf.single("notesPdf");
 export const uploadImages = upload.array("images", 5);
 export const uploadMultiple = upload.fields([
   { name: "avatar", maxCount: 1 },
   { name: "thumbnail", maxCount: 1 },
   { name: "video", maxCount: 1 },
   { name: "document", maxCount: 1 },
+  { name: "notesPdf", maxCount: 1 },
   { name: "images", maxCount: 5 },
 ]);
 
@@ -126,7 +144,7 @@ export const handleUploadError = (error, req, res, next) => {
     if (error.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         status: "error",
-        message: "File too large. Maximum size allowed is 5GB.",
+        message: "File too large. Maximum size allowed is 5GB for videos, 250MB for PDFs.",
       });
     }
     if (error.code === "LIMIT_FILE_COUNT") {

@@ -71,6 +71,18 @@ const liveClassRecordingSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // PDF Notes fields
+    notesPdfUrl: {
+      type: String,
+      trim: true,
+    },
+    notesPdfSize: {
+      type: Number,
+    },
+    notesPdfName: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -87,6 +99,17 @@ liveClassRecordingSchema.virtual("formattedFileSize").get(function () {
   const i = Math.floor(Math.log(this.fileSize) / Math.log(k));
   return (
     parseFloat((this.fileSize / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  );
+});
+
+// Virtual for formatted PDF size
+liveClassRecordingSchema.virtual("formattedPdfSize").get(function () {
+  if (!this.notesPdfSize || this.notesPdfSize === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(this.notesPdfSize) / Math.log(k));
+  return (
+    parseFloat((this.notesPdfSize / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   );
 });
 

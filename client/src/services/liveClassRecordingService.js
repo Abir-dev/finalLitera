@@ -72,6 +72,8 @@ export const liveClassRecordingService = {
       Object.keys(recordingData).forEach((key) => {
         if (key === "video" && recordingData[key]) {
           formData.append("video", recordingData[key]);
+        } else if (key === "notesPdf" && recordingData[key]) {
+          formData.append("notesPdf", recordingData[key]);
         } else if (
           recordingData[key] !== null &&
           recordingData[key] !== undefined

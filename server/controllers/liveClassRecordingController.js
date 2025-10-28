@@ -252,6 +252,46 @@ export const createLiveClassRecording = async (req, res) => {
       fileSize,
     } = req.body;
 
+    // Handle PDF notes upload if provided
+    let notesPdfUrl = null;
+    let notesPdfSize = null;
+    let notesPdfName = null;
+
+    if (req.files && req.files.notesPdf) {
+      try {
+        console.log("Starting PDF notes upload to R2...");
+        const pdfFile = req.files.notesPdf[0];
+        const uploadResult = await uploadToR2(pdfFile, "lms-king/documents", {
+          metadata: {
+            originalName: pdfFile.originalname,
+            fieldname: pdfFile.fieldname,
+            type: "pdf",
+          },
+        });
+
+        if (!uploadResult.success) {
+          console.error("Error uploading PDF:", uploadResult.error);
+          return res.status(500).json({
+            status: "error",
+            message: "Failed to upload PDF notes file",
+            error: uploadResult.error,
+          });
+        }
+
+        notesPdfUrl = uploadResult.data.secure_url;
+        notesPdfSize = pdfFile.size;
+        notesPdfName = pdfFile.originalname;
+
+        console.log("PDF notes uploaded successfully. URL:", notesPdfUrl);
+      } catch (uploadError) {
+        console.error("Error uploading PDF notes:", uploadError);
+        return res.status(500).json({
+          status: "error",
+          message: "Failed to upload PDF notes file",
+        });
+      }
+    }
+
     // Validate required fields
     if (
       !lectureNumber ||
@@ -354,6 +394,10 @@ export const createLiveClassRecording = async (req, res) => {
       recordingUrl: finalRecordingUrl,
       fileSize: finalFileSize,
       uploadedBy: req.admin.id,
+      // PDF notes fields
+      notesPdfUrl,
+      notesPdfSize,
+      notesPdfName,
     };
 
     // Final validation before saving
@@ -1865,6 +1909,70 @@ export const getEnrolledUsersForCourse = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching enrolled users for course:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      ...(process.env.NODE_ENV === "development" && {
+        error: error.message,
+        stack: error.stack,
+      }),
+    });
+  }
+};
+
+// @desc    Download PDF notes for a recording
+// @route   GET /api/live-class-recordings/:id/notes-pdf
+// @access  Private (for enrolled students)
+export const downloadNotesPdf = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Find the recording with course information
+    const recording = await LiveClassRecording.findById(id).populate(
+      "course",
+      "title"
+    );
+
+    if (!recording) {
+      return res.status(404).json({
+        status: "error",
+        message: "Recording not found",
+      });
+    }
+
+    // Check if PDF notes exist
+    if (!recording.notesPdfUrl) {
+      return res.status(404).json({
+        status: "error",
+        message: "No PDF notes available for this recording",
+      });
+    }
+
+    // Check if user is enrolled in the course
+    const enrollment = await Enrollment.findOne({
+      user: userId,
+      course: recording.course._id,
+      status: "active",
+    });
+
+    if (!enrollment) {
+      return res.status(403).json({
+        status: "error",
+        message: "Access denied. You must be enrolled in this course to download notes.",
+      });
+    }
+
+    // Set headers for PDF download
+    const filename = recording.notesPdfName || `notes-${recording.lectureNumber}.pdf`;
+    
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    
+    // Redirect to the PDF URL for download
+    res.redirect(recording.notesPdfUrl);
+  } catch (error) {
+    console.error("Error downloading PDF notes:", error);
     res.status(500).json({
       status: "error",
       message: "Server error",

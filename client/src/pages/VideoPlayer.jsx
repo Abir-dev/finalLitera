@@ -16,6 +16,8 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  Download,
 } from "lucide-react";
 import recordingService from "../services/recordingService.js";
 
@@ -145,6 +147,38 @@ export default function VideoPlayerPage() {
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  const handleDownloadNotes = async () => {
+    try {
+      const response = await fetch(`/api/live-class-recordings/${recordingId}/notes-pdf`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (response.ok) {
+        // Create a blob from the response
+        const blob = await response.blob();
+        
+        // Create a download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = recording.notesPdfName || `notes-${recording.lectureNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to download PDF notes');
+      }
+    } catch (error) {
+      console.error('Error downloading PDF notes:', error);
+      alert('Failed to download PDF notes. Please try again.');
+    }
   };
 
   if (loading) {
@@ -478,7 +512,56 @@ export default function VideoPlayerPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            {/* <div className="card-premium p-6">
+            {/* PDF Notes Download */}
+            {recording.notesPdfUrl && (
+              <div className="card-premium p-6 mb-6">
+                <h3
+                  className="text-lg font-bold mb-4"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Lecture Notes
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, var(--accent-rose)20, var(--accent-rose)10)",
+                        border: "1px solid var(--accent-rose)30",
+                      }}
+                    >
+                      <FileText size={16} style={{ color: "var(--accent-rose)" }} />
+                    </div>
+                    <div className="flex-1">
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        PDF Notes Available
+                      </p>
+                      <p
+                        className="text-xs"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {recording.notesPdfName || "Lecture Notes"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleDownloadNotes()}
+                    className="btn-premium w-full py-3 flex items-center justify-center gap-2"
+                  >
+                    <Download size={16} />
+                    Download PDF Notes
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Course Information */}
+            <div className="card-premium p-6">
               <h3
                 className="text-lg font-bold mb-4"
                 style={{ color: "var(--text-primary)" }}
@@ -528,7 +611,7 @@ export default function VideoPlayerPage() {
                   </button>
                 </div>
               )}
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

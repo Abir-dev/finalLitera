@@ -56,6 +56,7 @@ export default function AdminLiveRecordings() {
   });
 
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedPdfFile, setUploadedPdfFile] = useState(null);
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -113,6 +114,26 @@ export default function AdminLiveRecordings() {
     }
   };
 
+  const handlePdfFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate PDF file
+      if (file.type !== "application/pdf") {
+        error("Only PDF files are allowed for notes");
+        return;
+      }
+      
+      // Check file size (250MB limit)
+      const maxSize = 250 * 1024 * 1024; // 250MB in bytes
+      if (file.size > maxSize) {
+        error("PDF file size must be less than 250MB");
+        return;
+      }
+
+      setUploadedPdfFile(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -138,6 +159,7 @@ export default function AdminLiveRecordings() {
       const recordingData = {
         ...formData,
         video: uploadedFile,
+        notesPdf: uploadedPdfFile,
         courseId: formData.courseId,
       };
 
@@ -159,10 +181,13 @@ export default function AdminLiveRecordings() {
         description: "",
       });
       setUploadedFile(null);
+      setUploadedPdfFile(null);
 
-      // Clear file input
+      // Clear file inputs
       const fileInput = document.getElementById("videoFile");
       if (fileInput) fileInput.value = "";
+      const pdfInput = document.getElementById("pdfFile");
+      if (pdfInput) pdfInput.value = "";
 
       success("Recording uploaded successfully!");
     } catch (err) {
@@ -364,10 +389,10 @@ export default function AdminLiveRecordings() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mt-6">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-            Live Class Recordings
+            Live Recordings & Notes
           </h1>
           <p className="text-gray-300 mt-1 text-xs sm:text-sm lg:text-base">
-            Manage and organize live class recordings
+            Manage and organize live class recordings and notes
           </p>
         </div>
         <button
@@ -1213,6 +1238,41 @@ export default function AdminLiveRecordings() {
                       {uploadedFile && (
                         <span className="text-green-400 text-sm">
                           {formatFileSize(uploadedFile.size)}
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* PDF Notes Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Upload PDF Notes (Optional)
+                  </label>
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                    <input
+                      type="file"
+                      id="pdfFile"
+                      accept=".pdf"
+                      onChange={handlePdfFileChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="pdfFile"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <FileText size={48} className="text-gray-400" />
+                      <span className="text-white font-medium">
+                        {uploadedPdfFile
+                          ? uploadedPdfFile.name
+                          : "Click to upload PDF notes"}
+                      </span>
+                      <span className="text-gray-400 text-sm">
+                        PDF only (Max 250MB)
+                      </span>
+                      {uploadedPdfFile && (
+                        <span className="text-green-400 text-sm">
+                          {formatFileSize(uploadedPdfFile.size)}
                         </span>
                       )}
                     </label>
