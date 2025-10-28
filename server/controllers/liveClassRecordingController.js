@@ -3,6 +3,125 @@ import Course from "../models/Course.js";
 import Enrollment from "../models/Enrollment.js";
 import User from "../models/User.js";
 import { uploadToR2 } from "../utils/r2.js";
+import https from "https";
+import { URL } from "url";
+import fs from "fs";
+
+// Helper function to check if user is enrolled in a course
+const checkUserEnrollment = async (userId, courseId) => {
+  // First check traditional enrollment
+  let enrollment = await Enrollment.findOne({
+    user: userId,
+    course: courseId,
+    status: "active",
+  });
+
+  // If not found in traditional enrollment, check user's enrolledCourses array
+  if (!enrollment) {
+    const user = await User.findById(userId);
+    if (user && user.enrolledCourses) {
+      const userEnrollment = user.enrolledCourses.find(
+        (enrollment) => enrollment.course.toString() === courseId.toString()
+      );
+
+      if (userEnrollment) {
+        enrollment = {
+          _id: `user_${courseId}`,
+          user: userId,
+          course: courseId,
+          enrolledAt: userEnrollment.enrolledAt,
+          progress: userEnrollment.progress,
+          status: "active",
+          source: "user_enrolledCourses",
+        };
+      }
+    }
+  }
+
+  return enrollment;
+};
+
+// Helper function to get video file consistently
+const getVideoFile = (req) => {
+  // Priority: req.files.video[0] (from uploadMultiple) > req.file (from single upload)
+  if (req.files && req.files.video && req.files.video[0]) {
+    return req.files.video[0];
+  }
+  if (req.file) {
+    return req.file;
+  }
+  return null;
+};
+
+// Helper function to validate video file
+const validateVideoFile = (file) => {
+  if (!file) {
+    return { valid: false, error: "No file provided" };
+  }
+
+  const maxSize = 5 * 1024 * 1024 * 1024; // 5GB
+  const allowedTypes = [
+    "video/mp4",
+    "video/avi",
+    "video/mov",
+    "video/wmv",
+    "video/webm",
+  ];
+
+  if (file.size > maxSize) {
+    return {
+      valid: false,
+      error: `File too large. Maximum size allowed is ${
+        maxSize / (1024 * 1024 * 1024)
+      }GB`,
+    };
+  }
+
+  if (!allowedTypes.includes(file.mimetype)) {
+    return {
+      valid: false,
+      error: `Invalid file type. Allowed types: ${allowedTypes.join(", ")}`,
+    };
+  }
+
+  return { valid: true };
+};
+
+// Helper function to verify URL accessibility with timeout
+const verifyUrlAccessibility = (url) => {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      httpsRequest.destroy();
+      reject(new Error("URL verification timeout"));
+    }, 10000); // 10 second timeout
+
+    const httpsRequest = https.request(url, { method: "HEAD" }, (response) => {
+      clearTimeout(timeout);
+      httpsRequest.destroy();
+      resolve(response.statusCode === 200);
+    });
+
+    httpsRequest.on("error", (error) => {
+      clearTimeout(timeout);
+      httpsRequest.destroy();
+      reject(error);
+    });
+
+    httpsRequest.end();
+  });
+};
+
+// Helper function for production-safe logging
+const isDevelopment = process.env.NODE_ENV === "development";
+const logDebug = (message, data = null) => {
+  if (isDevelopment) {
+    if (data) {
+      console.log(message, data);
+    } else {
+      console.log(message);
+    }
+  }
+};
 
 // @desc    Get all live class recordings
 // @route   GET /api/live-class-recordings
@@ -109,19 +228,12 @@ export const getStudentRecordingById = async (req, res) => {
     }
 
     // Check if user is enrolled in the course
-    const enrollment = await Enrollment.findOne({
-      user: req.user.id,
-      course: recording.course._id,
-    });
-
-    // Also check user's enrolledCourses array
-    const user = await User.findById(req.user.id);
-    const userEnrolled = user.enrolledCourses.some(
-      (enrollment) =>
-        enrollment.course.toString() === recording.course._id.toString()
+    const enrollment = await checkUserEnrollment(
+      req.user.id,
+      recording.course._id
     );
 
-    if (!enrollment && !userEnrolled) {
+    if (!enrollment) {
       return res.status(403).json({
         status: "error",
         message: "You are not enrolled in this course",
@@ -218,7 +330,7 @@ export const getLiveClassRecordingById = async (req, res) => {
 export const createLiveClassRecording = async (req, res) => {
   try {
     // Debug authentication
-    console.log("Authentication debug:", {
+    logDebug("Authentication debug:", {
       hasUser: !!req.user,
       hasAdmin: !!req.admin,
       userId: req.user?.id,
@@ -252,6 +364,11 @@ export const createLiveClassRecording = async (req, res) => {
       fileSize,
     } = req.body;
 
+    // Debug logging
+    logDebug("Request body:", req.body);
+    logDebug("Request files:", req.files);
+    logDebug("Request file:", req.file);
+
     // Handle PDF notes upload if provided
     let notesPdfUrl = null;
     let notesPdfSize = null;
@@ -259,7 +376,7 @@ export const createLiveClassRecording = async (req, res) => {
 
     if (req.files && req.files.notesPdf) {
       try {
-        console.log("Starting PDF notes upload to R2...");
+        logDebug("Starting PDF notes upload to R2...");
         const pdfFile = req.files.notesPdf[0];
         const uploadResult = await uploadToR2(pdfFile, "lms-king/documents", {
           metadata: {
@@ -282,7 +399,7 @@ export const createLiveClassRecording = async (req, res) => {
         notesPdfSize = pdfFile.size;
         notesPdfName = pdfFile.originalname;
 
-        console.log("PDF notes uploaded successfully. URL:", notesPdfUrl);
+        logDebug("PDF notes uploaded successfully. URL:", notesPdfUrl);
       } catch (uploadError) {
         console.error("Error uploading PDF notes:", uploadError);
         return res.status(500).json({
@@ -317,30 +434,54 @@ export const createLiveClassRecording = async (req, res) => {
       });
     }
 
+    // Get video file consistently using helper function
+    const videoFile = getVideoFile(req);
+    const hasVideoFile = !!videoFile;
+
     // Check if recording URL is provided (for direct URL uploads)
-    if (!recordingUrl && !req.file) {
+    if (!recordingUrl && !hasVideoFile) {
       return res.status(400).json({
         status: "error",
         message: "Recording URL or file must be provided",
       });
     }
 
+    // Validate video file if provided
+    if (videoFile) {
+      const fileValidation = validateVideoFile(videoFile);
+      if (!fileValidation.valid) {
+        return res.status(400).json({
+          status: "error",
+          message: fileValidation.error,
+        });
+      }
+    }
+
     let finalRecordingUrl = recordingUrl;
     let finalFileSize = fileSize;
 
+    logDebug("Video file detection:", {
+      hasReqFile: !!req.file,
+      hasReqFiles: !!req.files,
+      hasVideoInFiles: !!(req.files && req.files.video),
+      videoFileArray: req.files?.video,
+      selectedVideoFile: videoFile,
+      hasVideoFile: hasVideoFile,
+    });
+
     // Handle file upload if file is provided
-    if (req.file) {
+    if (videoFile) {
       try {
-        console.log("Starting video upload to R2...");
-        const uploadResult = await uploadToR2(req.file, "lms-king/videos", {
+        logDebug("Starting video upload to R2...");
+        const uploadResult = await uploadToR2(videoFile, "lms-king/videos", {
           metadata: {
-            originalName: req.file.originalname,
-            fieldname: req.file.fieldname,
+            originalName: videoFile.originalname,
+            fieldname: videoFile.fieldname,
             type: "video",
           },
         });
 
-        console.log("Upload result:", uploadResult);
+        logDebug("Upload result:", uploadResult);
 
         if (!uploadResult.success) {
           console.error("Error uploading video:", uploadResult.error);
@@ -352,16 +493,18 @@ export const createLiveClassRecording = async (req, res) => {
         }
 
         finalRecordingUrl = uploadResult.data.secure_url;
-        finalFileSize = req.file.size;
+        finalFileSize = videoFile.size;
 
-        console.log("Video uploaded successfully. URL:", finalRecordingUrl);
-        console.log("File size:", finalFileSize);
+        logDebug("Video uploaded successfully. URL:", finalRecordingUrl);
+        logDebug("File size:", finalFileSize);
 
-        // Verify URL is accessible
+        // Verify URL is accessible with improved error handling
         try {
-          const response = await fetch(finalRecordingUrl, { method: "HEAD" });
-          console.log("URL accessibility check:", response.status);
-          if (response.status !== 200) {
+          const url = new URL(finalRecordingUrl);
+          const isAccessible = await verifyUrlAccessibility(url);
+          logDebug("URL accessibility check:", isAccessible);
+
+          if (!isAccessible) {
             console.warn(
               "Warning: Uploaded URL may not be accessible:",
               finalRecordingUrl
@@ -409,7 +552,7 @@ export const createLiveClassRecording = async (req, res) => {
       });
     }
 
-    console.log("Recording data to be saved:", {
+    logDebug("Recording data to be saved:", {
       ...recordingData,
       recordingUrl: finalRecordingUrl,
       fileSize: finalFileSize,
@@ -417,7 +560,7 @@ export const createLiveClassRecording = async (req, res) => {
 
     const recording = await LiveClassRecording.create(recordingData);
 
-    console.log("Recording created successfully:", {
+    logDebug("Recording created successfully:", {
       id: recording._id,
       recordingUrl: recording.recordingUrl,
       fileSize: recording.fileSize,
@@ -439,7 +582,7 @@ export const createLiveClassRecording = async (req, res) => {
       { path: "uploadedBy", select: "firstName lastName" },
     ]);
 
-    console.log("Final recording object before response:", {
+    logDebug("Final recording object before response:", {
       id: recording._id,
       recordingUrl: recording.recordingUrl,
       fileSize: recording.fileSize,
@@ -449,7 +592,7 @@ export const createLiveClassRecording = async (req, res) => {
     // Verify the recording was saved correctly by fetching it from database
     try {
       const savedRecording = await LiveClassRecording.findById(recording._id);
-      console.log("Verification - Recording from database:", {
+      logDebug("Verification - Recording from database:", {
         id: savedRecording._id,
         recordingUrl: savedRecording.recordingUrl,
         fileSize: savedRecording.fileSize,
@@ -477,15 +620,15 @@ export const createLiveClassRecording = async (req, res) => {
     });
 
     // Clean up any temporary files if they exist
-    if (req.file && req.file.path) {
+    if (videoFile && videoFile.path) {
       try {
-        const fs = await import("fs");
-        if (fs.existsSync(req.file.path)) {
-          fs.unlinkSync(req.file.path);
-          console.log("Cleaned up temporary file:", req.file.path);
+        if (fs.existsSync(videoFile.path)) {
+          fs.unlinkSync(videoFile.path);
+          logDebug("Cleaned up temporary file:", videoFile.path);
         }
       } catch (cleanupError) {
         console.error("Error cleaning up temporary file:", cleanupError);
+        // Don't throw - just log the error to prevent masking the original error
       }
     }
 
@@ -536,6 +679,82 @@ export const updateLiveClassRecording = async (req, res) => {
         return res.status(404).json({
           status: "error",
           message: "Course not found",
+        });
+      }
+    }
+
+    // Handle video file upload if provided
+    if (req.file) {
+      try {
+        console.log("Starting video upload to R2 for update...");
+        const uploadResult = await uploadToR2(req.file, "lms-king/videos", {
+          metadata: {
+            originalName: req.file.originalname,
+            fieldname: req.file.fieldname,
+            type: "video",
+          },
+        });
+
+        if (!uploadResult.success) {
+          console.error("Error uploading video:", uploadResult.error);
+          return res.status(500).json({
+            status: "error",
+            message: "Failed to upload video file",
+            error: uploadResult.error,
+          });
+        }
+
+        recording.recordingUrl = uploadResult.data.secure_url;
+        recording.fileSize = req.file.size;
+
+        console.log(
+          "Video uploaded successfully for update. URL:",
+          recording.recordingUrl
+        );
+      } catch (uploadError) {
+        console.error("Error uploading video for update:", uploadError);
+        return res.status(500).json({
+          status: "error",
+          message: "Failed to upload video file",
+        });
+      }
+    }
+
+    // Handle PDF notes upload if provided
+    if (req.files && req.files.notesPdf) {
+      try {
+        console.log("Starting PDF notes upload to R2 for update...");
+        const pdfFile = req.files.notesPdf[0];
+        const uploadResult = await uploadToR2(pdfFile, "lms-king/documents", {
+          metadata: {
+            originalName: pdfFile.originalname,
+            fieldname: pdfFile.fieldname,
+            type: "pdf",
+          },
+        });
+
+        if (!uploadResult.success) {
+          console.error("Error uploading PDF:", uploadResult.error);
+          return res.status(500).json({
+            status: "error",
+            message: "Failed to upload PDF notes file",
+            error: uploadResult.error,
+          });
+        }
+
+        recording.notesPdfUrl = uploadResult.data.secure_url;
+        recording.notesPdfSize = pdfFile.size;
+        recording.notesPdfName = pdfFile.originalname;
+
+        console.log(
+          "PDF notes uploaded successfully for update. URL:",
+          recording.notesPdfUrl
+        );
+      } catch (uploadError) {
+        console.error("Error uploading PDF notes for update:", uploadError);
+        return res.status(500).json({
+          status: "error",
+          message: "Failed to upload PDF notes file",
         });
       }
     }
@@ -1950,29 +2169,146 @@ export const downloadNotesPdf = async (req, res) => {
     }
 
     // Check if user is enrolled in the course
-    const enrollment = await Enrollment.findOne({
-      user: userId,
-      course: recording.course._id,
-      status: "active",
-    });
+    const enrollment = await checkUserEnrollment(userId, recording.course._id);
 
     if (!enrollment) {
       return res.status(403).json({
         status: "error",
-        message: "Access denied. You must be enrolled in this course to download notes.",
+        message:
+          "Access denied. You must be enrolled in this course to download notes.",
       });
     }
 
     // Set headers for PDF download
-    const filename = recording.notesPdfName || `notes-${recording.lectureNumber}.pdf`;
-    
+    const filename =
+      recording.notesPdfName || `notes-${recording.lectureNumber}.pdf`;
+
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    
-    // Redirect to the PDF URL for download
-    res.redirect(recording.notesPdfUrl);
+    res.setHeader("Cache-Control", "no-cache");
+
+    try {
+      // Fetch the PDF from S3 and stream it to the client
+      const pdfUrl = new URL(recording.notesPdfUrl);
+
+      const httpsRequest = https.get(pdfUrl, (response) => {
+        if (response.statusCode !== 200) {
+          console.error(
+            `Failed to fetch PDF: ${response.statusCode} ${response.statusMessage}`
+          );
+          return res.status(500).json({
+            status: "error",
+            message: "Failed to download PDF file",
+          });
+        }
+
+        // Set additional headers
+        res.setHeader("Content-Length", response.headers["content-length"]);
+
+        // Pipe the response directly to the client
+        response.pipe(res);
+      });
+
+      httpsRequest.on("error", (error) => {
+        console.error("Error fetching PDF from S3:", error);
+        if (!res.headersSent) {
+          res.status(500).json({
+            status: "error",
+            message: "Failed to download PDF file",
+          });
+        }
+      });
+
+      // Handle client disconnect
+      req.on("close", () => {
+        httpsRequest.destroy();
+      });
+    } catch (fetchError) {
+      console.error("Error setting up PDF download:", fetchError);
+      return res.status(500).json({
+        status: "error",
+        message: "Failed to download PDF file",
+      });
+    }
   } catch (error) {
     console.error("Error downloading PDF notes:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      ...(process.env.NODE_ENV === "development" && {
+        error: error.message,
+        stack: error.stack,
+      }),
+    });
+  }
+};
+
+// @desc    Delete PDF notes for a recording
+// @route   DELETE /api/live-class-recordings/:id/notes-pdf
+// @access  Private/Admin
+export const deletePdfNotes = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if user is admin
+    if (!req.admin) {
+      return res.status(401).json({
+        status: "error",
+        message: "Admin authentication required",
+      });
+    }
+
+    // Find the recording
+    const recording = await LiveClassRecording.findById(id);
+
+    if (!recording) {
+      return res.status(404).json({
+        status: "error",
+        message: "Recording not found",
+      });
+    }
+
+    // Check if PDF notes exist
+    if (!recording.notesPdfUrl) {
+      return res.status(404).json({
+        status: "error",
+        message: "No PDF notes found for this recording",
+      });
+    }
+
+    // Delete PDF from R2 storage
+    try {
+      const { deleteFromR2 } = await import("../utils/r2.js");
+
+      // Extract the key from the URL
+      const url = new URL(recording.notesPdfUrl);
+      const key = url.pathname.substring(1); // Remove leading slash
+
+      const deleteResult = await deleteFromR2(key);
+
+      if (!deleteResult.success) {
+        console.warn("Failed to delete PDF from R2:", deleteResult.error);
+        // Continue with database update even if R2 deletion fails
+      }
+    } catch (r2Error) {
+      console.warn("Error deleting PDF from R2:", r2Error);
+      // Continue with database update even if R2 deletion fails
+    }
+
+    // Update the recording to remove PDF fields
+    recording.notesPdfUrl = undefined;
+    recording.notesPdfSize = undefined;
+    recording.notesPdfName = undefined;
+
+    await recording.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "PDF notes deleted successfully",
+      data: { recording },
+    });
+  } catch (error) {
+    console.error("Error deleting PDF notes:", error);
     res.status(500).json({
       status: "error",
       message: "Server error",

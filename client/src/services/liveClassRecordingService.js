@@ -98,11 +98,46 @@ export const liveClassRecordingService = {
   // Update recording
   updateRecording: async (id, recordingData) => {
     try {
-      const response = await api.put(
-        `/live-class-recordings/${id}`,
-        recordingData
-      );
-      return response.data;
+      // Check if there are files to upload
+      const hasFiles = recordingData.video || recordingData.notesPdf;
+
+      if (hasFiles) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+
+        // Add all form fields
+        Object.keys(recordingData).forEach((key) => {
+          if (key === "video" && recordingData[key]) {
+            formData.append("video", recordingData[key]);
+          } else if (key === "notesPdf" && recordingData[key]) {
+            formData.append("notesPdf", recordingData[key]);
+          } else if (
+            recordingData[key] !== null &&
+            recordingData[key] !== undefined
+          ) {
+            formData.append(key, recordingData[key]);
+          }
+        });
+
+        const response = await api.put(
+          `/live-class-recordings/${id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            timeout: 300000, // 5 minutes timeout for video uploads
+          }
+        );
+        return response.data;
+      } else {
+        // Regular JSON request for non-file updates
+        const response = await api.put(
+          `/live-class-recordings/${id}`,
+          recordingData
+        );
+        return response.data;
+      }
     } catch (error) {
       console.error("Error updating recording:", error);
       throw error.response?.data || { message: "Failed to update recording" };
@@ -169,6 +204,19 @@ export const liveClassRecordingService = {
     } catch (error) {
       console.error("Error uploading video:", error);
       throw error.response?.data || { message: "Failed to upload video" };
+    }
+  },
+
+  // Delete PDF notes for a recording
+  deletePdfNotes: async (recordingId) => {
+    try {
+      const response = await api.delete(
+        `/live-class-recordings/${recordingId}/notes-pdf`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting PDF notes:", error);
+      throw error.response?.data || { message: "Failed to delete PDF notes" };
     }
   },
 };

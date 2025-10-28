@@ -21,6 +21,7 @@ import {
   debugUserRecordings,
   debugCourseRecordings,
   downloadNotesPdf,
+  deletePdfNotes,
 } from "../controllers/liveClassRecordingController.js";
 import { adminAuth } from "../middleware/adminAuth.js";
 import { protect } from "../middleware/auth.js";
@@ -147,12 +148,23 @@ router.post(
 // @desc    Update live class recording
 // @route   PUT /api/live-class-recordings/:id
 // @access  Private/Admin
-router.put("/:id", adminAuth, updateLiveClassRecording);
+router.put(
+  "/:id",
+  adminAuth,
+  uploadTimeout,
+  uploadMultiple,
+  updateLiveClassRecording
+);
 
 // @desc    Download PDF notes for a recording
 // @route   GET /api/live-class-recordings/:id/notes-pdf
 // @access  Private (for enrolled students)
 router.get("/:id/notes-pdf", protect, downloadNotesPdf);
+
+// @desc    Delete PDF notes for a recording
+// @route   DELETE /api/live-class-recordings/:id/notes-pdf
+// @access  Private/Admin
+router.delete("/:id/notes-pdf", adminAuth, deletePdfNotes);
 
 // @desc    Delete live class recording
 // @route   DELETE /api/live-class-recordings/:id

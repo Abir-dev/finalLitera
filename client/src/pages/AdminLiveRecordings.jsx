@@ -41,6 +41,9 @@ export default function AdminLiveRecordings() {
   const [recordingToEdit, setRecordingToEdit] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showDeletePdfDialog, setShowDeletePdfDialog] = useState(false);
+  const [recordingToDeletePdf, setRecordingToDeletePdf] = useState(null);
+  const [isDeletingPdf, setIsDeletingPdf] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRecordings, setFilteredRecordings] = useState([]);
 
@@ -57,6 +60,8 @@ export default function AdminLiveRecordings() {
 
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadedPdfFile, setUploadedPdfFile] = useState(null);
+  const [editUploadedFile, setEditUploadedFile] = useState(null);
+  const [editUploadedPdfFile, setEditUploadedPdfFile] = useState(null);
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -122,7 +127,7 @@ export default function AdminLiveRecordings() {
         error("Only PDF files are allowed for notes");
         return;
       }
-      
+
       // Check file size (250MB limit)
       const maxSize = 250 * 1024 * 1024; // 250MB in bytes
       if (file.size > maxSize) {
@@ -131,6 +136,39 @@ export default function AdminLiveRecordings() {
       }
 
       setUploadedPdfFile(file);
+    }
+  };
+
+  const handleEditFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validation = recordingUtils.validateVideoFile(file);
+      if (!validation.valid) {
+        error(validation.message);
+        return;
+      }
+
+      setEditUploadedFile(file);
+    }
+  };
+
+  const handleEditPdfFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate PDF file
+      if (file.type !== "application/pdf") {
+        error("Only PDF files are allowed for notes");
+        return;
+      }
+
+      // Check file size (250MB limit)
+      const maxSize = 250 * 1024 * 1024; // 250MB in bytes
+      if (file.size > maxSize) {
+        error("PDF file size must be less than 250MB");
+        return;
+      }
+
+      setEditUploadedPdfFile(file);
     }
   };
 
@@ -208,6 +246,11 @@ export default function AdminLiveRecordings() {
     setShowDeleteDialog(true);
   };
 
+  const handleDeletePdf = (recording) => {
+    setRecordingToDeletePdf(recording);
+    setShowDeletePdfDialog(true);
+  };
+
   const handleEditRecording = (recording) => {
     setRecordingToEdit(recording);
 
@@ -257,6 +300,11 @@ export default function AdminLiveRecordings() {
       courseId: recording.course?._id || recording.course || "",
       description: recording.description || "",
     });
+
+    // Reset edit file states
+    setEditUploadedFile(null);
+    setEditUploadedPdfFile(null);
+
     setShowEditModal(true);
   };
 
@@ -278,6 +326,26 @@ export default function AdminLiveRecordings() {
     }
   };
 
+  const confirmDeletePdf = async () => {
+    if (!recordingToDeletePdf) return;
+
+    setIsDeletingPdf(true);
+    try {
+      await liveClassRecordingService.deletePdfNotes(recordingToDeletePdf._id);
+      success("PDF notes deleted successfully");
+      await fetchRecordings();
+      setShowDeletePdfDialog(false);
+      setRecordingToDeletePdf(null);
+      // Close the detail modal to refresh the data
+      setShowDetailModal(false);
+    } catch (err) {
+      console.error("Error deleting PDF notes:", err);
+      error("Failed to delete PDF notes");
+    } finally {
+      setIsDeletingPdf(false);
+    }
+  };
+
   const handleUpdateRecording = async (e) => {
     e.preventDefault();
 
@@ -295,6 +363,14 @@ export default function AdminLiveRecordings() {
         course: formData.courseId,
         description: formData.description,
       };
+
+      // Add file uploads if new files are selected
+      if (editUploadedFile) {
+        updateData.video = editUploadedFile;
+      }
+      if (editUploadedPdfFile) {
+        updateData.notesPdf = editUploadedPdfFile;
+      }
 
       await liveClassRecordingService.updateRecording(
         recordingToEdit._id,
@@ -325,6 +401,9 @@ export default function AdminLiveRecordings() {
       description: "",
     });
     setUploadedFile(null);
+    setUploadedPdfFile(null);
+    setEditUploadedFile(null);
+    setEditUploadedPdfFile(null);
   };
 
   // Search functionality
@@ -698,6 +777,56 @@ export default function AdminLiveRecordings() {
                         </p>
                       </div>
                     )}
+
+                    {/* PDF Notes Section */}
+                    {selectedRecording.notesPdfUrl && (
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                        <label className="text-sm font-medium text-gray-300 block mb-2">
+                          PDF Notes
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <FileText size={20} className="text-blue-400" />
+                          <div className="flex-1">
+                            <p className="text-white font-medium">
+                              {selectedRecording.notesPdfName ||
+                                "Lecture Notes"}
+                            </p>
+                            {selectedRecording.notesPdfSize && (
+                              <p className="text-gray-400 text-sm">
+                                {formatFileSize(selectedRecording.notesPdfSize)}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                const link = document.createElement("a");
+                                link.href = selectedRecording.notesPdfUrl;
+                                link.download =
+                                  selectedRecording.notesPdfName ||
+                                  "lecture-notes.pdf";
+                                link.target = "_blank";
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                            >
+                              <Download size={14} />
+                              Download
+                            </button>
+                            <button
+                              onClick={() => handleDeletePdf(selectedRecording)}
+                              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors flex items-center gap-1"
+                              title="Delete PDF Notes"
+                            >
+                              <Trash2 size={14} />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -807,6 +936,81 @@ export default function AdminLiveRecordings() {
                     <>
                       <Trash2 size={16} />
                       Delete
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete PDF Confirmation Dialog */}
+      {showDeletePdfDialog && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="card-premium max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-red-500/20 rounded-full">
+                  <AlertCircle className="text-red-400" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    Delete PDF Notes
+                  </h3>
+                  <p className="text-sm text-gray-300">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-300 mb-2">
+                  Are you sure you want to delete the PDF notes for this
+                  recording?
+                </p>
+                {recordingToDeletePdf && (
+                  <div className="bg-white/5 border border-white/10 p-3 rounded-lg">
+                    <p className="font-medium text-white">
+                      {recordingToDeletePdf.lectureNumber}
+                    </p>
+                    <p className="text-sm text-gray-300">
+                      {recordingToDeletePdf.course?.title || "Unknown Course"}
+                    </p>
+                    {recordingToDeletePdf.notesPdfName && (
+                      <p className="text-sm text-blue-400 mt-1">
+                        PDF: {recordingToDeletePdf.notesPdfName}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowDeletePdfDialog(false);
+                    setRecordingToDeletePdf(null);
+                  }}
+                  className="px-4 py-2 text-gray-300 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20"
+                  disabled={isDeletingPdf}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeletePdf}
+                  disabled={isDeletingPdf}
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isDeletingPdf ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={16} />
+                      Delete PDF
                     </>
                   )}
                 </button>
@@ -993,6 +1197,118 @@ export default function AdminLiveRecordings() {
                     rows={3}
                     className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
+                </div>
+
+                {/* Current Video File Info */}
+                {recordingToEdit?.recordingUrl && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Current Video File
+                    </label>
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-sm text-gray-300">
+                        <FileVideo size={16} />
+                        <span>Current video file is uploaded</span>
+                        {recordingToEdit.fileSize && (
+                          <span className="text-gray-400">
+                            ({formatFileSize(recordingToEdit.fileSize)})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Video Upload (Optional - to replace current) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Replace Video File (Optional)
+                  </label>
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                    <input
+                      type="file"
+                      id="editVideoFile"
+                      accept="video/mp4,video/avi,video/mov,video/wmv"
+                      onChange={handleEditFileChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="editVideoFile"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <FileVideo size={48} className="text-gray-400" />
+                      <span className="text-white font-medium">
+                        {editUploadedFile
+                          ? editUploadedFile.name
+                          : "Click to upload new video"}
+                      </span>
+                      <span className="text-gray-400 text-sm">
+                        MP4, AVI, MOV, WMV (Max 5GB)
+                      </span>
+                      {editUploadedFile && (
+                        <span className="text-green-400 text-sm">
+                          {formatFileSize(editUploadedFile.size)}
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                {/* Current PDF Notes Info */}
+                {recordingToEdit?.notesPdfUrl && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Current PDF Notes
+                    </label>
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-sm text-gray-300">
+                        <FileText size={16} />
+                        <span>
+                          {recordingToEdit.notesPdfName || "PDF notes uploaded"}
+                        </span>
+                        {recordingToEdit.notesPdfSize && (
+                          <span className="text-gray-400">
+                            ({formatFileSize(recordingToEdit.notesPdfSize)})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* PDF Notes Upload (Optional - to replace current) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Replace PDF Notes (Optional)
+                  </label>
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                    <input
+                      type="file"
+                      id="editPdfFile"
+                      accept=".pdf"
+                      onChange={handleEditPdfFileChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="editPdfFile"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <FileText size={48} className="text-gray-400" />
+                      <span className="text-white font-medium">
+                        {editUploadedPdfFile
+                          ? editUploadedPdfFile.name
+                          : "Click to upload new PDF notes"}
+                      </span>
+                      <span className="text-gray-400 text-sm">
+                        PDF only (Max 250MB)
+                      </span>
+                      {editUploadedPdfFile && (
+                        <span className="text-green-400 text-sm">
+                          {formatFileSize(editUploadedPdfFile.size)}
+                        </span>
+                      )}
+                    </label>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
