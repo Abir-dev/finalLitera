@@ -305,7 +305,42 @@ export const assignCourseToStudent = async (req, res) => {
       });
     }
 
-    // Add course to student's enrolled courses
+    // Check if Enrollment document already exists
+    const existingEnrollmentDoc = await Enrollment.findOne({
+      user: id,
+      course: courseId
+    });
+
+    if (existingEnrollmentDoc) {
+      console.log("Enrollment document already exists, updating payment info");
+      // Update existing enrollment to mark as paid (admin-assigned)
+      existingEnrollmentDoc.status = "active";
+      existingEnrollmentDoc.payment = {
+        amount: course.price || 0,
+        currency: "INR",
+        paymentMethod: "admin_assigned",
+        transactionId: `admin_${Date.now()}`,
+        paidAt: new Date()
+      };
+      await existingEnrollmentDoc.save();
+    } else {
+      // Create Enrollment document with payment info (admin-assigned courses are considered paid)
+      await Enrollment.create({
+        user: id,
+        course: courseId,
+        status: "active",
+        payment: {
+          amount: course.price || 0,
+          currency: "INR",
+          paymentMethod: "admin_assigned",
+          transactionId: `admin_${Date.now()}`,
+          paidAt: new Date()
+        }
+      });
+      console.log("Created Enrollment document for admin-assigned course");
+    }
+
+    // Add course to student's enrolled courses (User model)
     const enrollment = {
       course: courseId,
       enrolledAt: new Date(),
