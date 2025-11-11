@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Enrollment from '../models/Enrollment.js';
 import Course from '../models/Course.js';
 import Notification from '../models/Notification.js';
+import mongoose from 'mongoose';
 
 // @desc    Get all users (Admin only)
 // @route   GET /api/users

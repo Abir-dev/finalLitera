@@ -141,26 +141,6 @@ router.get("/stats/overview", adminAuth, getUserStats);
 // @access  Private/Admin
 router.get("/", adminAuth, validatePagination, getUsers);
 
-// @desc    Get user by ID
-// @route   GET /api/users/:id
-// @access  Private
-router.get("/:id", protect, getUserById);
-
-// @desc    Update user (Admin only or own profile)
-// @route   PUT /api/users/:id
-// @access  Private
-router.put("/:id", protect, validateProfileUpdate, updateUser);
-
-// @desc    Delete user (Admin only)
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
-router.delete("/:id", deleteUser);
-
-// @desc    Get user's enrolled courses
-// @route   GET /api/users/:id/courses
-// @access  Private
-router.get("/:id/courses", protect, getUserCourses);
-
 // @desc    Get current user's enrollments from Enrollment collection
 // @route   GET /api/users/enrollments
 // @access  Private
@@ -243,5 +223,27 @@ router.post("/sync-enrollments", protect, async (req, res) => {
     });
   }
 });
+
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private
+router.get("/:id", protect, getUserById);
+
+// @desc    Update user (Admin only or own profile)
+// @route   PUT /api/users/:id
+// @access  Private
+router.put("/:id", protect, validateProfileUpdate, updateUser);
+
+// @desc    Delete user (Admin only)
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+router.delete("/:id", deleteUser);
+
+// @desc    Get user's enrolled courses
+// @route   GET /api/users/:id/courses
+// @access  Private
+router.get("/:id/courses", protect, getUserCourses);
+
+
 
 export default router;
